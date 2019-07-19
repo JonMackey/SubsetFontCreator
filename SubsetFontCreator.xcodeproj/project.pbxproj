@@ -1,0 +1,482 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 50;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		DA7F2DA921C076A2009BFE30 /* libfreetype.a in Frameworks */ = {isa = PBXBuildFile; fileRef = DA7F2DA821C076A2009BFE30 /* libfreetype.a */; };
+		DA8D885C2282309B002EE769 /* OpeningInstructions.rtf in Resources */ = {isa = PBXBuildFile; fileRef = DA8D885B2282309B002EE769 /* OpeningInstructions.rtf */; };
+		DAA1441F21BFFE0C00C263CA /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = DAA1441E21BFFE0C00C263CA /* AppDelegate.m */; };
+		DAA1442121BFFE0D00C263CA /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = DAA1442021BFFE0D00C263CA /* Assets.xcassets */; };
+		DAA1442421BFFE0D00C263CA /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = DAA1442221BFFE0D00C263CA /* MainMenu.xib */; };
+		DAA1442721BFFE0D00C263CA /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = DAA1442621BFFE0D00C263CA /* main.m */; };
+		DAA1443121BFFED900C263CA /* MainWindowController.mm in Sources */ = {isa = PBXBuildFile; fileRef = DAA1442F21BFFED900C263CA /* MainWindowController.mm */; };
+		DAA1443221BFFED900C263CA /* MainWindowController.xib in Resources */ = {isa = PBXBuildFile; fileRef = DAA1443021BFFED900C263CA /* MainWindowController.xib */; };
+		DAA8F66922CFD3B200C863A4 /* NSTextButtonCell.m in Sources */ = {isa = PBXBuildFile; fileRef = DAA8F66822CFD3B200C863A4 /* NSTextButtonCell.m */; };
+		DAA949F622DA43360056FBCC /* XFontR1BitDataStream.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DAA949F522DA43360056FBCC /* XFontR1BitDataStream.cpp */; };
+		DAB67FA221C2B1A2003B3503 /* LogViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = DAB67FA121C2B1A1003B3503 /* LogViewController.m */; };
+		DAB67FA421C2B35D003B3503 /* LogViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = DAB67FA321C2B35D003B3503 /* LogViewController.xib */; };
+		DABF5318227B375400ADEBC8 /* ArduinoDisplays.plist in Resources */ = {isa = PBXBuildFile; fileRef = DABF5317227B375400ADEBC8 /* ArduinoDisplays.plist */; };
+		DAC03A9722734D1100408360 /* SubsetHelper.xib in Resources */ = {isa = PBXBuildFile; fileRef = DAC03A9622734D1100408360 /* SubsetHelper.xib */; };
+		DAC03A9B2273529700408360 /* SubsetHelperWindowControler.mm in Sources */ = {isa = PBXBuildFile; fileRef = DAC03A992273529700408360 /* SubsetHelperWindowControler.mm */; };
+		DAC2DB502260DF6E008BD00B /* ExportFormat.xib in Resources */ = {isa = PBXBuildFile; fileRef = DAC2DB4F2260DF6D008BD00B /* ExportFormat.xib */; };
+		DAC2DB5322624EBE008BD00B /* TabbedFileStream.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DAC2DB5122624EBE008BD00B /* TabbedFileStream.cpp */; };
+		DAC2DB5622625C85008BD00B /* Tabs.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DAC2DB5522625C85008BD00B /* Tabs.cpp */; };
+		DAC2DB592266712C008BD00B /* IndexVec.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DAC2DB572266712B008BD00B /* IndexVec.cpp */; };
+		DAD244EA21C431A6006A3211 /* SubsetFontCreator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DAD244E821C431A6006A3211 /* SubsetFontCreator.cpp */; };
+		DAEED7792277B89E00C2E2BA /* ArduinoDisplayView.mm in Sources */ = {isa = PBXBuildFile; fileRef = DAEED7782277B89E00C2E2BA /* ArduinoDisplayView.mm */; };
+		DAF972F622D0D40F0098C0E9 /* DataStream.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DAF972ED22D0D40D0098C0E9 /* DataStream.cpp */; };
+		DAF972F722D0D4100098C0E9 /* XFont.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DAF972F022D0D40E0098C0E9 /* XFont.cpp */; };
+		DAF972F822D0D4100098C0E9 /* DisplayController.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DAF972F322D0D40F0098C0E9 /* DisplayController.cpp */; };
+		DAF972F922D0D4100098C0E9 /* XFont16BitDataStream.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DAF972F422D0D40F0098C0E9 /* XFont16BitDataStream.cpp */; };
+		DAF972FC22D0D9AA0098C0E9 /* BitmapDisplayController.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DAF972FA22D0D9AA0098C0E9 /* BitmapDisplayController.cpp */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		DA7F2DA821C076A2009BFE30 /* libfreetype.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libfreetype.a; sourceTree = "<group>"; };
+		DA8D885B2282309B002EE769 /* OpeningInstructions.rtf */ = {isa = PBXFileReference; lastKnownFileType = text.rtf; path = OpeningInstructions.rtf; sourceTree = "<group>"; };
+		DAA1441A21BFFE0C00C263CA /* SubsetFontCreator.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SubsetFontCreator.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		DAA1441D21BFFE0C00C263CA /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
+		DAA1441E21BFFE0C00C263CA /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
+		DAA1442021BFFE0D00C263CA /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		DAA1442321BFFE0D00C263CA /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = Base; path = Base.lproj/MainMenu.xib; sourceTree = "<group>"; };
+		DAA1442521BFFE0D00C263CA /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		DAA1442621BFFE0D00C263CA /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
+		DAA1442821BFFE0D00C263CA /* SubsetFontCreator.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = SubsetFontCreator.entitlements; sourceTree = "<group>"; };
+		DAA1442E21BFFED900C263CA /* MainWindowController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MainWindowController.h; sourceTree = "<group>"; };
+		DAA1442F21BFFED900C263CA /* MainWindowController.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = MainWindowController.mm; sourceTree = "<group>"; };
+		DAA1443021BFFED900C263CA /* MainWindowController.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = MainWindowController.xib; sourceTree = "<group>"; };
+		DAA8F66722CFD3B200C863A4 /* NSTextButtonCell.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = NSTextButtonCell.h; sourceTree = "<group>"; };
+		DAA8F66822CFD3B200C863A4 /* NSTextButtonCell.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = NSTextButtonCell.m; sourceTree = "<group>"; };
+		DAA949F422DA43360056FBCC /* XFontR1BitDataStream.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XFontR1BitDataStream.h; sourceTree = "<group>"; };
+		DAA949F522DA43360056FBCC /* XFontR1BitDataStream.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = XFontR1BitDataStream.cpp; sourceTree = "<group>"; };
+		DAB67FA021C2B1A1003B3503 /* LogViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LogViewController.h; sourceTree = "<group>"; };
+		DAB67FA121C2B1A1003B3503 /* LogViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LogViewController.m; sourceTree = "<group>"; };
+		DAB67FA321C2B35D003B3503 /* LogViewController.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = LogViewController.xib; sourceTree = "<group>"; };
+		DABF5317227B375400ADEBC8 /* ArduinoDisplays.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = ArduinoDisplays.plist; sourceTree = "<group>"; };
+		DAC03A9622734D1100408360 /* SubsetHelper.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = SubsetHelper.xib; sourceTree = "<group>"; };
+		DAC03A982273529600408360 /* SubsetHelperWindowControler.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SubsetHelperWindowControler.h; sourceTree = "<group>"; };
+		DAC03A992273529700408360 /* SubsetHelperWindowControler.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = SubsetHelperWindowControler.mm; sourceTree = "<group>"; };
+		DAC2DB4F2260DF6D008BD00B /* ExportFormat.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = ExportFormat.xib; sourceTree = "<group>"; };
+		DAC2DB5122624EBE008BD00B /* TabbedFileStream.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = TabbedFileStream.cpp; sourceTree = "<group>"; };
+		DAC2DB5222624EBE008BD00B /* TabbedFileStream.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = TabbedFileStream.h; sourceTree = "<group>"; };
+		DAC2DB5422625C84008BD00B /* Tabs.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Tabs.h; sourceTree = "<group>"; };
+		DAC2DB5522625C85008BD00B /* Tabs.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Tabs.cpp; sourceTree = "<group>"; };
+		DAC2DB572266712B008BD00B /* IndexVec.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = IndexVec.cpp; sourceTree = "<group>"; };
+		DAC2DB582266712C008BD00B /* IndexVec.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IndexVec.h; sourceTree = "<group>"; };
+		DAD244E821C431A6006A3211 /* SubsetFontCreator.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = SubsetFontCreator.cpp; sourceTree = "<group>"; };
+		DAD244E921C431A6006A3211 /* SubsetFontCreator.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SubsetFontCreator.h; sourceTree = "<group>"; };
+		DAEED7772277B89E00C2E2BA /* ArduinoDisplayView.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ArduinoDisplayView.h; sourceTree = "<group>"; };
+		DAEED7782277B89E00C2E2BA /* ArduinoDisplayView.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = ArduinoDisplayView.mm; sourceTree = "<group>"; };
+		DAF972ED22D0D40D0098C0E9 /* DataStream.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = DataStream.cpp; sourceTree = "<group>"; };
+		DAF972EE22D0D40D0098C0E9 /* DisplayController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DisplayController.h; sourceTree = "<group>"; };
+		DAF972EF22D0D40D0098C0E9 /* XFont.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XFont.h; sourceTree = "<group>"; };
+		DAF972F022D0D40E0098C0E9 /* XFont.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = XFont.cpp; sourceTree = "<group>"; };
+		DAF972F122D0D40E0098C0E9 /* DataStream.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DataStream.h; sourceTree = "<group>"; };
+		DAF972F222D0D40E0098C0E9 /* pgmspace_stub.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = pgmspace_stub.h; sourceTree = "<group>"; };
+		DAF972F322D0D40F0098C0E9 /* DisplayController.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = DisplayController.cpp; sourceTree = "<group>"; };
+		DAF972F422D0D40F0098C0E9 /* XFont16BitDataStream.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = XFont16BitDataStream.cpp; sourceTree = "<group>"; };
+		DAF972F522D0D40F0098C0E9 /* XFont16BitDataStream.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XFont16BitDataStream.h; sourceTree = "<group>"; };
+		DAF972FA22D0D9AA0098C0E9 /* BitmapDisplayController.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = BitmapDisplayController.cpp; sourceTree = "<group>"; };
+		DAF972FB22D0D9AA0098C0E9 /* BitmapDisplayController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = BitmapDisplayController.h; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		DAA1441721BFFE0C00C263CA /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				DA7F2DA921C076A2009BFE30 /* libfreetype.a in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		DA7F2DA521C071CC009BFE30 /* Libraries */ = {
+			isa = PBXGroup;
+			children = (
+				DA7F2DA821C076A2009BFE30 /* libfreetype.a */,
+			);
+			path = Libraries;
+			sourceTree = "<group>";
+		};
+		DAA1441121BFFE0C00C263CA = {
+			isa = PBXGroup;
+			children = (
+				DAA1441C21BFFE0C00C263CA /* SubsetFontCreator */,
+				DA7F2DA521C071CC009BFE30 /* Libraries */,
+				DAA1441B21BFFE0C00C263CA /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		DAA1441B21BFFE0C00C263CA /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				DAA1441A21BFFE0C00C263CA /* SubsetFontCreator.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		DAA1441C21BFFE0C00C263CA /* SubsetFontCreator */ = {
+			isa = PBXGroup;
+			children = (
+				DAA1441D21BFFE0C00C263CA /* AppDelegate.h */,
+				DAA1441E21BFFE0C00C263CA /* AppDelegate.m */,
+				DAA1442021BFFE0D00C263CA /* Assets.xcassets */,
+				DAA1442221BFFE0D00C263CA /* MainMenu.xib */,
+				DAA1442E21BFFED900C263CA /* MainWindowController.h */,
+				DAA1442F21BFFED900C263CA /* MainWindowController.mm */,
+				DAA1443021BFFED900C263CA /* MainWindowController.xib */,
+				DA8D885B2282309B002EE769 /* OpeningInstructions.rtf */,
+				DAEED7772277B89E00C2E2BA /* ArduinoDisplayView.h */,
+				DAEED7782277B89E00C2E2BA /* ArduinoDisplayView.mm */,
+				DABF5317227B375400ADEBC8 /* ArduinoDisplays.plist */,
+				DAA8F66722CFD3B200C863A4 /* NSTextButtonCell.h */,
+				DAA8F66822CFD3B200C863A4 /* NSTextButtonCell.m */,
+				DAD244E921C431A6006A3211 /* SubsetFontCreator.h */,
+				DAD244E821C431A6006A3211 /* SubsetFontCreator.cpp */,
+				DAC2DB5222624EBE008BD00B /* TabbedFileStream.h */,
+				DAC2DB5122624EBE008BD00B /* TabbedFileStream.cpp */,
+				DAC2DB5422625C84008BD00B /* Tabs.h */,
+				DAC2DB5522625C85008BD00B /* Tabs.cpp */,
+				DAC2DB582266712C008BD00B /* IndexVec.h */,
+				DAC2DB572266712B008BD00B /* IndexVec.cpp */,
+				DAF972ED22D0D40D0098C0E9 /* DataStream.cpp */,
+				DAF972F122D0D40E0098C0E9 /* DataStream.h */,
+				DAF972F322D0D40F0098C0E9 /* DisplayController.cpp */,
+				DAF972EE22D0D40D0098C0E9 /* DisplayController.h */,
+				DAF972FA22D0D9AA0098C0E9 /* BitmapDisplayController.cpp */,
+				DAF972FB22D0D9AA0098C0E9 /* BitmapDisplayController.h */,
+				DAF972F222D0D40E0098C0E9 /* pgmspace_stub.h */,
+				DAF972F022D0D40E0098C0E9 /* XFont.cpp */,
+				DAF972EF22D0D40D0098C0E9 /* XFont.h */,
+				DAA949F522DA43360056FBCC /* XFontR1BitDataStream.cpp */,
+				DAA949F422DA43360056FBCC /* XFontR1BitDataStream.h */,
+				DAF972F422D0D40F0098C0E9 /* XFont16BitDataStream.cpp */,
+				DAF972F522D0D40F0098C0E9 /* XFont16BitDataStream.h */,
+				DAB67FA021C2B1A1003B3503 /* LogViewController.h */,
+				DAB67FA121C2B1A1003B3503 /* LogViewController.m */,
+				DAB67FA321C2B35D003B3503 /* LogViewController.xib */,
+				DAC03A982273529600408360 /* SubsetHelperWindowControler.h */,
+				DAC03A992273529700408360 /* SubsetHelperWindowControler.mm */,
+				DAC03A9622734D1100408360 /* SubsetHelper.xib */,
+				DAA1442521BFFE0D00C263CA /* Info.plist */,
+				DAA1442621BFFE0D00C263CA /* main.m */,
+				DAA1442821BFFE0D00C263CA /* SubsetFontCreator.entitlements */,
+				DAC2DB4F2260DF6D008BD00B /* ExportFormat.xib */,
+			);
+			path = SubsetFontCreator;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		DAA1441921BFFE0C00C263CA /* SubsetFontCreator */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = DAA1442B21BFFE0D00C263CA /* Build configuration list for PBXNativeTarget "SubsetFontCreator" */;
+			buildPhases = (
+				DAA1441621BFFE0C00C263CA /* Sources */,
+				DAA1441721BFFE0C00C263CA /* Frameworks */,
+				DAA1441821BFFE0C00C263CA /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = SubsetFontCreator;
+			productName = SubsetFontCreator;
+			productReference = DAA1441A21BFFE0C00C263CA /* SubsetFontCreator.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		DAA1441221BFFE0C00C263CA /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 1010;
+				ORGANIZATIONNAME = Jon;
+				TargetAttributes = {
+					DAA1441921BFFE0C00C263CA = {
+						CreatedOnToolsVersion = 10.1;
+						SystemCapabilities = {
+							com.apple.Sandbox = {
+								enabled = 1;
+							};
+						};
+					};
+				};
+			};
+			buildConfigurationList = DAA1441521BFFE0C00C263CA /* Build configuration list for PBXProject "SubsetFontCreator" */;
+			compatibilityVersion = "Xcode 9.3";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = DAA1441121BFFE0C00C263CA;
+			productRefGroup = DAA1441B21BFFE0C00C263CA /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				DAA1441921BFFE0C00C263CA /* SubsetFontCreator */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		DAA1441821BFFE0C00C263CA /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				DAC2DB502260DF6E008BD00B /* ExportFormat.xib in Resources */,
+				DAA1442121BFFE0D00C263CA /* Assets.xcassets in Resources */,
+				DAA1443221BFFED900C263CA /* MainWindowController.xib in Resources */,
+				DAA1442421BFFE0D00C263CA /* MainMenu.xib in Resources */,
+				DAB67FA421C2B35D003B3503 /* LogViewController.xib in Resources */,
+				DABF5318227B375400ADEBC8 /* ArduinoDisplays.plist in Resources */,
+				DA8D885C2282309B002EE769 /* OpeningInstructions.rtf in Resources */,
+				DAC03A9722734D1100408360 /* SubsetHelper.xib in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		DAA1441621BFFE0C00C263CA /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				DAC2DB5622625C85008BD00B /* Tabs.cpp in Sources */,
+				DAA1443121BFFED900C263CA /* MainWindowController.mm in Sources */,
+				DAD244EA21C431A6006A3211 /* SubsetFontCreator.cpp in Sources */,
+				DAF972FC22D0D9AA0098C0E9 /* BitmapDisplayController.cpp in Sources */,
+				DAC03A9B2273529700408360 /* SubsetHelperWindowControler.mm in Sources */,
+				DAF972F722D0D4100098C0E9 /* XFont.cpp in Sources */,
+				DAF972F922D0D4100098C0E9 /* XFont16BitDataStream.cpp in Sources */,
+				DAC2DB592266712C008BD00B /* IndexVec.cpp in Sources */,
+				DAA949F622DA43360056FBCC /* XFontR1BitDataStream.cpp in Sources */,
+				DAF972F622D0D40F0098C0E9 /* DataStream.cpp in Sources */,
+				DAA1442721BFFE0D00C263CA /* main.m in Sources */,
+				DAF972F822D0D4100098C0E9 /* DisplayController.cpp in Sources */,
+				DAEED7792277B89E00C2E2BA /* ArduinoDisplayView.mm in Sources */,
+				DAC2DB5322624EBE008BD00B /* TabbedFileStream.cpp in Sources */,
+				DAA1441F21BFFE0C00C263CA /* AppDelegate.m in Sources */,
+				DAB67FA221C2B1A2003B3503 /* LogViewController.m in Sources */,
+				DAA8F66922CFD3B200C863A4 /* NSTextButtonCell.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXVariantGroup section */
+		DAA1442221BFFE0D00C263CA /* MainMenu.xib */ = {
+			isa = PBXVariantGroup;
+			children = (
+				DAA1442321BFFE0D00C263CA /* Base */,
+			);
+			name = MainMenu.xib;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
+
+/* Begin XCBuildConfiguration section */
+		DAA1442921BFFE0D00C263CA /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_IDENTITY = "-";
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.14;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = macosx;
+			};
+			name = Debug;
+		};
+		DAA1442A21BFFE0D00C263CA /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_IDENTITY = "-";
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.14;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SDKROOT = macosx;
+			};
+			name = Release;
+		};
+		DAA1442C21BFFE0D00C263CA /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = SubsetFontCreator/SubsetFontCreator.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				GCC_C_LANGUAGE_STANDARD = "compiler-default";
+				GCC_PREPROCESSOR_DEFINITIONS = "$(GCC_PREPROCESSOR_DEFINITIONS)";
+				HEADER_SEARCH_PATHS = (
+					"$(HEADER_SEARCH_PATHS)",
+					"$(SOURCE_ROOT)",
+					"$(SOURCE_ROOT)/freetype/include",
+					"$(SOURCE_ROOT)/freetype/include/freetype",
+				);
+				INFOPLIST_FILE = SubsetFontCreator/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/Libraries",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = Mackey.SubsetFontCreator;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Debug;
+		};
+		DAA1442D21BFFE0D00C263CA /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = SubsetFontCreator/SubsetFontCreator.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				GCC_C_LANGUAGE_STANDARD = "compiler-default";
+				GCC_PREPROCESSOR_DEFINITIONS = "$(GCC_PREPROCESSOR_DEFINITIONS)";
+				HEADER_SEARCH_PATHS = (
+					"$(HEADER_SEARCH_PATHS)",
+					"$(SOURCE_ROOT)",
+					"$(SOURCE_ROOT)/freetype/include",
+					"$(SOURCE_ROOT)/freetype/include/freetype",
+				);
+				INFOPLIST_FILE = SubsetFontCreator/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/Libraries",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = Mackey.SubsetFontCreator;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		DAA1441521BFFE0C00C263CA /* Build configuration list for PBXProject "SubsetFontCreator" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				DAA1442921BFFE0D00C263CA /* Debug */,
+				DAA1442A21BFFE0D00C263CA /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		DAA1442B21BFFE0D00C263CA /* Build configuration list for PBXNativeTarget "SubsetFontCreator" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				DAA1442C21BFFE0D00C263CA /* Debug */,
+				DAA1442D21BFFE0D00C263CA /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = DAA1441221BFFE0C00C263CA /* Project object */;
+}
