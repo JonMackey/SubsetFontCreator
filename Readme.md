@@ -1,6 +1,6 @@
 # SubsetFontCreator
 
-SubsetFontCreator is an Objective-C OS X app that creates a subset of a font for use on displays such as Color TFT, Monochrome OLED and LCDs used on small MCUs such as Arduino.
+SubsetFontCreator is an Objective-C OS X app that creates a subset of a font for use on displays such as Color TFT, Monochrome OLED and LCDs controlled by many of the MCUs supported by the Arduino IDE.
 
 In many cases you only need a subset of the characters within a font.  For example, if you're writing a thermometer sketch you probably only need the characters needed to display the temperature.
 
@@ -62,7 +62,7 @@ XFont allows you to set the text foreground and background colors as well as hig
 Note that XFont is not a subclass of Print nor do I plan to make it a subclass.  I suppose a Print wrapper class could be written at some point.
 
 # Arduino
-Under the Arduino folder in the repository are the classes described above and a few simple examples.  Contact me if you have questions about implentation.
+Under the Arduino folder in the repository are the classes described above and a few simple examples.  Contact me if you have questions about implementation.
 
 # Glyph Data Storage
 1 bit data is stored by removing all bit padding and shifting the bits into a contiguous string of bits.  FreeType generates bitmap data that is the exact size of the glyph with padding (e.g for a 6 bit wide glyph there will be 2 bits of padding per row.)  The XFont storage requirements for any glyph are its row and column dimensions rounded up to the nearest byte.  For example, if the glyph dimensions are 6 rows x 6 columns, the number of bytes needed to store it would be abs(((6 * 6) + 7)/8) or 5 bytes.
