@@ -18,14 +18,18 @@ SubsetFontCreator has two export formats, binary and C header.  The binary forma
 
 All of the other export options are selected in the application's main window.  These options are:
 * Font - any ttf or otf font supported by FreeType
-* Font size - the font size in points.  This size is currently limited to 72.
+* Font size - the font size in points.
 * Glyph data format - 1 bit, 1 bit rotated, and 8 bit for antialiased text.  8 bit is selected when the 1 bit checkbox is unchecked.
-* Subset string - a UTF string that defines the set of glyphs to export.  Press "Helper…" to display a helper window that allows you to create the range string. Type or paste text containing the characters you plan to use into the window's text field. 
+* Subset string - a UTF-8 string that defines the set of glyphs to export.   
 * 16 or 32 bit glyph data offsets.  In general 16 should be used.  The XFont class described below currently doesn't handle 32 bit offsets.
 
-In addition to the primary feature of exporting bitmapped subset fonts, there is a sample feature for viewing sample text with the defined options at the same physical size for various common displays.  Note that all settings below the subset edit field have no impact on what gets exported, they're only used to define the sample.  Additional sample displays may be added by editing the ArduinoDisplays property list in the application bundle.  This property list defines the screen dimension in pixels as well as the size of the active area in millimeters.  By combining this information with the Mac's own display information it's possible to display an accurately scaled sample.  If you take a ruler and measure the device sample on a 72dpi screen, and measure the same sample on a 144dpi screen, the measurements will be the same size as the target device. 
+Press "Helper…" to display the subset string helper window.  This window allows you to create the subset string by typing or pasting text containing the characters you plan to use into the helper window's text field.
+
+In addition to the primary feature of exporting bitmapped subset fonts, there is a sample feature for viewing sample text with the defined options at the same physical size for various common displays.  Note that all settings below the subset string edit field have no impact on what gets exported, they're only used to define the sample.
 
 ![Image](MainWAtLaunch.jpg)
+
+Additional sample displays may be added by editing the ArduinoDisplays property list in the application bundle.  This property list defines the screen dimension in pixels as well as the size of the active area in millimeters.  By combining this information with the Mac's own display information it's possible to display an accurately scaled sample.
 
 An unscaled sample:
 
@@ -47,8 +51,6 @@ A scaled sample on a 1 bit OLED display:
 ![Image](OLED_Time_Sample.jpg)
 
 The same classes used to create the sample are used in the Arduino sketches.  This will give you a reasonable idea of what the sample will look like on your device.  Using the actual classes in the SubsetFontCreator also makes it easier to debug the non-device specific code using Xcode's debugger.
-
-Note that SubsetFontCreator calls a C++ class of the same name.  All file creation happens in this class using std C++.  This class could be used as the basis for an app on another OS with minor tweaking (it uses POSIX paths.)  FreeType is already cross platform.
 
 # Glyph Drawing
 The primary class is XFont.  All of the other classes are used in combination based on the font storage and the display device being targeted.  As noted earlier, subset fonts can be exported in multiple ways depending on where the font data will be stored.
@@ -77,4 +79,6 @@ To get font data or any other data onto various storage devices, I wrote an appl
 
 # Building
 The app can be built as a sandboxed app or a regular app.  Only the sandboxed app has been tested.  A built sandboxed app is included in the repository.  A built archive of the FreeType library is included in the repository.  If for some reason you need to build the FreeType archive, the FreeType project without the sources is included in the repository.    You can get the FreeType sources from [FreeType](https://download.savannah.gnu.org/releases/freetype/) org, version 2.9.1.  Before building the FreeType archive you should comment out the two zip related defines: FT_CONFIG_OPTION_USE_LZW and FT_CONFIG_OPTION_USE_ZLIB in ftoption.h otherwise you may get missing symbol errors when you try to build the release version of SubsetFontCreator.  The built libfreetype archive needs to be copied to the Library folder within the root SubsetFontCreator folder.
+
+Note that SubsetFontCreator calls a C++ class of the same name.  All file creation happens in this class using std C++.  This class could be used as the basis for an app on another OS with minor tweaking (it uses POSIX paths.)  FreeType is already cross platform.
 
