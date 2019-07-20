@@ -12,7 +12,7 @@ The source fonts are whatever ttf and otf fonts that are present on your Mac.
 
 
 # Usage
-Launch the application, select a font, encoding options and define the subset range string.  Use the Help menu to display instructions for creating the subset range string.  If you use a particular font often, you can save the font and it's settings via shift-command-s.  These saved sets show up in the recents menu.
+Launch the application, select a font, encoding options and define the subset range string.  Use the Help menu to display instructions for creating the subset range string.  If you use a particular font often, you can save the font and its settings via shift-⌘-s.  These saved sets show up in the recents menu.
 
 SubsetFontCreator has two export formats, binary and C header.  The binary format is useful if you plan on storing the font on an EEPROM or SD Card.  The C header format is generally used when you intend to store the font in the MCU's flash memory.  In addition, both formats have the option of exporting the glyph data as a separate binary file.  The separate binary option might be used to store the glyph data on an EEPROM with the font header and lookup tables in the MCU's flash memory.  When this option is selected, the associated C header or binary does not contain the glyph data.  This option is found on the export save panel.
 
