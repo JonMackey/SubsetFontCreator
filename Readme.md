@@ -19,7 +19,7 @@ SubsetFontCreator has two export formats, binary and C header.  The binary forma
 All of the other export options are selected in the application's main window.  These options are:
 * Font - any ttf or otf font supported by FreeType
 * Font size - the font size in points.
-* Glyph data format - 1 bit, 1 bit rotated, and 8 bit for antialiased text.  8 bit is selected when the 1 bit checkbox is unchecked.
+* Glyph data format - 1 bit, 1 bit rotated, and 8 bit for antialiased text.  8 bit is exported when the 1 bit checkbox is unchecked.
 * Subset string - a UTF-8 string that defines the set of glyphs to export.   
 * 16 or 32 bit glyph data offsets.  In general 16 should be used.  The XFont class described below currently doesn't handle 32 bit offsets.
 
@@ -29,7 +29,7 @@ In addition to the primary feature of exporting bitmapped subset fonts, there is
 
 ![Image](MainWAtLaunch.jpg)
 
-Additional sample displays may be added by editing the ArduinoDisplays property list in the application bundle.  This property list defines the screen dimension in pixels as well as the size of the active area in millimeters.  By combining this information with the Mac's own display information it's possible to display an accurately scaled sample.
+Additional sample displays may be added by editing the ArduinoDisplays property list in the application bundle.  This property list defines the screen dimensions in pixels as well as the size of the active area in millimeters.  By combining this information with the Mac's own display information it's possible to display an accurately scaled sample.
 
 An unscaled sample:
 
