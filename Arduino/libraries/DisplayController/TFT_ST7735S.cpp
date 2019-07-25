@@ -31,11 +31,12 @@ TFT_ST7735S::TFT_ST7735S(
 	uint8_t		inDCPin,
 	int8_t		inResetPin,	
 	int8_t		inCSPin,
+	int8_t		inBacklightPin,
 	uint16_t	inHeight,
 	uint16_t	inWidth,
-	uint8_t		inRowOffset,
-	uint8_t		inColOffset)
-	: TFT_ST77XX(inDCPin, inResetPin, inCSPin, inHeight, inWidth, inRowOffset, inColOffset)
+	bool		inCentered,
+	bool		inIsBGR)
+	: TFT_ST77XX(inDCPin, inResetPin, inCSPin, inBacklightPin, inHeight, inWidth, inCentered, inIsBGR)
 {
 }
 

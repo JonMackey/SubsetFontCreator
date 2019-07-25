@@ -34,10 +34,11 @@ public:
 								uint8_t					inDCPin,
 								int8_t					inResetPin,	
 								int8_t					inCSPin,
+								int8_t					inBacklightPin,
 								uint16_t				inHeight,
 								uint16_t				inWidth,
-								uint8_t					inRowOffset,
-								uint8_t					inColOffset);
+								bool					inCentered,
+								bool					inIsBGR);
 
 							// Rotation, one of 0, 1, 2, or 3.
 							// Corresponds to MADCTL in doc
@@ -147,10 +148,14 @@ protected:
 	int8_t		mCSPin;
 	uint8_t		mDCPin;
 	uint8_t		mResetPin;
+	int8_t		mBacklightPin;
 	uint8_t		mChipSelBitMask;
 	uint8_t		mDCBitMask;
 	uint8_t		mRowOffset;
 	uint8_t		mColOffset;
+	bool		mIsBGR;		// Set when display pixel RGB order is opposite of the controller docs (bug fix)
+	bool		mCentered;	// Display pixels are physically centered within the controllers memory space.
+							// When false the the display pixel origin is 0,0 at 0 degree rotation
 	volatile uint8_t*	mChipSelPortReg;
 	volatile uint8_t*	mDCPortReg;
 	SPISettings	mSPISettings;
@@ -193,5 +198,8 @@ protected:
 	void					WriteData16(
 								const uint16_t*			inData,
 								uint16_t				inDataLen) const;
+							// The native controller display resolution.
+	virtual uint16_t		VerticalRes(void) const = 0;
+	virtual uint16_t		HorizontalRes(void) const = 0;
 };
 #endif // TFT_ST77XX_h

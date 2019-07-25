@@ -32,12 +32,17 @@ public:
 								uint8_t					inDCPin,
 								int8_t					inResetPin = -1,	
 								int8_t					inCSPin = -1,
+								int8_t					inBacklightPin = -1,
 								uint16_t				inHeight = 240,
 								uint16_t				inWidth = 240,
-								uint8_t					inRowOffset = 0,
-								uint8_t					inColOffset = 0);
+								bool					inCentered = false,
+								bool					inIsBGR = false);
 protected:
 	virtual void			Init(void);
+	virtual uint16_t		VerticalRes(void) const
+								{return(320);}
+	virtual uint16_t		HorizontalRes(void) const
+								{return(240);}
 };
 
 #endif // TFT_ST7789_h

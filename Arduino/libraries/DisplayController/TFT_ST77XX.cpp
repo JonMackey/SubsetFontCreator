@@ -36,16 +36,18 @@ TFT_ST77XX::TFT_ST77XX(
 	uint8_t		inDCPin,
 	int8_t		inResetPin,	
 	int8_t		inCSPin,
+	int8_t		inBacklightPin,
 	uint16_t	inHeight,
 	uint16_t	inWidth,
-	uint8_t		inRowOffset,
-	uint8_t		inColOffset)
+	bool		inCentered,
+	bool		inIsBGR)
 	: DisplayController(inHeight, inWidth),
 	// According to the docs for the 35 and 89 controllers, the min write
 	// cycle is 66ns or approximately 15Mhz
 	  mSPISettings(15000000, MSBFIRST, SPI_MODE3),
 	  mCSPin(inCSPin), mDCPin(inDCPin), mResetPin(inResetPin),
-	  mRowOffset(inRowOffset), mColOffset(inColOffset)
+	  mBacklightPin(inBacklightPin), mRowOffset(0), mColOffset(0),
+	  mCentered(inCentered), mIsBGR(inIsBGR)
 {
 	if (mCSPin >= 0)
 	{
@@ -60,6 +62,11 @@ TFT_ST77XX::TFT_ST77XX(
 void TFT_ST77XX::begin(
 	uint8_t	inRotation)
 {
+	if (mBacklightPin >= 0)
+	{
+		pinMode(mBacklightPin, OUTPUT);
+		digitalWrite(mBacklightPin, LOW);	// Off
+	}
 	if (mCSPin >= 0 &&
 		mCSPin != SS)	// If it's SS, SPI.begin() takes care of initializing it.
 	{
@@ -216,11 +223,53 @@ MH  = 0x04 (when set it's right to left)
 For both the 89 and 35R the RGB order is BGR.
 
 */
-	//static const uint8_t cmdData[] PROGMEM = {0x08, 0x68, 0xC8, 0xA8};
-	static const uint8_t cmdData[] PROGMEM = {0x00, 0x60, 0xC0, 0xA0};
+	inRotation &= 3;
+	/*
+	*	It looks like there's a manufacturing mistake in the 160x80 displays
+	*	that I have (maybe all?) where RGB is BGR based on the controller
+	*	RGB/BGR order bit is the opposite of what you expect.  So either there's
+	*	a bug in the ST7735S controller or the display manufacturer screwed up.
+	*
+	*	This is the reason for the mSwapRB flag.  
+	*
+	*	The other thing about the 160x80 display is that rather than pick 0,0
+	*	to be the origin, they centered it in ST7735S's 162x132 memory window,
+	*	so all xy values need to be offset regardless of rotation.  For the
+	*	240x240 display they did not center it, so you only need to offset when
+	*	rotating by 180 and 270.
+	*
+	*	This is the reason for the mCentered flag.
+	*/
+	static const uint8_t cmdData[] PROGMEM = {0x08, 0x68, 0xC8, 0xA8};
+	uint8_t	madctlParam = pgm_read_byte(&cmdData[inRotation]);
+	if (mIsBGR)
+	{
+		madctlParam &= ~8;
+	}
 	BeginTransaction();
-	WriteCmd(eMADCTLCmd, &cmdData[inRotation & 3], 1, true);
+	WriteCmd(eMADCTLCmd);
+	SPI.transfer(madctlParam);
 	EndTransaction();
+	{
+		uint8_t	vDelta = VerticalRes() - mRows;
+		uint8_t	hDelta = HorizontalRes() - mColumns;
+		if (mCentered)
+		{
+			mRowOffset = vDelta /= 2;
+			mColOffset = hDelta /= 2;
+		} else
+		{
+			if (inRotation & 2)
+			{
+				mRowOffset = vDelta;
+				mColOffset = hDelta;
+			} else
+			{
+				mRowOffset = 0;
+				mColOffset = 0;
+			}
+		}
+	}
 	if (inRotation & 1)
 	{
 		uint16_t	temp = mRows;
@@ -239,6 +288,11 @@ void TFT_ST77XX::Sleep(void)
 	// Per docs: When going to Sleep, delay 120ms before sending the next command.
 	// delay(120);  << This assumes there will be no commands after calling
 	// this routine.
+	
+	if (mBacklightPin >= 0)
+	{
+		digitalWrite(mBacklightPin, LOW);	// Off
+	}
 }
 
 /*********************************** WakeUp ***********************************/
@@ -247,6 +301,11 @@ void TFT_ST77XX::WakeUp(void)
 	WriteCmd(eSLPOUTCmd);
 	// Per docs: When waking from Sleep, delay 120ms before sending the next command.
 	delay(120);
+	if (mBacklightPin >= 0)
+	{
+		digitalWrite(mBacklightPin, HIGH);	// On
+	}
+
 }
 
 /********************************* FillPixels *********************************/

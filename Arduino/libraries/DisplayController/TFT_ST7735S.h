@@ -32,12 +32,17 @@ public:
 								uint8_t					inDCPin,
 								int8_t					inResetPin,	
 								int8_t					inCSPin,
+								int8_t					inBacklightPin = -1,
 								uint16_t				inHeight = 160,
 								uint16_t				inWidth = 80,
-								uint8_t					inRowOffset = 1,
-								uint8_t					inColOffset = 26);
+								bool					inCentered = true,
+								bool					inIsBGR = true);
 protected:
 	virtual void			Init(void);
+	virtual uint16_t		VerticalRes(void) const
+								{return(162);}
+	virtual uint16_t		HorizontalRes(void) const
+								{return(132);}
 };
 
 #endif // TFT_ST7735S_h
