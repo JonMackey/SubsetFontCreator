@@ -219,7 +219,7 @@ SMenuItemDesc	menuItems[] = {
 		[openPanel setCanChooseDirectories:NO];
 		[openPanel setCanChooseFiles:YES];
 		[openPanel setAllowsMultipleSelection:NO];
-		openPanel.allowedFileTypes = @[@"otf", @"ttf"];
+		openPanel.allowedFileTypes = @[@"otf", @"ttf", @"ttc"];
 		openPanel.directoryURL = folderURL;
 		openPanel.message = @"Select a font";
 		openPanel.prompt = kSelectPrompt;
