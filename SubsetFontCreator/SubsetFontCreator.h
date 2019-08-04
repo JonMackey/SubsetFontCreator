@@ -77,6 +77,7 @@ public:
 								int32_t					inPointSize,
 								int						inOptions,
 								SubsetCharcodeIterator&	inCharcodeItr,
+								long					inFontFaceIndex,
 								std::string*			outErrorStr = NULL,
 								std::string*			outWarningStr = NULL,
 								std::string*			outInfoStr = NULL);
@@ -87,9 +88,13 @@ public:
 								int32_t					inPointSize,
 								int						inOptions,
 								const char*				inSubset,
+								long					inFontFaceIndex,
 								std::string*			outErrorStr = NULL,
 								std::string*			outWarningStr = NULL,
 								std::string*			outInfoStr = NULL);
+	static int				GetFaceNames(
+								const char*				inFontFilePath,
+								std::vector<std::string>&	outFaceNames);
 
 protected:
 	static int				XFntToC_Header(

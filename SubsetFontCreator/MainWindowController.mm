@@ -59,6 +59,7 @@ NSString *const kFontPathKey = @"fontPath";
 
 NSString *const kSubsetFileIdentifierKey = @"subsetFileID";
 NSString *const kSubsetFileIdentifier = @"1521E46C-08C5-4276-913C-2FF08F4DCB1C";
+NSString *const kFontFaceKey = @"fontFace";
 NSString *const kFontSizeKey = @"fontSize";
 NSString *const kIs1BitKey = @"is1Bit";
 NSString *const kRotateKey = @"rotate";
@@ -223,6 +224,30 @@ SMenuItemDesc	menuItems[] = {
 		openPanel.directoryURL = folderURL;
 		openPanel.message = @"Select a font";
 		openPanel.prompt = kSelectPrompt;
+	}
+}
+
+/****************************** fontPathChanged *******************************/
+- (IBAction)fontPathChanged:(id)sender
+{
+	[self loadFacePopup:fontPathControl.URL faceIndex:0];
+}
+
+/******************************* loadFacePopup ********************************/
+-(void)loadFacePopup:(NSURL*)inFontURL faceIndex:(NSInteger)inFaceIndex
+{
+	std::vector<std::string>	fontFaces;
+	SubsetFontCreator::GetFaceNames(inFontURL.path.UTF8String, fontFaces);
+	[facePopupButton removeAllItems];
+	std::vector<std::string>::iterator	itr = fontFaces.begin();
+	std::vector<std::string>::iterator	itrEnd = fontFaces.end();
+	for (; itr != itrEnd; ++itr)
+	{
+		[facePopupButton addItemWithTitle:[NSString stringWithUTF8String:itr->c_str()]];
+	}
+	if (inFaceIndex <= fontFaces.size())
+	{
+		[facePopupButton selectItemAtIndex:inFaceIndex];
 	}
 }
 
@@ -479,6 +504,7 @@ SMenuItemDesc	menuItems[] = {
 			[NSNumber numberWithInteger:[rotateCheckBox state]], kRotateKey,
 			[NSNumber numberWithInteger:[offsetWidth32Radio state]], k32BitDataOffsetsKey,
 			[subsetTextField stringValue], kSubsetStrKey,
+			[NSNumber numberWithInteger:facePopupButton.indexOfSelectedItem], kFontFaceKey,
 			/*[sampleTextField stringValue], kSampleStrKey,
 			[sampleDisplayPopupButton titleOfSelectedItem], kSampleDisplayKey,*/
 #if SANDBOX_ENABLED
@@ -536,6 +562,7 @@ SMenuItemDesc	menuItems[] = {
 			NSURL*	fontURL = [NSURL fileURLWithPath:[archivedSet objectForKey:kFontPathKey]];
 #endif
 			[fontPathControl setURL:fontURL];
+			[self loadFacePopup:fontURL faceIndex:[[archivedSet objectForKey:kFontFaceKey] integerValue]];
 			[pointSizeTextField setIntegerValue:[[archivedSet objectForKey:kFontSizeKey] integerValue]];
 			[oneBitCheckBox setState:[[archivedSet objectForKey:kIs1BitKey] integerValue]];
 			[rotateCheckBox setState:[[archivedSet objectForKey:kRotateKey] integerValue]];
@@ -695,6 +722,7 @@ SMenuItemDesc	menuItems[] = {
 				pointSize,
 				inOptions,
 				subsetTextField.stringValue.UTF8String,
+				facePopupButton.indexOfSelectedItem,
 				&errorStr,
 				&warningStr,
 				&infoStr);
@@ -731,6 +759,7 @@ SMenuItemDesc	menuItems[] = {
 	[arduinoDisplayView loadSample:sampleTextField.stringValue pointSize:pointSize
 			fontURL:fontPathControl.URL isRotated:rotateCheckBox.state
 				is1BitPerPixel:oneBitCheckBox.state
+				faceIndex:facePopupButton.indexOfSelectedItem
 				textColor:isColor ? ((NSTextButtonCell*)textColorButton.cell).fillColor : NSColor.whiteColor
 				textBGColor:isColor ? ((NSTextButtonCell*)textBGColorButton.cell).fillColor : NSColor.blackColor
 				simulateMono:simulateMonoCheckbox.state
@@ -854,4 +883,5 @@ SMenuItemDesc	menuItems[] = {
 	[_logViewController.logText appendAttributedString:openingInstructions];
 	[_logViewController post];
 }
+
 @end

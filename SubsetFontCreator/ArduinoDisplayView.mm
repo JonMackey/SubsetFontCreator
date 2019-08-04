@@ -135,6 +135,7 @@ uint16_t EntryIndexFor(
 - (void)loadSample:(NSString*)inSampleText pointSize:(NSUInteger)inPointSize
 			fontURL:(NSURL*)inFontURL isRotated:(BOOL)inIsRotated
 				is1BitPerPixel:(BOOL)in1BitPerPixel
+				faceIndex:(NSInteger)inFaceIndex
 					textColor:(NSColor*)inTextColor
 						textBGColor:(NSColor*)inTextBGColor
 							simulateMono:(BOOL)inSimulateMono
@@ -161,7 +162,7 @@ uint16_t EntryIndexFor(
 				(in1BitPerPixel ? SubsetFontCreator::e1BitPerPixel : 0);
 			createErr = SubsetFontCreator::CreateXfntFile(inFontURL.path.UTF8String,
 								xfntFile, xfntFile, (int32_t)inPointSize, options,
-								charcodeItr, &errorStr, &warningStr, &infoStr);
+								charcodeItr, inFaceIndex, &errorStr, &warningStr, &infoStr);
 			fclose(xfntFile);
 		#ifndef DEBUG_ARDUINO
 			_bitmapIsRotated = inIsRotated;

@@ -114,6 +114,7 @@ int SubsetFontCreator::CreateFile(
 	int32_t			inPointSize,
 	int				inOptions,
 	const char*		inSubset,
+	long			inFontFaceIndex,
 	std::string*	outErrorStr,
 	std::string*	outWarningStr,
 	std::string*	outInfoStr)
@@ -144,7 +145,7 @@ int SubsetFontCreator::CreateFile(
 				if (glyphDataFile)
 				{
 					createFileError = CreateXfntFile(inFontFilePath, file, glyphDataFile,
-										inPointSize, inOptions, charcodeIterator,
+										inPointSize, inOptions, charcodeIterator, inFontFaceIndex,
 											outErrorStr, outWarningStr, outInfoStr);
 					if (inExportFormat != eBinaryXfntFormat &&
 						createFileError == eSubsetNoErr)
@@ -179,6 +180,74 @@ int SubsetFontCreator::CreateFile(
 	return(createFileError);
 }
 
+/******************************** GetFaceNames ********************************/
+int SubsetFontCreator::GetFaceNames(
+	const char*					inFontFilePath,
+	std::vector<std::string>&	outFaceNames)
+{
+	int	success = 0;
+	std::string utf8FontPath(inFontFilePath);
+	FT_Library ftLibrary = NULL;
+	if (FT_Init_FreeType(&ftLibrary) == 0)
+	{
+		FT_Face  face = NULL;
+		
+		FT_Long  num_faces     = 0;
+		FT_Long  num_instances = 0;
+		
+		FT_Long  face_idx     = 0;
+		FT_Long  instance_idx = 0;
+		
+		
+		do
+		{
+			FT_Long  id = ( instance_idx << 16 ) + face_idx;
+			
+			success = FT_New_Face(ftLibrary, utf8FontPath.c_str(), id, &face) == 0;
+			if (success)
+			{
+				
+				num_faces     = face->num_faces;
+				num_instances = face->style_flags >> 16;
+				/*
+				*	If this isn't a hidden face THEN
+				*	add the face name to the array as is
+				*/
+				if (face->family_name[0] != '.')
+				{
+					outFaceNames.push_back(face->style_name);
+					//fprintf(stderr, "%s - %s\n", face->family_name, face->style_name);
+				/*
+				*	Else this is a hidden face name  (e.g. ".Lucida Grande UI" is part of Lucida Grande.tcc)
+				*/
+				} else
+				{
+					std::string hiddenFaceName(face->family_name);
+					hiddenFaceName.append(" - ");
+					hiddenFaceName.append(face->style_name);
+					outFaceNames.push_back(hiddenFaceName);
+				}
+				FT_Done_Face( face );
+				
+				if (instance_idx < num_instances)
+				{
+					instance_idx++;
+				} else
+				{
+					face_idx++;
+					instance_idx = 0;
+				}
+			} else
+			{
+				break;
+			}
+		} while (face_idx < num_faces);
+		FT_Done_FreeType(ftLibrary);
+	}
+
+	return(success);
+}
+
 /******************************* CreateXfntFile *******************************/
 int SubsetFontCreator::CreateXfntFile(
 	const char*				inFontFilePath,
@@ -187,6 +256,7 @@ int SubsetFontCreator::CreateXfntFile(
 	int32_t					inPointSize,
 	int						inOptions,
 	SubsetCharcodeIterator&	inCharcodeItr,
+	long					inFontFaceIndex,
 	std::string*			outErrorStr,
 	std::string*			outWarningStr,
 	std::string*			outInfoStr)
@@ -202,11 +272,14 @@ int SubsetFontCreator::CreateXfntFile(
 		std::string utf8FontPath(inFontFilePath);
 		if (inExportFile && inGlyphDataExportFile)
 		{
+			std::vector<std::string>	faceNameVec;
+			GetFaceNames(utf8FontPath.c_str(), faceNameVec);
+			
 			FT_Library ftLibrary = NULL;
 			if (FT_Init_FreeType(&ftLibrary) == 0)
 			{
 				FT_Face	face = NULL;
-				bool success = FT_New_Face(ftLibrary, utf8FontPath.c_str(), 0, &face) == 0;
+				bool success = FT_New_Face(ftLibrary, utf8FontPath.c_str(), inFontFaceIndex, &face) == 0;
 				if (success)
 				{
 					

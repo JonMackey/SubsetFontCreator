@@ -53,6 +53,7 @@ NS_ASSUME_NONNULL_BEGIN
 			fontURL:(NSURL*)inFontURL
 			isRotated:(BOOL)inIsRotated
 			is1BitPerPixel:(BOOL)in1BitPerPixel
+			faceIndex:(NSInteger)inFaceIndex
 			textColor:(NSColor*)inTextColor
 			textBGColor:(NSColor*)inTextBGColor
 			simulateMono:(BOOL)inSimulateMono

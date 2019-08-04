@@ -42,6 +42,7 @@ NS_ASSUME_NONNULL_BEGIN
 	IBOutlet NSView*		serialView;
 	IBOutlet NSButton*		oneBitCheckBox;
 	IBOutlet NSButton*		rotateCheckBox;
+	IBOutlet NSPopUpButton*	facePopupButton;
 	IBOutlet NSTextField*	pointSizeTextField;
 	IBOutlet NSTextField*	subsetTextField;
 	IBOutlet NSTextField*	sampleTextField;
