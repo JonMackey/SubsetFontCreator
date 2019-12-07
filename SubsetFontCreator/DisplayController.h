@@ -63,6 +63,10 @@ public:
 								{return(mRow);}
 	uint16_t				GetColumn(void) const
 								{return(mColumn);}
+	uint16_t				GetRows(void) const
+								{return(mRows);}
+	uint16_t				GetColumns(void) const
+								{return(mColumns);}
 	/*
 	*	Turns the display off.
 	*/

@@ -121,7 +121,7 @@ SMenuItemDesc	menuItems[] = {
 	
 	if (self.formatViewController == nil)
 	{
-		_formatViewController  = [[NSViewController alloc] initWithNibName:@"ExportFormat" bundle:nil];
+		_formatViewController  = [[NSViewController alloc] initWithNibName:@"XfntExportFormat" bundle:nil];
 		NSPopUpButton* formatPopupBtn = [_formatViewController.view viewWithTag:2];
 		formatPopupBtn.action = @selector(changeFormat:);
 		formatPopupBtn.target = self;

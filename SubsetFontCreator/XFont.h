@@ -56,7 +56,9 @@ public:
 	void					SetDisplay(
 								DisplayController*		inDisplay,
 								Font*					inFont = nullptr);
-	
+	DisplayController*		GetDisplay(void) const
+								{return(mDisplay);}
+
 	/*
 	*	SetFont: called to set the initial font or to change fonts.
 	*	SetFont should be called after setting the display.
@@ -95,6 +97,39 @@ public:
 								const char*				inUTF8Str,
 								bool					inClearTillEOL = false,
 								uint8_t					inFakeMonospaceWidth = 0);
+	/*
+	*	DrawRightJustified draws the passed string from the right side of the
+	*	display, ignoring the display's current x position.  It's assumed there
+	*	is only a single line, no newlines in string.  If the passed string is
+	*	wider than the display, the string is drawn left justified, truncated
+	*	on the right.  This routine returns the width of the passed string.
+	*	As an optimization, if inWidth is not zero it will be used to determine
+	*	the starting column.
+	*	When inRight is zero the display width is used as the right edge, else
+	*	inRight is used.
+	*/
+	uint16_t				DrawRightJustified(
+								const char*				inUTF8Str,
+								uint16_t				inRight = 0,
+								uint16_t				inWidth = 0);
+	/*
+	*	DrawCentered draws the passed string centered in the display, ignoring
+	*	the display's current x position.  It's assumed there is only a single
+	*	line, no newlines in string.  If the passed string is wider than the
+	*	display, the string is drawn left justified, truncated on the right.
+	*	This routine returns the width of the passed string. As an optimization,
+	*	if inWidth is not zero it will be used to determine the starting column.
+	*/
+	uint16_t				DrawCentered(
+								const char*				inUTF8Str,
+								uint16_t				inLeft = 0,
+								uint16_t				inRight = 0,
+								uint16_t				inWidth = 0);
+	void					EraseTillEndOfLine(void);
+	void					EraseTillColumn(
+								uint16_t				inColumn);
+	uint8_t					FontRows(void) const
+								{return(mFontRows);}
 	void					DrawLoadedGlyph(void);
 	uint16_t				FindGlyph(
 								uint16_t				inCharcode);
@@ -110,11 +145,22 @@ public:
 	*/
 	uint8_t					WidestGlyph(
 								const char*				inUTF8RangeStr);
+	/*
+	*	inUTF8Str is the string to be measured
+	*	outHeight is the overall height of all lines within inUTF8Str
+	*	outWidth is the width of the widest line within inUTF8Str
+	*	inFakeMonospaceWidth if not zero, is what will be used for the width of each glyph
+	*	ioLineCount on entry is the max number of elements in outLineWidths
+	*	ioLineCount on exit is the actual number of lines in inUTF8Str
+	*	outLineWidths on exit will contain the width of each line.
+	*/
 	bool					MeasureStr(
 								const char*				inUTF8Str,
 								uint16_t&				outHeight,
 								uint16_t&				outWidth,
-								uint8_t					inFakeMonospaceWidth = 0);
+								uint8_t					inFakeMonospaceWidth = 0,
+								uint8_t*				ioLineCount = nullptr,
+								uint16_t*				outLineWidths = nullptr);
 	// Returns the last glyph loaded by LoadGlyph
 	const GlyphHeader&		Glyph(void) const
 								{return(mGlyph);}
@@ -145,6 +191,21 @@ public:
 								const char*&			inUTF8Str);
 	static bool 			SkipToNextLine(
 								const char*&			inUTF8Str);
+	enum E565Colors
+	{
+		eBlack		= 0,
+		eRed		= 0x31DF,
+		eGreen		= 0x4665,
+		eBlue		= 0xFBC0,
+		eCyan		= 0xFFE0,
+		eMagenta	= 0xFA1F,
+		eYellow		= 0x07DF,
+		eBrown		= 0x43D5,
+		ePurple		= 0x9112,
+		eOrange		= 0x049F,
+		eGray		= 0xCE79,
+		eWhite		= 0xFFFF
+	};
 protected:
 	FontHeader			mFontHeader;
 	Font*				mFont;

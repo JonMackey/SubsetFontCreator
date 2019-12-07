@@ -36,16 +36,19 @@ AT24C::AT24C(
 {
 	switch(inCapacity)
 	{
-		case 4:
-		case 8:
+		case 4:		// C32
+		case 8:		// C64
 			mPageSize = 32;
 			break;
-		case 16:
-		case 32:
+		case 16:	// C128
+		case 32:	// C256
 			mPageSize = 64;
 			break;
-		case 64:
+		case 64:	// C512
 			mPageSize = 128;
+			break;
+		case 128:	// C1024
+			mPageSize = 256;
 			break;
 		default:
 			mPageSize = 32;
@@ -126,14 +129,16 @@ uint16_t AT24C::Write(
 {
 	/*
 	*	Constraints:
-	*	- Wire only allows you to write 32 bytes at a time (including the 2 data address bytes).
+	*	- Wire only allows you to write 32 bytes at a time (including the 2 byte data address).
 	*	- The AT24Cxx only allows you to write to a single page at a time:
-	*		32/64 - 32 byte page (low 5 bits is the address within the page)
-	*		128/256 - 64 byte page (low 6 bits is the address within the page)
-	*		512 - 128 byte page (low 7 bits is the address within the page)
+	*		C32/64 - 32 byte page (low 5 bits is the address within the page)
+	*		C128/256 - 64 byte page (low 6 bits is the address within the page)
+	*		C512 - 128 byte page (low 7 bits is the address within the page)
+	*		C1024 - 256 byte page (low 8 bits is the address within the page)
 	*/
-	uint16_t	lowerAddressMask = 0x7F >> (2 - (mPageSize >> 6)); // results in one of 0x1F, 0x3F, 0x7F
-	uint16_t	bytesLeftInPage = mPageSize - (inDataAddress & lowerAddressMask);
+	// mPageSize -1 results in one of 0x1F, 0x3F, 0x7F, 0xFF.  This value is
+	// used as a mask to determine the bytes left in the current page.
+	uint16_t	bytesLeftInPage = mPageSize - (inDataAddress & (mPageSize -1));
 	uint16_t	bytesLeft2Write = inLength;
 	uint16_t	bytes2Write;
 	while (WaitTillReady() &&

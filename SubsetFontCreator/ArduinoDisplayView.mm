@@ -191,7 +191,7 @@ uint16_t EntryIndexFor(
 			NSData* xfntData = [NSData dataWithContentsOfFile:xfntFilePath];
 			[self createBitmapImageRepForSample:inSampleText xfntData:xfntData
 							textColor:inTextColor textBGColor:inTextBGColor
-							simulateMono:inSimulateMono];
+							simulateMono:inSimulateMono log:inLog];
 		}
 	}
 	if (createErr)
@@ -235,7 +235,8 @@ uint8_t CalcOneBitHeight(
 */
 - (void)createBitmapImageRepForSample:(NSString*)inSampleText xfntData:(NSData*)inXFntData
 				textColor:(NSColor*)inTextColor textBGColor:(NSColor*)inTextBGColor
-											simulateMono:(BOOL)inSimulateMono
+						simulateMono:(BOOL)inSimulateMono
+							log:(LogViewController*__nullable)inLog
 {
 	const FontHeader*	fontHeader = (const FontHeader*)inXFntData.bytes;
 	const CharcodeRun* charCodeRun = (const CharcodeRun*)&fontHeader[1];
@@ -278,8 +279,18 @@ uint8_t CalcOneBitHeight(
 		monoWidth = xFont.WidestGlyph(subsetItr.GetSubset(subsetStr).c_str());
 	}
 	uint16_t	xHeight, xWidth;
-	xFont.MeasureStr(inSampleText.UTF8String, xHeight, xWidth, monoWidth);
-
+	{
+		uint16_t	lineWidths[255];
+		uint8_t		numLineWidths = 255;
+		xFont.MeasureStr(inSampleText.UTF8String, xHeight, xWidth, monoWidth, &numLineWidths, lineWidths);
+		//xWidth = 160;
+		[inLog postInfoString:@"Line Widths:"];
+		for (uint8_t lineIndex = 0; lineIndex < numLineWidths; lineIndex++)
+		{
+			[inLog postInfoString:[NSString stringWithFormat:@" [%d] = %hdpx",
+					(uint32_t)(lineIndex + 1), lineWidths[lineIndex]]];
+		}
+	}
 	NSBitmapImageRep*	imageRep = [NSBitmapImageRep alloc];
 	_bitmapImageRep = [imageRep initWithBitmapDataPlanes:NULL
 							  pixelsWide:xWidth

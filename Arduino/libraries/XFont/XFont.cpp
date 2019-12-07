@@ -237,7 +237,7 @@ uint16_t XFont::LoadGlyph(
 	}
 	return(entryIndex);
 }
-
+//#include <stdio.h>
 /********************************** DrawStr ***********************************/
 /*
 *	inUTF8Str is the string to be drawn starting at the current x,y position
@@ -255,6 +255,8 @@ void XFont::DrawStr(
 	bool	oneBit = mFontHeader.oneBit;
 	bool	rotated = mFontHeader.rotated;
 	DataStream*	glyphData = mFont->glyphData;
+	uint16_t	startRow = mDisplay->GetRow();
+	uint16_t	startColumn = mDisplay->GetColumn();
 
 	if (inFakeMonospaceWidth && mFontHeader.monospaced)
 	{
@@ -295,8 +297,7 @@ void XFont::DrawStr(
 				#endif
 					}
 				}
-				uint16_t	startColumn = mDisplay->GetColumn();
-				uint16_t	startRow = mDisplay->GetRow();
+				startColumn = mDisplay->GetColumn();
 				uint16_t	rowsWritten = 0;
 				/*
 				*	Clear the pixels before the glyph...
@@ -369,22 +370,93 @@ void XFont::DrawStr(
 		} else
 		{
 			if (inClearTillEOL &&
-				mDisplay->GetColumn() != 0)
+				//startRow == mDisplay->GetRow() &&
+				startColumn <= mDisplay->GetColumn())	// in case of wrap to 0
 			{
-				mDisplay->FillTillEndColumn(mFontRows, mTextBGColor);
+				mDisplay->MoveToRow(startRow);
+				EraseTillEndOfLine();
 			}
 			if (AdvanceRow(1, strStartColumn))
 			{
+				startRow = mDisplay->GetRow();
+				startColumn = 0;	// if empty line & inClearTillEOL
 				continue;
 			}
 		}
 		break;
 	}
 	if (inClearTillEOL &&
-		mDisplay->GetColumn() != 0)
+		//startRow == mDisplay->GetRow() &&
+		startColumn <= mDisplay->GetColumn())	// in case of wrap to 0
 	{
-		mDisplay->FillTillEndColumn(mFontRows, mTextBGColor);
+		mDisplay->MoveToRow(startRow);
+		EraseTillEndOfLine();
 	}
+}
+
+/***************************** EraseTillEndOfLine *****************************/
+void XFont::EraseTillEndOfLine(void)
+{
+	mDisplay->FillTillEndColumn(mFontRows, mTextBGColor);
+}
+
+/****************************** EraseTillColumn *******************************/
+void XFont::EraseTillColumn(
+	uint16_t	inColumn)
+{
+	uint16_t column = mDisplay->GetColumn();
+	if (column < inColumn)
+	{
+		// FillBlock will clip the requested colunms if wider than the display.
+		mDisplay->FillBlock(mFontRows, inColumn-column, mTextBGColor);
+	}
+}
+
+/***************************** DrawRightJustified *****************************/
+uint16_t XFont::DrawRightJustified(
+	const char*	inUTF8Str,
+	uint16_t	inRight,
+	uint16_t	inWidth)
+{
+	if (inRight == 0 ||
+		inRight > mDisplay->GetColumns())
+	{
+		inRight = mDisplay->GetColumns();
+	}
+	if (inWidth == 0)
+	{
+		uint16_t	unusedHeight;
+		MeasureStr(inUTF8Str, unusedHeight, inWidth);
+	}
+	mDisplay->MoveToColumn(inRight > inWidth ? (inRight-inWidth) : 0);
+	DrawStr(inUTF8Str);
+	return(inWidth);
+}
+
+/******************************** DrawCentered ********************************/
+uint16_t XFont::DrawCentered(
+	const char*	inUTF8Str,
+	uint16_t	inLeft,
+	uint16_t	inRight,
+	uint16_t	inWidth)
+{
+	if (inRight == 0 ||
+		inRight > mDisplay->GetColumns())
+	{
+		inRight = mDisplay->GetColumns();
+	}
+	if (inWidth == 0)
+	{
+		uint16_t	unusedHeight;
+		MeasureStr(inUTF8Str, unusedHeight, inWidth);
+	}
+	if (inLeft < inRight)
+	{
+		uint16_t	columns = inRight - inLeft;
+		mDisplay->MoveToColumn(columns > inWidth ? (inLeft + ((columns-inWidth)/2)) : inLeft);
+	}
+	DrawStr(inUTF8Str);
+	return(inWidth);
 }
 
 /******************************** WidestGlyph *********************************/
@@ -447,7 +519,9 @@ bool XFont::MeasureStr(
 	const char*	inUTF8Str,
 	uint16_t&	outHeight,
 	uint16_t&	outWidth,
-	uint8_t		inFakeMonospaceWidth)
+	uint8_t		inFakeMonospaceWidth,
+	uint8_t*	ioLineCount,
+	uint16_t*	outLineWidths)
 {
 	const char*	strPtr = inUTF8Str;
 	if (inFakeMonospaceWidth && mFontHeader.monospaced)
@@ -468,6 +542,9 @@ bool XFont::MeasureStr(
 
 	outHeight = adjustedHeight;
 	outWidth = 0;
+	uint16_t	lineWidth = 0;
+	uint8_t		lineWidthsSize = (ioLineCount && outLineWidths) ? *ioLineCount : 0;
+	uint8_t		lineCount = 0;
 	for (uint16_t charcode = NextChar(strPtr); charcode;
 								charcode = NextChar(strPtr))
 	{
@@ -478,18 +555,41 @@ bool XFont::MeasureStr(
 			{
 				if (inFakeMonospaceWidth)
 				{
-					outWidth += inFakeMonospaceWidth;
+					lineWidth += inFakeMonospaceWidth;
 				} else
 				{
-					outWidth += mGlyph.advanceX;
+					lineWidth += mGlyph.advanceX;
 				}
 				continue;
 			}
 			break;
 		} else
 		{
+			if (lineWidth > outWidth)
+			{
+				outWidth = lineWidth;
+			}
+			if (lineWidthsSize > lineCount)
+			{
+				outLineWidths[lineCount] = lineWidth;
+			}
+			lineCount++;
+			lineWidth = 0;
 			outHeight += adjustedHeight;
 		}
+	}
+	if (lineWidth > outWidth)
+	{
+		outWidth = lineWidth;
+	}
+	if (lineWidthsSize > lineCount)
+	{
+		outLineWidths[lineCount] = lineWidth;
+	}
+	lineCount++;
+	if (ioLineCount)
+	{
+		*ioLineCount = lineCount;
 	}
 	return(allGlyphsExist);
 }

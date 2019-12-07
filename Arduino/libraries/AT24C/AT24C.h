@@ -25,14 +25,14 @@
 #define AT24C_H
 
 // AT24C01A -> C16A aren't supported
-// Only tested with C32 and C128 (32 byte and 64 byte pages resp.)
+// Only tested with C32, C128, and C256 (32, 64 and 64 byte pages resp.)
 #define DEBUG_AT24C 1
 class AT24C
 {
 public:
 							AT24C(
 								uint8_t					inDeviceAddress,
-								uint8_t					inCapacity); // KB, one of: 4, 8, 16, 32, 64
+								uint8_t					inCapacity); // KB, one of: 4, 8, 16, 32, 64, 128
 	uint16_t				Read(
 								uint16_t				inDataAddress,
 								uint16_t				inLength,
@@ -54,7 +54,7 @@ public:
 private:
 	uint8_t		mDeviceAddress;	// 0x50 + N low address bits.
 								// 3 bits for C32 -> C64, 2 bits for C128 -> C512
-	uint8_t		mPageSize;		// Initialized to one of: 32, 64, 128
+	uint16_t	mPageSize;		// Initialized to one of: 32, 64, 128
 };
 
 #endif

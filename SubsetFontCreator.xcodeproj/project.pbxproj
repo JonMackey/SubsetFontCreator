@@ -22,7 +22,7 @@
 		DABF5318227B375400ADEBC8 /* ArduinoDisplays.plist in Resources */ = {isa = PBXBuildFile; fileRef = DABF5317227B375400ADEBC8 /* ArduinoDisplays.plist */; };
 		DAC03A9722734D1100408360 /* SubsetHelper.xib in Resources */ = {isa = PBXBuildFile; fileRef = DAC03A9622734D1100408360 /* SubsetHelper.xib */; };
 		DAC03A9B2273529700408360 /* SubsetHelperWindowControler.mm in Sources */ = {isa = PBXBuildFile; fileRef = DAC03A992273529700408360 /* SubsetHelperWindowControler.mm */; };
-		DAC2DB502260DF6E008BD00B /* ExportFormat.xib in Resources */ = {isa = PBXBuildFile; fileRef = DAC2DB4F2260DF6D008BD00B /* ExportFormat.xib */; };
+		DAC2DB502260DF6E008BD00B /* XfntExportFormat.xib in Resources */ = {isa = PBXBuildFile; fileRef = DAC2DB4F2260DF6D008BD00B /* XfntExportFormat.xib */; };
 		DAC2DB5322624EBE008BD00B /* TabbedFileStream.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DAC2DB5122624EBE008BD00B /* TabbedFileStream.cpp */; };
 		DAC2DB5622625C85008BD00B /* Tabs.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DAC2DB5522625C85008BD00B /* Tabs.cpp */; };
 		DAC2DB592266712C008BD00B /* IndexVec.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DAC2DB572266712B008BD00B /* IndexVec.cpp */; };
@@ -60,7 +60,7 @@
 		DAC03A9622734D1100408360 /* SubsetHelper.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = SubsetHelper.xib; sourceTree = "<group>"; };
 		DAC03A982273529600408360 /* SubsetHelperWindowControler.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SubsetHelperWindowControler.h; sourceTree = "<group>"; };
 		DAC03A992273529700408360 /* SubsetHelperWindowControler.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = SubsetHelperWindowControler.mm; sourceTree = "<group>"; };
-		DAC2DB4F2260DF6D008BD00B /* ExportFormat.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = ExportFormat.xib; sourceTree = "<group>"; };
+		DAC2DB4F2260DF6D008BD00B /* XfntExportFormat.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = XfntExportFormat.xib; sourceTree = "<group>"; };
 		DAC2DB5122624EBE008BD00B /* TabbedFileStream.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = TabbedFileStream.cpp; sourceTree = "<group>"; };
 		DAC2DB5222624EBE008BD00B /* TabbedFileStream.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = TabbedFileStream.h; sourceTree = "<group>"; };
 		DAC2DB5422625C84008BD00B /* Tabs.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Tabs.h; sourceTree = "<group>"; };
@@ -167,7 +167,7 @@
 				DAA1442521BFFE0D00C263CA /* Info.plist */,
 				DAA1442621BFFE0D00C263CA /* main.m */,
 				DAA1442821BFFE0D00C263CA /* SubsetFontCreator.entitlements */,
-				DAC2DB4F2260DF6D008BD00B /* ExportFormat.xib */,
+				DAC2DB4F2260DF6D008BD00B /* XfntExportFormat.xib */,
 			);
 			path = SubsetFontCreator;
 			sourceTree = "<group>";
@@ -234,7 +234,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				DAC2DB502260DF6E008BD00B /* ExportFormat.xib in Resources */,
+				DAC2DB502260DF6E008BD00B /* XfntExportFormat.xib in Resources */,
 				DAA1442121BFFE0D00C263CA /* Assets.xcassets in Resources */,
 				DAA1443221BFFED900C263CA /* MainWindowController.xib in Resources */,
 				DAA1442421BFFE0D00C263CA /* MainMenu.xib in Resources */,
