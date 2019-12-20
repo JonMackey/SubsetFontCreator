@@ -531,6 +531,7 @@ SMenuItemDesc	menuItems[] = {
 - (BOOL)setSetWithContentsOfURL:(NSURL*)inDocURL
 {
 	BOOL success = NO;
+	[self.logViewController clear:self];
 	if (inDocURL)
 	{
 		NSError*	error = nil;
@@ -554,33 +555,44 @@ SMenuItemDesc	menuItems[] = {
 			[[archivedSet objectForKey:kSubsetFileIdentifierKey] isEqualToString:kSubsetFileIdentifier])
 		{
 			success = YES;
+			BOOL	bookmarkIsStale = NO;
 #if SANDBOX_ENABLED
 			NSURL*	fontURL = [NSURL URLByResolvingBookmarkData: [archivedSet objectForKey:kFontURLBMKey]
 			options:NSURLBookmarkResolutionWithoutUI+NSURLBookmarkResolutionWithoutMounting+NSURLBookmarkResolutionWithSecurityScope
-					relativeToURL:NULL bookmarkDataIsStale:NULL error:NULL];
+					relativeToURL:NULL bookmarkDataIsStale:&bookmarkIsStale error:&error];
 #else
 			NSURL*	fontURL = [NSURL fileURLWithPath:[archivedSet objectForKey:kFontPathKey]];
 #endif
-			[fontPathControl setURL:fontURL];
-			[self loadFacePopup:fontURL faceIndex:[[archivedSet objectForKey:kFontFaceKey] integerValue]];
-			[pointSizeTextField setIntegerValue:[[archivedSet objectForKey:kFontSizeKey] integerValue]];
-			[oneBitCheckBox setState:[[archivedSet objectForKey:kIs1BitKey] integerValue]];
-			[rotateCheckBox setState:[[archivedSet objectForKey:kRotateKey] integerValue]];
-			[([[archivedSet objectForKey:k32BitDataOffsetsKey] integerValue] ? offsetWidth32Radio : offsetWidth16Radio) setState:NSControlStateValueOn];
-			[subsetTextField setStringValue:[archivedSet objectForKey:kSubsetStrKey]];
-			/*[sampleTextField setStringValue:[archivedSet objectForKey:kSampleStrKey]];
+			if (error)
 			{
-				NSString*	sampleDisplayName = [archivedSet objectForKey:kSampleDisplayKey];
-				if (sampleDisplayName)
+				[self.logViewController postErrorString:error.localizedDescription];
+			}
+			if (fontURL)
+			{
+				[fontPathControl setURL:fontURL];
+				[self loadFacePopup:fontURL faceIndex:[[archivedSet objectForKey:kFontFaceKey] integerValue]];
+				[pointSizeTextField setIntegerValue:[[archivedSet objectForKey:kFontSizeKey] integerValue]];
+				[oneBitCheckBox setState:[[archivedSet objectForKey:kIs1BitKey] integerValue]];
+				[rotateCheckBox setState:[[archivedSet objectForKey:kRotateKey] integerValue]];
+				[([[archivedSet objectForKey:k32BitDataOffsetsKey] integerValue] ? offsetWidth32Radio : offsetWidth16Radio) setState:NSControlStateValueOn];
+				[subsetTextField setStringValue:[archivedSet objectForKey:kSubsetStrKey]];
+				/*[sampleTextField setStringValue:[archivedSet objectForKey:kSampleStrKey]];
 				{
-					NSInteger	displayItemIndex = [sampleDisplayPopupButton indexOfItemWithTitle:sampleDisplayName];
-					if (displayItemIndex >= 0)
+					NSString*	sampleDisplayName = [archivedSet objectForKey:kSampleDisplayKey];
+					if (sampleDisplayName)
 					{
-						[sampleDisplayPopupButton selectItemAtIndex:displayItemIndex];
-						[self setDisplay:sampleDisplayPopupButton];
+						NSInteger	displayItemIndex = [sampleDisplayPopupButton indexOfItemWithTitle:sampleDisplayName];
+						if (displayItemIndex >= 0)
+						{
+							[sampleDisplayPopupButton selectItemAtIndex:displayItemIndex];
+							[self setDisplay:sampleDisplayPopupButton];
+						}
 					}
-				}
-			}*/
+				}*/
+			} else
+			{
+				success = NO;
+			}
 		}
 	}
 	return(success);
