@@ -15,12 +15,13 @@
  
 	Licence can be viewed at
 	http://www.gnu.org/licenses/gpl-3.0.txt
-
+//
 	Please maintain this license information along with authorship
 	and copyright notices in any redistribution of this code
 *******************************************************************************/
 //
 //  LogViewController.m
+//  FatFsToHex
 //
 //  Created by Jon Mackey on 1/3/18.
 //  Copyright © 2018 Jon Mackey. All rights reserved.
@@ -95,7 +96,7 @@
 */
 - (LogViewController*)postErrorString:(NSString*)inString
 {
-	[[[[[[self setColor:self.redColor] appendString:@"Error:"] setColor:self.blackColor] appendFormat:@"   %@", inString] appendNewLine] post];
+	[[[[[[[[self setColor:self.redColor] appendString:@"["] appendDate] appendString:@"] Error:"] setColor:self.blackColor] appendFormat:@"   %@", inString] appendNewLine] post];
 	return(self);
 }
 
@@ -106,7 +107,7 @@
 */
 - (LogViewController*)postWarningString:(NSString*)inString
 {
-	[[[[[[self setColor:self.yellowColor] appendString:@"Warning:"] setColor:self.blackColor] appendFormat:@"   %@", inString] appendNewLine] post];
+	[[[[[[[[self setColor:self.yellowColor] appendString:@"["] appendDate] appendString:@"] Warning:"] setColor:self.blackColor] appendFormat:@"   %@", inString] appendNewLine] post];
 	return(self);
 }
 
@@ -117,7 +118,7 @@
 */
 - (LogViewController*)postInfoString:(NSString*)inString
 {
-	[[[self appendString:inString] appendNewLine] post];
+	[[[[[[[[self setColor:self.greenColor] appendString:@"["] appendDate] appendString:@"]"] setColor:self.blackColor] appendFormat:@"   %@", inString] appendNewLine] post];
 	return(self);
 }
 
@@ -135,6 +136,20 @@
 		// See https://stackoverflow.com/questions/21396034/nstextview-setneedsdisplay-not-working-under-mavericks
 		[self.receivedDataTextView setSelectedRange:endRange];
 		[self.receivedDataTextView scrollRangeToVisible:endRange];
+		[self.receivedDataTextView setNeedsDisplay:YES];
+		[self flush];
+	}
+	return(self);
+}
+
+/***************************** postWithoutScroll ******************************/
+- (LogViewController*)postWithoutScroll
+{
+	if ([self.logText length] > 0)
+	{
+		[self setParaStyle:NULL];
+		[self setColor:NULL];
+		[self.receivedDataTextView.textStorage appendAttributedString:self.logText];
 		[self.receivedDataTextView setNeedsDisplay:YES];
 		[self flush];
 	}

@@ -15,7 +15,7 @@
  
 	Licence can be viewed at
 	http://www.gnu.org/licenses/gpl-3.0.txt
-
+//
 	Please maintain this license information along with authorship
 	and copyright notices in any redistribution of this code
 *******************************************************************************/
@@ -60,6 +60,7 @@
 - (LogViewController*)postWarningString:(NSString*)inString;
 - (LogViewController*)postInfoString:(NSString*)inString;
 - (LogViewController*)post;
+- (LogViewController*)postWithoutScroll;
 - (LogViewController*)flush;
 - (void)setFont:(NSFont*)inFont;	// All text
 - (LogViewController*)setColor:(NSColor*)inColor;
