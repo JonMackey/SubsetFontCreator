@@ -105,4 +105,20 @@ public:
 								const void*				inBuffer);
 
 };
+
+// EEPROM data stream.
+class DataStream_E : public DataStreamImpl
+{
+public:
+							DataStream_E(
+								const void*				inStartAddress,
+								uint32_t				inLength);
+	virtual uint32_t		Read(
+								uint32_t				inLength,
+								void*					outBuffer);
+	virtual uint32_t		Write(
+								uint32_t				inLength,
+								const void*				inBuffer);
+
+};
 #endif // DataStream_h

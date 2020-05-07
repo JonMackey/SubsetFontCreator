@@ -49,10 +49,14 @@ TFT_ST77XX::TFT_ST77XX(
 	  mBacklightPin(inBacklightPin), mRowOffset(0), mColOffset(0),
 	  mCentered(inCentered), mIsBGR(inIsBGR)
 {
+	// Setting the CS pin mode and state was moved from begin to avoid
+	// interference with other SPI devices on the bus.
 	if (mCSPin >= 0)
 	{
 		mChipSelBitMask = digitalPinToBitMask(mCSPin);
 		mChipSelPortReg = portOutputRegister(digitalPinToPort(mCSPin));
+		digitalWrite(mCSPin, HIGH);
+		pinMode(mCSPin, OUTPUT);
 	}
 	mDCBitMask = digitalPinToBitMask(mDCPin);
 	mDCPortReg = portOutputRegister(digitalPinToPort(mDCPin));
@@ -60,27 +64,22 @@ TFT_ST77XX::TFT_ST77XX(
 
 /*********************************** begin ************************************/
 void TFT_ST77XX::begin(
-	uint8_t	inRotation)
+	uint8_t	inRotation,
+	bool	inResetLevel)
 {
 	if (mBacklightPin >= 0)
 	{
 		pinMode(mBacklightPin, OUTPUT);
 		digitalWrite(mBacklightPin, LOW);	// Off
 	}
-	if (mCSPin >= 0 &&
-		mCSPin != SS)	// If it's SS, SPI.begin() takes care of initializing it.
-	{
-		digitalWrite(mCSPin, HIGH);
-		pinMode(mCSPin, OUTPUT);
-	}
-	SPI.begin();
 	digitalWrite(mDCPin, HIGH);
 	pinMode(mDCPin, OUTPUT);
 
 	if (mResetPin >= 0)
 	{
+		mResetLevel = inResetLevel;
 		pinMode(mResetPin, OUTPUT);
-		digitalWrite(mResetPin, HIGH);
+		digitalWrite(mResetPin, !mResetLevel);
 	}
 	Init();
 	SetRotation(inRotation);
@@ -92,9 +91,9 @@ void TFT_ST77XX::Init(void)
 	if (mResetPin >= 0)
 	{
 		delay(1);
-		digitalWrite(mResetPin, LOW);
+		digitalWrite(mResetPin, mResetLevel);
 		delay(1);
-		digitalWrite(mResetPin, HIGH);
+		digitalWrite(mResetPin, !mResetLevel);
 	} else
 	{
 		WriteCmd(eSWRESETCmd);

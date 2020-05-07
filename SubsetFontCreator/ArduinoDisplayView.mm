@@ -179,9 +179,9 @@ uint16_t EntryIndexFor(
 				}
 				if (infoStr.length())
 				{
-					[inLog postInfoString:[NSString stringWithUTF8String:infoStr.c_str()]];
+					[inLog postString:[NSString stringWithUTF8String:infoStr.c_str()]];
 				}
-				[inLog postInfoString:[NSString stringWithFormat:@"565 text colors F/B = %04hX/%04hX",
+				[inLog postString:[NSString stringWithFormat:@"565 text colors F/B = %04hX/%04hX",
 					[ArduinoDisplayView to565Color:inTextColor], [ArduinoDisplayView to565Color:inTextBGColor]]];
 				
 			}
@@ -284,10 +284,10 @@ uint8_t CalcOneBitHeight(
 		uint8_t		numLineWidths = 255;
 		xFont.MeasureStr(inSampleText.UTF8String, xHeight, xWidth, monoWidth, &numLineWidths, lineWidths);
 		//xWidth = 160;
-		[inLog postInfoString:@"Line Widths:"];
+		[inLog postString:@"Line Widths:"];
 		for (uint8_t lineIndex = 0; lineIndex < numLineWidths; lineIndex++)
 		{
-			[inLog postInfoString:[NSString stringWithFormat:@" [%d] = %hdpx",
+			[inLog postString:[NSString stringWithFormat:@" [%d] = %hdpx",
 					(uint32_t)(lineIndex + 1), lineWidths[lineIndex]]];
 		}
 	}

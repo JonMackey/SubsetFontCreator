@@ -749,7 +749,7 @@ SMenuItemDesc	menuItems[] = {
 			}
 			if (infoStr.length())
 			{
-				[_logViewController postInfoString:[NSString stringWithUTF8String:infoStr.c_str()]];
+				[_logViewController postString:[NSString stringWithUTF8String:infoStr.c_str()]];
 			}
 		}
 	}

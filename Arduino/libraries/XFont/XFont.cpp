@@ -152,7 +152,7 @@ uint16_t XFont::FindGlyph(
 		{
 			current = (leftIndex + rightIndex) / 2;
 			
-			int	cmpResult = pgm_read_word_near(&charcodeRuns[current].start) - inCharcode;
+			int32_t	cmpResult = (int32_t)pgm_read_word_near(&charcodeRuns[current].start) - inCharcode;
 			if (cmpResult == 0)
 			{
 				charcodeRun = &charcodeRuns[current];

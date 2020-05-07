@@ -59,6 +59,7 @@
 - (LogViewController*)postErrorString:(NSString*)inString;
 - (LogViewController*)postWarningString:(NSString*)inString;
 - (LogViewController*)postInfoString:(NSString*)inString;
+- (LogViewController*)postString:(NSString*)inString;
 - (LogViewController*)post;
 - (LogViewController*)postWithoutScroll;
 - (LogViewController*)flush;

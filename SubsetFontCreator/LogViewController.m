@@ -122,6 +122,17 @@
 	return(self);
 }
 
+/********************************* postString *********************************/
+/*
+*	Immediately post a time stamped error string to the log of the form:
+*	<happy face> [date] %@\n
+*/
+- (LogViewController*)postString:(NSString*)inString
+{
+	[[[self appendString:inString] appendNewLine] post];
+	return(self);
+}
+
 /*********************************** post *************************************/
 - (LogViewController*)post
 {

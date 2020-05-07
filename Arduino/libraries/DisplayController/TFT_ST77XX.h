@@ -48,7 +48,8 @@ public:
 							// 2	180	1	1	0	
 							// 3	270	1	0	1	
 	void					begin(
-								uint8_t					inRotation = 0);
+								uint8_t					inRotation = 0,
+								bool					inResetLevel = LOW);
 	virtual void			MoveTo(
 								uint16_t				inRow,
 								uint16_t				inColumn);
@@ -156,6 +157,7 @@ protected:
 	bool		mIsBGR;		// Set when display pixel RGB order is opposite of the controller docs (bug fix)
 	bool		mCentered;	// Display pixels are physically centered within the controllers memory space.
 							// When false the the display pixel origin is 0,0 at 0 degree rotation
+	bool		mResetLevel;// Allows the reset pin value to be inverted when run through an inverting level shifter.
 	volatile uint8_t*	mChipSelPortReg;
 	volatile uint8_t*	mDCPortReg;
 	SPISettings	mSPISettings;

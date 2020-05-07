@@ -25,6 +25,7 @@
 #include "pgmspace_stub.h"
 #else
 #include <avr/pgmspace.h>
+#include <EEPROM.h>
 #endif
 #include <string.h>
 
@@ -143,3 +144,46 @@ uint32_t DataStream_P::Write(
 	// Does nothing
 	return(Clip(inLength));
 }
+
+/****************************** DataStream_E *******************************/
+DataStream_E::DataStream_E(
+	const void*	inStartAddress,
+	uint32_t	inLength)
+	: DataStreamImpl(inStartAddress, inLength)
+{
+}
+
+/************************************ Read ************************************/
+uint32_t DataStream_E::Read(
+	uint32_t	inLength,
+	void*		outBuffer)
+{
+	uint32_t	bytesRead = Clip(inLength);
+#ifndef EEPROM_h
+	memcpy(outBuffer, mCurrent, bytesRead);
+#else
+	EEPtr e = (int)mCurrent;
+	uint8_t *ptr = (uint8_t*)outBuffer;
+	for( int count = bytesRead ; count ; --count, ++e )  *ptr++ = *e;
+#endif
+	mCurrent += bytesRead;
+	return(bytesRead);
+}
+
+/*********************************** Write ************************************/
+uint32_t DataStream_E::Write(
+	uint32_t	inLength,
+	const void*	inBuffer)
+{
+	uint32_t	bytesWritten = Clip(inLength);
+#ifndef EEPROM_h
+	memcpy((void*)mCurrent, inBuffer, bytesWritten);
+#else
+	EEPtr e = (int)mCurrent;
+	const uint8_t *ptr = (const uint8_t*)inBuffer;
+	for( int count = bytesWritten ; count ; --count, ++e )  (*e).update( *ptr++ );
+#endif
+	mCurrent += bytesWritten;
+	return(bytesWritten);
+}
+
