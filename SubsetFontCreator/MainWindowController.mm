@@ -63,6 +63,7 @@ NSString *const kFontFaceKey = @"fontFace";
 NSString *const kFontSizeKey = @"fontSize";
 NSString *const kIs1BitKey = @"is1Bit";
 NSString *const kRotateKey = @"rotate";
+NSString *const kHorizontalKey = @"horizontal";	// 0 = vertical, 1 = horizontal
 NSString *const kSubsetStrKey = @"subset";
 NSString *const kSampleStrKey = @"sample";
 NSString *const kSampleTextBGColorStrKey = @"sampleTextBGColor";
@@ -189,7 +190,6 @@ SMenuItemDesc	menuItems[] = {
 		[self updateTextBGColorTextColor];
 	}
 	offsetWidth16Radio.state = NSControlStateValueOn;
-	_rotateWarningIssued = NO;
 }
 
 /****************************** validateMenuItem ******************************/
@@ -405,12 +405,13 @@ SMenuItemDesc	menuItems[] = {
 /******************************* initialDocName *******************************/
 -(NSString*)initialDocName
 {
+	NSInteger	format = formatPopupButton.selectedTag;
 	return([NSString stringWithFormat:@"%@_%d%s%s%s",
 		[[[[fontPathControl URL] path] lastPathComponent] stringByDeletingPathExtension],
 		pointSizeTextField.intValue,
-		(oneBitCheckBox.state == NSControlStateValueOn || rotateCheckBox.state == NSControlStateValueOn) ? "_" : "",
-		oneBitCheckBox.state == NSControlStateValueOn ? "1b":"",
-		rotateCheckBox.state == NSControlStateValueOn ? "Rt":""]);
+		format == SubsetFontCreator::e8BitsPerPixel ? "" : "_",	// else 1 bit
+		format & SubsetFontCreator::e1BitPerPixel ? "1b":"",
+		format & SubsetFontCreator::eRotated ? "Rt":""]);
 }
 
 /********************************* saveas *************************************/
@@ -497,11 +498,13 @@ SMenuItemDesc	menuItems[] = {
 			NSLog(@"%@\n", error);
 		}
 #endif
+		NSInteger	format = formatPopupButton.selectedTag;
 		NSDictionary* setDict = [NSDictionary dictionaryWithObjectsAndKeys:
 			kSubsetFileIdentifier, kSubsetFileIdentifierKey,
 			[NSNumber numberWithInteger:[pointSizeTextField integerValue]], kFontSizeKey,
-			[NSNumber numberWithInteger:[oneBitCheckBox state]], kIs1BitKey,
-			[NSNumber numberWithInteger:[rotateCheckBox state]], kRotateKey,
+			[NSNumber numberWithInteger:(format & SubsetFontCreator::e1BitPerPixel) != 0 ? 1 : 0], kIs1BitKey,
+			[NSNumber numberWithInteger:(format & SubsetFontCreator::eRotated) != 0 ? 1 : 0], kRotateKey,
+			[NSNumber numberWithInteger:(format & SubsetFontCreator::eHorizontal) != 0 ? 1 : 0], kHorizontalKey,
 			[NSNumber numberWithInteger:[offsetWidth32Radio state]], k32BitDataOffsetsKey,
 			[subsetTextField stringValue], kSubsetStrKey,
 			[NSNumber numberWithInteger:facePopupButton.indexOfSelectedItem], kFontFaceKey,
@@ -572,8 +575,21 @@ SMenuItemDesc	menuItems[] = {
 				[fontPathControl setURL:fontURL];
 				[self loadFacePopup:fontURL faceIndex:[[archivedSet objectForKey:kFontFaceKey] integerValue]];
 				[pointSizeTextField setIntegerValue:[[archivedSet objectForKey:kFontSizeKey] integerValue]];
-				[oneBitCheckBox setState:[[archivedSet objectForKey:kIs1BitKey] integerValue]];
-				[rotateCheckBox setState:[[archivedSet objectForKey:kRotateKey] integerValue]];
+				{
+					// The format settings are broken out for backward compatiblity.
+					// The old controls were checkboxes with corresponding keys.
+					NSInteger	format = [[archivedSet objectForKey:kIs1BitKey] integerValue] ?
+											SubsetFontCreator::e1BitPerPixel : SubsetFontCreator::e8BitsPerPixel;
+					if ([[archivedSet objectForKey:kRotateKey] integerValue])
+					{
+						format |= SubsetFontCreator::eRotated;
+						if ([[archivedSet objectForKey:kHorizontalKey] integerValue])
+						{
+							format |= SubsetFontCreator::eHorizontal;
+						}
+					}
+					[formatPopupButton selectItemWithTag:format];
+				}
 				[([[archivedSet objectForKey:k32BitDataOffsetsKey] integerValue] ? offsetWidth32Radio : offsetWidth16Radio) setState:NSControlStateValueOn];
 				[subsetTextField setStringValue:[archivedSet objectForKey:kSubsetStrKey]];
 				/*[sampleTextField setStringValue:[archivedSet objectForKey:kSampleStrKey]];
@@ -651,9 +667,8 @@ SMenuItemDesc	menuItems[] = {
 						[[NSUserDefaults standardUserDefaults] setObject:[exportTypes objectAtIndex:typeIndex] forKey:kLastExportTypeKey];
 						options = glyphDataSeparatelyCheckBox.state == NSControlStateValueOn ? SubsetFontCreator::eGlyphDataSeparately : 0;
 						[[NSUserDefaults standardUserDefaults] setObject:[NSNumber numberWithInt:options] forKey:kLastExportOptionsKey];
-						options |= self->oneBitCheckBox.state == NSControlStateValueOn ? SubsetFontCreator::e1BitPerPixel : 0;
-						options |= self->rotateCheckBox.state == NSControlStateValueOn ? SubsetFontCreator::eRotated : 0;
-						options |= self->offsetWidth32Radio.state == NSControlStateValueOn ? SubsetFontCreator::e32BitDataOffsets : 0;
+						options |= (int)(self->formatPopupButton.selectedTag);
+						//options |= self->offsetWidth32Radio.state == NSControlStateValueOn ? SubsetFontCreator::e32BitDataOffsets : 0;
 						[self.savePanel orderOut:nil];
 						if (options & SubsetFontCreator::eGlyphDataSeparately &&
 							access([exportURL URLByDeletingLastPathComponent].path.UTF8String, W_OK) == -1)
@@ -768,45 +783,15 @@ SMenuItemDesc	menuItems[] = {
 	}
 	[_logViewController clear:self];
 	BOOL	isColor = sampleCSPopupButton.indexOfSelectedItem == 1;
+	NSInteger	options = formatPopupButton.selectedTag;
 	[arduinoDisplayView loadSample:sampleTextField.stringValue pointSize:pointSize
-			fontURL:fontPathControl.URL isRotated:rotateCheckBox.state
-				is1BitPerPixel:oneBitCheckBox.state
+			fontURL:fontPathControl.URL
+				options:options
 				faceIndex:facePopupButton.indexOfSelectedItem
 				textColor:isColor ? ((NSTextButtonCell*)textColorButton.cell).fillColor : NSColor.whiteColor
 				textBGColor:isColor ? ((NSTextButtonCell*)textBGColorButton.cell).fillColor : NSColor.blackColor
 				simulateMono:simulateMonoCheckbox.state
 				log:_logViewController];
-}
-/***************************** oneBitStateChanged *****************************/
-- (IBAction)oneBitStateChanged:(id)sender
-{
-	if (oneBitCheckBox.state == NSControlStateValueOff &&
-		rotateCheckBox.state == NSControlStateValueOn)
-	{
-		rotateCheckBox.state = NSControlStateValueOff;
-		[self displayRotateWarningIfNeeded];
-	}
-}
-
-/***************************** rotateStateChanged *****************************/
-- (IBAction)rotateStateChanged:(id)sender
-{
-	if (oneBitCheckBox.state == NSControlStateValueOff &&
-		rotateCheckBox.state == NSControlStateValueOn)
-	{
-		oneBitCheckBox.state = NSControlStateValueOn;
-		[self displayRotateWarningIfNeeded];
-	}
-}
-
-/************************ displayRotateWarningIfNeeded ************************/
--(void)displayRotateWarningIfNeeded
-{
-	if (_rotateWarningIssued == NO)
-	{
-		_rotateWarningIssued = YES;
-		[_logViewController postWarningString:@"Rotate is only allowed when 1 bit is set"];
-	}
 }
 
 - (IBAction)setTextColor:(id)sender

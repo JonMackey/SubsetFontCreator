@@ -24,7 +24,7 @@
 *	SubsetFontCreator
 *	
 *	Created by Jon Mackey on 12/14/18.
-*	Copyright © 2018 Jon. All rights reserved.
+*	Copyright © 2020 Jon Mackey. All rights reserved.
 *
 *	This code was ported from my FreeTypeTest project (2015).  Major changes
 *	were made to implement as much code in standard C++ as possible, and use
@@ -65,10 +65,18 @@ public:
 	};
 	enum EOptionsMask
 	{
+		e8BitsPerPixel			= 0,	// Grayscale for RGB antialiasing
 		e1BitPerPixel			= 1,	// Else 8 bit grayscale
 		eRotated				= 2,
-		e32BitDataOffsets		= 4,	// Else 16 bit
-		eGlyphDataSeparately	= 8
+		eHorizontal				= 4,	// See CreateRotatedData
+		eGlyphDataSeparately	= 8,
+		/*
+		*	32 bit data offsets are only supported in the binary format.
+		*	The SubsetFontCreator application no longer exposes the flag to
+		*	create 32 bit offsets.  If this flag is exposed then attempting to
+		*	create a C file header will produce garbage.
+		*/
+		e32BitDataOffsets		= 0x10
 	};
 	static int				CreateXfntFile(
 								const char*				inFontFilePath,
@@ -107,7 +115,9 @@ protected:
 								const uint8_t*			inBitmap,
 								int						inRows,
 								int						inColumns,
+								int						inYOffset,
 								bool					inMSBTop,
+								bool					inHorizontal,
 								size_t&					outDataLen);};
 
 class SubsetCharcodeIterator

@@ -33,6 +33,7 @@
 #include "XFont.h"
 #include "XFont16BitDataStream.h"
 #include "XFontR1BitDataStream.h"
+#include "XFontRH1BitDataStream.h"
 #include "BitmapDisplayController.h"
 
 /*
@@ -133,13 +134,13 @@ uint16_t EntryIndexFor(
 
 /********************************* loadSample *********************************/
 - (void)loadSample:(NSString*)inSampleText pointSize:(NSUInteger)inPointSize
-			fontURL:(NSURL*)inFontURL isRotated:(BOOL)inIsRotated
-				is1BitPerPixel:(BOOL)in1BitPerPixel
-				faceIndex:(NSInteger)inFaceIndex
-					textColor:(NSColor*)inTextColor
-						textBGColor:(NSColor*)inTextBGColor
-							simulateMono:(BOOL)inSimulateMono
-								log:(LogViewController*__nullable)inLog
+			fontURL:(NSURL*)inFontURL
+				options:(NSInteger)inOptions
+					faceIndex:(NSInteger)inFaceIndex
+						textColor:(NSColor*)inTextColor
+							textBGColor:(NSColor*)inTextBGColor
+								simulateMono:(BOOL)inSimulateMono
+									log:(LogViewController*__nullable)inLog
 {
 	int createErr = -1;
 	BOOL isDirectory = YES;
@@ -154,18 +155,12 @@ uint16_t EntryIndexFor(
 			SubsetCharcodeIterator	charcodeItr;
 			charcodeItr.InitializeWithText(inSampleText.UTF8String);
 			std::string	errorStr, warningStr, infoStr;
-			int options =
-			#ifndef DEBUG_ARDUINO
-				SubsetFontCreator::e32BitDataOffsets |
-			#endif
-				(inIsRotated ? SubsetFontCreator::eRotated : 0) |
-				(in1BitPerPixel ? SubsetFontCreator::e1BitPerPixel : 0);
 			createErr = SubsetFontCreator::CreateXfntFile(inFontURL.path.UTF8String,
-								xfntFile, xfntFile, (int32_t)inPointSize, options,
+								xfntFile, xfntFile, (int32_t)inPointSize, (int)inOptions,
 								charcodeItr, inFaceIndex, &errorStr, &warningStr, &infoStr);
 			fclose(xfntFile);
 		#ifndef DEBUG_ARDUINO
-			_bitmapIsRotated = inIsRotated;
+			_bitmapIsRotated = (inOptions & SubsetFontCreator::eRotated) != 0;
 		#endif
 			if (inLog)
 			{
@@ -247,6 +242,7 @@ uint8_t CalcOneBitHeight(
 										glyphDataOffset[fontHeader->numCharCodes]);
 	XFont	xFont;
 	XFontR1BitDataStream*	oneBitDataStream = NULL;
+	XFontRH1BitDataStream*	oneBitHDataStream = NULL;
 	DataStream*	dataStream = &glyphDataStream;
 	/*
 	*	When 1 bit rotated is used, insert a XFontR1BitDataStream to shift and
@@ -256,8 +252,15 @@ uint8_t CalcOneBitHeight(
 	if (fontHeader->oneBit &&
 		fontHeader->rotated)
 	{
-		oneBitDataStream = new XFontR1BitDataStream(&xFont, &glyphDataStream);
-		dataStream = oneBitDataStream;
+		if (fontHeader->horizontal)
+		{
+			oneBitHDataStream = new XFontRH1BitDataStream(&xFont, &glyphDataStream);
+			dataStream = oneBitHDataStream;
+		} else
+		{
+			oneBitDataStream = new XFontR1BitDataStream(&xFont, &glyphDataStream);
+			dataStream = oneBitDataStream;
+		}
 	}
 	XFont16BitDataStream xFontDataStream(&xFont, dataStream);
 	XFont::Font	xFontFont(fontHeader, charCodeRun, glyphDataOffset, &xFontDataStream);
@@ -308,6 +311,8 @@ uint8_t CalcOneBitHeight(
 		uint8_t*	data = imageRep.bitmapData;
 		BitmapDisplayController	display(xHeight, xWidth,
 									(uint16_t)imageRep.bytesPerRow, data);
+		// Enable special pixel mapping if 1 bit rotated horizontal.
+		display.Set1BitRotatedHorizontal(oneBitHDataStream != NULL);
 		// Set the display passing the font again to trigger the initialization
 		// of XFont members related to the display depth.
 		xFont.SetDisplay(&display, &xFontFont);
@@ -317,7 +322,12 @@ uint8_t CalcOneBitHeight(
 	{
 		delete oneBitDataStream;
 	}
+	if (oneBitHDataStream)
+	{
+		delete oneBitHDataStream;
+	}
 #else
+	// This case is not being maintained.
 	const uint32_t*	glyphDataOffset = (const uint32_t*)&charCodeRun[fontHeader->numCharcodeRuns];
 	const uint8_t*	glyphData = (const uint8_t*)&glyphDataOffset[fontHeader->numCharCodes +1];
 	/*

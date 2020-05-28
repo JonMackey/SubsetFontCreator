@@ -42,7 +42,7 @@ struct FontHeader
 	uint8_t		version : 4,	// structs version, currently 1
 				oneBit : 1,		// One bit per pixel, else 8 bit (antialiased)
 				rotated : 1,	// each data byte represents 8 pixels of a column (applies to 1 bit only)
-				wideOffsets : 1,// 1 = 32 bit, 0 = 16 bit glyph data offsets
+				horizontal : 1,	// addressing for rotated data, else vertical (applies to 1 bit only)
 				monospaced : 1;	// fixed width font (for this subset)
 	int8_t 		ascent;			// font in pixels
 	int8_t 		descent;		// font in pixels
@@ -75,10 +75,10 @@ struct CharcodeRun
 };
 
 /*
-*	GlyphDataOffsets is an array of uint16_t or uint32_t, one offset per glyph.
+*	GlyphDataOffsets is an array of uint16_t, one offset per glyph.
 *	The actual length is numCharCodes +1.  The +1 accounts for the extra offset
 *	used to calculate the size of the last glyph.
-*	The size of an offset is defined by FontHeader->wideOffsets.
+*
 *	The first Glyph in a xfnt file is immediately after the last glyph offset.
 *	GlyphDataOffsets are relative to the start of the glyph data (first glyph.)
 */
@@ -123,5 +123,15 @@ struct GlyphHeader
 *			The same packing takes place for rotated, it's just columns rather
 *			than rows.
 *
+*	Meaning of the FontHeader.vertical flag:
+*	The vertical flag controls whether the rotated and packed data is stored
+*	as horizontal or vertical strips.	Horizontal: 123		Vertical:	147
+*													456					258
+*													789					369
+*
+*	Horizontal is needed because some display controllers don't support
+*	vertical addressing.  These controllers require multile bytes sent for each
+*	data byte written in order to implement vertical addressing in software.
+*	(e.g. ST7567 controller)
 */
 #endif /* XFontGlyph_h */

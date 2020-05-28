@@ -51,8 +51,7 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)loadSample:(NSString*)inSampleText
 			pointSize:(NSUInteger)inPointSize
 			fontURL:(NSURL*)inFontURL
-			isRotated:(BOOL)inIsRotated
-			is1BitPerPixel:(BOOL)in1BitPerPixel
+			options:(NSInteger)inOptions
 			faceIndex:(NSInteger)inFaceIndex
 			textColor:(NSColor*)inTextColor
 			textBGColor:(NSColor*)inTextBGColor

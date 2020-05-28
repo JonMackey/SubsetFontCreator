@@ -104,37 +104,35 @@ inline void LCD_PCD8544::WriteCmd(
 *	Implements constraining to a fixed window based on the current addressing
 *	mode.
 */
-void LCD_PCD8544::IncCoords(
-	uint8_t&	ioRow,
-	uint8_t&	ioColumn) const
+void LCD_PCD8544::IncCoords(void)
 {
 	if (mAddressingMode)	// If vertical
 	{
-		ioRow++;
-		if (ioRow > mEndRow)
+		mDataRow++;
+		if (mDataRow > mEndRow)
 		{
-			ioRow = mStartRow;
-			ioColumn++;
-			if (ioColumn > mEndColumn)
+			mDataRow = mStartRow;
+			mDataColumn++;
+			if (mDataColumn > mEndColumn)
 			{
-				ioColumn = mStartColumn;
+				mDataColumn = mStartColumn;
 			}
-			WriteCmd(eSetXAddrCmd | ioColumn);
-			WriteCmd(eSetYAddrCmd | ioRow);
+			WriteCmd(eSetXAddrCmd | mDataColumn);
+			WriteCmd(eSetYAddrCmd | mDataRow);
 		}
 	} else
 	{
-		ioColumn++;
-		if (ioColumn > mEndColumn)
+		mDataColumn++;
+		if (mDataColumn > mEndColumn)
 		{
-			ioColumn = mStartColumn;
-			ioRow++;
-			if (ioRow > mEndRow)
+			mDataColumn = mStartColumn;
+			mDataRow++;
+			if (mDataRow > mEndRow)
 			{
-				ioRow = mStartRow;
+				mDataRow = mStartRow;
 			}
-			WriteCmd(eSetXAddrCmd | ioColumn);
-			WriteCmd(eSetYAddrCmd | ioRow);
+			WriteCmd(eSetXAddrCmd | mDataColumn);
+			WriteCmd(eSetYAddrCmd | mDataRow);
 		}
 	}
 }
@@ -144,12 +142,11 @@ void LCD_PCD8544::WriteData(
 	const uint8_t*	inData,
 	uint16_t		inDataLen)
 {
-	uint8_t	row = mRow;
-	uint8_t	column = mColumn;
+	// mDataRow and mDataColumn should be setup prior to calling this routine.
 	for (; inDataLen; inDataLen--)
 	{
 		SPI.transfer(*(inData++));
-		IncCoords(row, column);
+		IncCoords();
 	}
 }
 
@@ -175,15 +172,15 @@ void LCD_PCD8544::FillPixels(
 	uint16_t	inPixelsToFill,
 	uint16_t	inFillColor)
 {
-	uint8_t	row = mRow;
-	uint8_t	column = mColumn;
+	mDataRow = mRow;
+	mDataColumn = mColumn;
 	uint8_t	fillData = inFillColor ? 0xFF : 0;
 	BeginTransaction();
 
 	for (; inPixelsToFill; inPixelsToFill--)
 	{
 		SPI.transfer(fillData);
-		IncCoords(row, column);
+		IncCoords();
 	}
 	EndTransaction();
 }
@@ -263,6 +260,8 @@ void LCD_PCD8544::StreamCopy(
 {
 	BeginTransaction();
 	uint8_t	buffer[32];
+	mDataRow = mRow;
+	mDataColumn = mColumn;
 	while (inPixelsToCopy)
 	{
 		uint16_t pixelsToWrite = inPixelsToCopy > 32 ? 32 : inPixelsToCopy;

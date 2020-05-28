@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		DA175FB9247DA816004BCF5C /* XFontRH1BitDataStream.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DA175FB8247DA816004BCF5C /* XFontRH1BitDataStream.cpp */; };
 		DA7F2DA921C076A2009BFE30 /* libfreetype.a in Frameworks */ = {isa = PBXBuildFile; fileRef = DA7F2DA821C076A2009BFE30 /* libfreetype.a */; };
 		DA8D885C2282309B002EE769 /* OpeningInstructions.rtf in Resources */ = {isa = PBXBuildFile; fileRef = DA8D885B2282309B002EE769 /* OpeningInstructions.rtf */; };
 		DAA1441F21BFFE0C00C263CA /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = DAA1441E21BFFE0C00C263CA /* AppDelegate.m */; };
@@ -36,6 +37,8 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		DA175FB7247DA815004BCF5C /* XFontRH1BitDataStream.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XFontRH1BitDataStream.h; sourceTree = "<group>"; };
+		DA175FB8247DA816004BCF5C /* XFontRH1BitDataStream.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = XFontRH1BitDataStream.cpp; sourceTree = "<group>"; };
 		DA7F2DA821C076A2009BFE30 /* libfreetype.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libfreetype.a; sourceTree = "<group>"; };
 		DA8D885B2282309B002EE769 /* OpeningInstructions.rtf */ = {isa = PBXFileReference; lastKnownFileType = text.rtf; path = OpeningInstructions.rtf; sourceTree = "<group>"; };
 		DAA1441A21BFFE0C00C263CA /* SubsetFontCreator.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SubsetFontCreator.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -71,6 +74,7 @@
 		DAD244E921C431A6006A3211 /* SubsetFontCreator.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SubsetFontCreator.h; sourceTree = "<group>"; };
 		DAEED7772277B89E00C2E2BA /* ArduinoDisplayView.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ArduinoDisplayView.h; sourceTree = "<group>"; };
 		DAEED7782277B89E00C2E2BA /* ArduinoDisplayView.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = ArduinoDisplayView.mm; sourceTree = "<group>"; };
+		DAF268AB247C4B4A00683BAE /* XFontGlyph.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = XFontGlyph.h; sourceTree = "<group>"; };
 		DAF972ED22D0D40D0098C0E9 /* DataStream.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = DataStream.cpp; sourceTree = "<group>"; };
 		DAF972EE22D0D40D0098C0E9 /* DisplayController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DisplayController.h; sourceTree = "<group>"; };
 		DAF972EF22D0D40D0098C0E9 /* XFont.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XFont.h; sourceTree = "<group>"; };
@@ -154,8 +158,11 @@
 				DAF972F222D0D40E0098C0E9 /* pgmspace_stub.h */,
 				DAF972F022D0D40E0098C0E9 /* XFont.cpp */,
 				DAF972EF22D0D40D0098C0E9 /* XFont.h */,
+				DAF268AB247C4B4A00683BAE /* XFontGlyph.h */,
 				DAA949F522DA43360056FBCC /* XFontR1BitDataStream.cpp */,
 				DAA949F422DA43360056FBCC /* XFontR1BitDataStream.h */,
+				DA175FB8247DA816004BCF5C /* XFontRH1BitDataStream.cpp */,
+				DA175FB7247DA815004BCF5C /* XFontRH1BitDataStream.h */,
 				DAF972F422D0D40F0098C0E9 /* XFont16BitDataStream.cpp */,
 				DAF972F522D0D40F0098C0E9 /* XFont16BitDataStream.h */,
 				DAB67FA021C2B1A1003B3503 /* LogViewController.h */,
@@ -253,6 +260,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				DAC2DB5622625C85008BD00B /* Tabs.cpp in Sources */,
+				DA175FB9247DA816004BCF5C /* XFontRH1BitDataStream.cpp in Sources */,
 				DAA1443121BFFED900C263CA /* MainWindowController.mm in Sources */,
 				DAD244EA21C431A6006A3211 /* SubsetFontCreator.cpp in Sources */,
 				DAF972FC22D0D9AA0098C0E9 /* BitmapDisplayController.cpp in Sources */,
@@ -402,8 +410,10 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = SubsetFontCreator/SubsetFontCreator.entitlements;
+				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
+				DEVELOPMENT_TEAM = WXZPWNBKA4;
 				GCC_C_LANGUAGE_STANDARD = "compiler-default";
 				GCC_PREPROCESSOR_DEFINITIONS = "$(GCC_PREPROCESSOR_DEFINITIONS)";
 				HEADER_SEARCH_PATHS = (
@@ -431,8 +441,10 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = SubsetFontCreator/SubsetFontCreator.entitlements;
+				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
+				DEVELOPMENT_TEAM = WXZPWNBKA4;
 				GCC_C_LANGUAGE_STANDARD = "compiler-default";
 				GCC_PREPROCESSOR_DEFINITIONS = "$(GCC_PREPROCESSOR_DEFINITIONS)";
 				HEADER_SEARCH_PATHS = (

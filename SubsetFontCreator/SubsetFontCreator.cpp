@@ -24,7 +24,7 @@
 *	SubsetFontCreator
 *	
 *	Created by Jon Mackey on 12/14/18.
-*	Copyright © 2018 Jon. All rights reserved.
+*	Copyright © 2020 Jon Mackey. All rights reserved.
 */
 
 
@@ -34,6 +34,20 @@
 #include <ft2build.h>
 
 #include FT_FREETYPE_H
+/********************************* DumpBinary *********************************/
+void DumpBinaryX(
+	uint8_t		inValue)
+{
+	uint8_t	nMask = 0x80;
+	char	buffer[50];
+	char*	buffPtr = buffer;
+	for (; nMask != 0; nMask >>= 1)
+	{
+		*(buffPtr++) = (inValue & nMask) ? '*':'.';
+	}
+	*buffPtr = 0;
+	fprintf(stderr, "%s ", buffer);
+}
 
 /***************************** CreateRotatedData ******************************/
 /*
@@ -45,12 +59,22 @@
 *	much to unpack.
 *
 *	SSD1306 (OLED) and PCD8544 (Nokia 5110) use MSB bottom.
+*
+*	inHorizontal controls whether the rotated and packed data is stored
+*	as horizontal or vertical strips.	Horizontal: 123		Vertical:	147
+*													456					258
+*													789					369
+*
+*	The vertical case is pretty straight forward, just a serailly rotated block.
+*	The horizontal case needs to account for the glyph's y offset.
 */
 uint8_t* SubsetFontCreator::CreateRotatedData(
 	const uint8_t*	inBitmap,
 	int				inRows,		// bits
 	int				inColumns,	// bits
+	int				inYOffset,	// only used by the horizontal case.
 	bool			inMSBTop,
+	bool			inHorizontal,
 	size_t&			outDataLen)
 {
 	uint8_t*	rotatedData = NULL;
@@ -62,36 +86,69 @@ uint8_t* SubsetFontCreator::CreateRotatedData(
 		// inBitmap is 16 bit word aligned
 		int bytesPerRow = ((inColumns + 15)/16) * 2;
 		
-		const uint8_t*	firstRowPtr = inBitmap;
+		const uint8_t*	firstRowPtr;
 		const uint8_t*	bitMapPtr;
 		uint8_t		byteOut = 0;
-		uint8_t		maskIn = 0x80;
+		uint8_t		maskIn;
 		uint8_t		maskOutInit = inMSBTop ? 0x80 : 1;
 		uint8_t		maskOut = maskOutInit;
 		uint8_t*	dataOutPtr = rotatedData;
-		for (int column = 0; column < inColumns; column++)
+		int			endRow = 0;
+
+		if (inYOffset < 0)
 		{
-			bitMapPtr = firstRowPtr;
-			for (int row = 0; row < inRows; row++)
+			inYOffset = 0;	// Kerning not supported
+		}
+		/*
+		*	This outer loop only loops once for vertical.
+		*	For horizontal it loops (int)((inRows + 7)/8) times.
+		*/
+		for (int startRow = 0; startRow < inRows; startRow = endRow)
+		{
+			if (inHorizontal)
 			{
-				if (*bitMapPtr & maskIn)
+				if (startRow)
 				{
-					byteOut |= maskOut;
-				}
-				maskOut = inMSBTop ? (maskOut >>= 1) : (maskOut <<= 1);
-				if (maskOut == 0)
+					endRow = startRow+8;
+				} else
 				{
-					maskOut = maskOutInit;
-					*(dataOutPtr++) = byteOut;
-					byteOut = 0;
+					endRow = 8 - (inYOffset % 8);
 				}
-				bitMapPtr += bytesPerRow;
+				if (endRow > inRows)
+				{
+					endRow = inRows;
+				}
+				firstRowPtr = &inBitmap[startRow*bytesPerRow];
+			} else
+			{
+				endRow = inRows;
+				firstRowPtr = inBitmap;
 			}
-			maskIn >>= 1;
-			if (maskIn == 0)
+			maskIn = 0x80;
+			for (int column = 0; column < inColumns; column++)
 			{
-				maskIn = 0x80;
-				firstRowPtr++;
+				bitMapPtr = firstRowPtr;
+				for (int row = startRow; row < endRow; row++)
+				{
+					if (*bitMapPtr & maskIn)
+					{
+						byteOut |= maskOut;
+					}
+					maskOut = inMSBTop ? (maskOut >>= 1) : (maskOut <<= 1);
+					if (maskOut == 0)
+					{
+						maskOut = maskOutInit;
+						*(dataOutPtr++) = byteOut;
+						byteOut = 0;
+					}
+					bitMapPtr += bytesPerRow;
+				}
+				maskIn >>= 1;
+				if (maskIn == 0)
+				{
+					maskIn = 0x80;
+					firstRowPtr++;
+				}
 			}
 		}
 		if (maskOut != maskOutInit)
@@ -267,6 +324,7 @@ int SubsetFontCreator::CreateXfntFile(
 	if (success)
 	{
 		bool	rotated = (inOptions & (e1BitPerPixel+eRotated)) == e1BitPerPixel+eRotated;
+		bool	horizontal = (inOptions & eHorizontal) != 0;
 		bool	oneBitPerPixel = (inOptions & e1BitPerPixel) != 0;
 		bool	wideOffsets = (inOptions & e32BitDataOffsets) != 0;
 		std::string utf8FontPath(inFontFilePath);
@@ -293,7 +351,8 @@ int SubsetFontCreator::CreateXfntFile(
 					uint32_t	numCharCodes = inCharcodeItr.GetNumCharCodes();
 					FontHeader fontHeader;
 					fontHeader.version = 1;
-					fontHeader.wideOffsets = wideOffsets ? 1:0;
+					//fontHeader.wideOffsets = wideOffsets ? 1:0;
+					fontHeader.horizontal = (rotated && horizontal) ? 1:0;
 					fontHeader.oneBit = oneBitPerPixel ? 1:0;
 					fontHeader.rotated = rotated ? 1:0;
 					fontHeader.ascent = face->size->metrics.ascender/64;
@@ -393,7 +452,7 @@ int SubsetFontCreator::CreateXfntFile(
 										{
 											size_t	rotatedDataLen;
 											// Rotated data is created with MSB bottom for use by SSD1306 and PCD8544 controllers.
-											glyphData = CreateRotatedData(bufferPtr, rows, bitmap.width, false, rotatedDataLen);
+											glyphData = CreateRotatedData(bufferPtr, rows, bitmap.width, ascent - slot->bitmap_top, false, horizontal, rotatedDataLen);
 											if (glyphData)
 											{
 												glyphDataPtr = &glyphData[rotatedDataLen];
@@ -947,7 +1006,9 @@ int SubsetFontCreator::XFntToC_Header(
 	CleanStrForMacroName(exportFilename, headerMacro);
 	// For the namespace name, strip off _h if it exists (it should always exist)
 	std::string	namespaceName(headerMacro, 0, headerMacro.length() - 2);
-	std::string	xFontStreamClassName(fontHeader->rotated ? "XFontR1BitDataStream" : "XFont16BitDataStream");
+	std::string	xFontStreamClassName(fontHeader->rotated ?
+		(fontHeader->horizontal ? "XFontRH1BitDataStream" : "XFontR1BitDataStream") :
+			"XFont16BitDataStream");
 	tabbedStream.Write(
 		"// Subset font created by SubsetFontCreator"
 		"\n// For subset: \"%s\""
@@ -964,11 +1025,14 @@ int SubsetFontCreator::XFntToC_Header(
 				 xFontStreamClassName.c_str(),
 				 namespaceName.c_str());
 	tabbedStream+=2;
+		//	32 bit offsets are not supported in C headers.
+		//"\n%d,%2t// wideOffsets, 1 = 32 bit, 0 = 16 bit glyph data offsets"
+		//(int)fontHeader->wideOffsets,
 	tabbedStream.Write(
 		"\n%d,%2t// version, currently version = 1"
 		"\n%d,%2t// oneBit, 1 = 1 bit per pixel, 0 = 8 bit (antialiased)"
 		"\n%d,%2t// rotated, glyph data is rotated (applies to 1 bit only)"
-		"\n%d,%2t// wideOffsets, 1 = 32 bit, 0 = 16 bit glyph data offsets"
+		"\n%d,%2t// horizontal, addressing for rotated data, else vertical"
 		"\n%d,%2t// monospaced, fixed width font (for this subset)"
 		"\n%d,%2t// ascent, font in pixels"
 		"\n%d,%2t// descent, font in pixels"
@@ -979,7 +1043,7 @@ int SubsetFontCreator::XFntToC_Header(
 		(int)fontHeader->version,
 		(int)fontHeader->oneBit,
 		(int)fontHeader->rotated,
-		(int)fontHeader->wideOffsets,
+		(int)fontHeader->horizontal,
 		(int)fontHeader->monospaced,
 		(int)fontHeader->ascent,
 		(int)fontHeader->descent,
@@ -1023,66 +1087,33 @@ int SubsetFontCreator::XFntToC_Header(
 	tabbedStream--;
 	tabbedStream.Write(
 		"\n};"
-		"\n\nconst %s\tglyphDataOffset[] PROGMEM ="
-		"\n{", fontHeader->wideOffsets ? "uint32_t" : "uint16_t");
-	if (fontHeader->wideOffsets)
+		"\n\nconst uint16_t\tglyphDataOffset[] PROGMEM ="
+		"\n{");
+	tabbedStream++;
 	{
-		tabbedStream++;
+		uint16_t*	dataOffsetPtr = (uint16_t*)currOffset;
+		uint16_t*	dataOffsetEnd = &dataOffsetPtr[fontHeader->numCharCodes+1];
+		currOffset = (uint8_t*)dataOffsetEnd;
+		glyphDataLen = dataOffsetEnd[-1];
+		
+		int	offsetsOnRow = 0;
+		while (dataOffsetPtr != dataOffsetEnd)
 		{
-			uint32_t*	dataOffsetPtr = (uint32_t*)currOffset;
-			uint32_t*	dataOffsetEnd = &dataOffsetPtr[fontHeader->numCharCodes+1];
-			currOffset = (uint8_t*)dataOffsetEnd;
-			glyphDataLen = dataOffsetEnd[-1];
-			
-			int	offsetsOnRow = 0;
-			while (dataOffsetPtr != dataOffsetEnd)
+			if (offsetsOnRow == 0)
 			{
-				if (offsetsOnRow == 0)
-				{
-					tabbedStream.Write("\n");
-				}
-				
-				fprintf(inOutputFile, "0x%08X", *dataOffsetPtr);
-				dataOffsetPtr++;
-				offsetsOnRow++;
-				if (offsetsOnRow == 6)	// offsets per row
-				{
-					offsetsOnRow = 0;
-				}
-				if (dataOffsetPtr != dataOffsetEnd)
-				{
-					fprintf(inOutputFile, offsetsOnRow != 0 ? ", " : ",");
-				}
+				tabbedStream.Write("\n");
 			}
-		}
-	} else
-	{
-		tabbedStream++;
-		{
-			uint16_t*	dataOffsetPtr = (uint16_t*)currOffset;
-			uint16_t*	dataOffsetEnd = &dataOffsetPtr[fontHeader->numCharCodes+1];
-			currOffset = (uint8_t*)dataOffsetEnd;
-			glyphDataLen = dataOffsetEnd[-1];
 			
-			int	offsetsOnRow = 0;
-			while (dataOffsetPtr != dataOffsetEnd)
+			fprintf(inOutputFile, "0x%04hX", *dataOffsetPtr);
+			dataOffsetPtr++;
+			offsetsOnRow++;
+			if (offsetsOnRow == 8)	// offsets per row
 			{
-				if (offsetsOnRow == 0)
-				{
-					tabbedStream.Write("\n");
-				}
-				
-				fprintf(inOutputFile, "0x%04hX", *dataOffsetPtr);
-				dataOffsetPtr++;
-				offsetsOnRow++;
-				if (offsetsOnRow == 8)	// offsets per row
-				{
-					offsetsOnRow = 0;
-				}
-				if (dataOffsetPtr != dataOffsetEnd)
-				{
-					fprintf(inOutputFile, offsetsOnRow != 0 ? ", " : ",");
-				}
+				offsetsOnRow = 0;
+			}
+			if (dataOffsetPtr != dataOffsetEnd)
+			{
+				fprintf(inOutputFile, offsetsOnRow != 0 ? ", " : ",");
 			}
 		}
 	}

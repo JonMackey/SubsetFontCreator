@@ -44,7 +44,7 @@ BitmapDisplayController::BitmapDisplayController(
 	uint16_t	inBytesPerRow,
 	uint8_t*	inData)
 	: DisplayController(inRows, inColumns),
-	  mBytesPerRow(inBytesPerRow), mData(inData)
+	  mBytesPerRow(inBytesPerRow), mData(inData), m1BitRotatedHorizontal(false)
 {
 	mCurrentRow = mStartRow = mCurrent = (uint32_t*)mData;
 	mStartColumn = 0;
@@ -212,34 +212,71 @@ void BitmapDisplayController::WritePixels(
 	uint32_t*	current = mCurrent;
 	if (mAddressingMode == eHorizontal)
 	{
-		while (inPixelsToWrite)
+		if (m1BitRotatedHorizontal)
 		{
-			uint32_t	rowPixels = (uint32_t)(&mCurrentRow[mEndColumn] - current);
-			bool	atEndOfRow = inPixelsToWrite >= rowPixels;
-			if (atEndOfRow)
+			/*
+			*	1 bit rotated horizontal simulates a 1 bit display in horizontal
+			*	addressing mode.  In this mode these controllers display 8
+			*	pixels vertically in rows (8 pixel rows per display page.)
+			*	inPixelsToWrite will always be a multiple of 8.
+			*	Each pixel written will increment to the next bitmap row till 8
+			*	rows are written, then the column is incremented moving back to
+			*	the start row.  This continues till the end of the row
+			*	(mEndColumn).  When the end of the row is reached, the column is
+			*	reset to mStartColumn
+			*/
+			uint32_t*	currentColumn = current;
+			while (inPixelsToWrite)
 			{
-				inPixelsToWrite -= rowPixels;
-			} else
-			{
-				rowPixels = inPixelsToWrite;
-				inPixelsToWrite = 0;
-			}
-			uint32_t*	endOfRow = &current[rowPixels];
-			while (current != endOfRow)
-			{
-				*(current++) = Pixel16To24(*(inPixels++));
-			}
-			if (atEndOfRow)
-			{
-				// Advance to the next row
-				mCurrentRow = (uint32_t*)&((uint8_t*)mCurrentRow)[mBytesPerRow];
-				// Wrap if at last row
-				if (mCurrentRow == mEndRow)
+				for (int bits = 8; bits; bits--)
 				{
-					mCurrentRow = mStartRow;
+					*current = Pixel16To24(*(inPixels++));
+					current = (uint32_t*)&((uint8_t*)current)[mBytesPerRow];
 				}
-				// Point to the start of the new row
-				current = &mCurrentRow[mStartColumn];
+				inPixelsToWrite -= 8;
+				currentColumn++;
+				/*
+				*	If we're at the end of the row THEN
+				*	increment to the next page (set of 8 rows.)
+				*/
+				if (currentColumn == &mCurrentRow[mEndColumn])
+				{
+					mCurrentRow = (uint32_t*)&((uint8_t*)mCurrentRow)[mBytesPerRow*8];
+					currentColumn = &mCurrentRow[mStartColumn];
+				}
+				current = currentColumn;
+			}
+		} else
+		{
+			while (inPixelsToWrite)
+			{
+				uint32_t	rowPixels = (uint32_t)(&mCurrentRow[mEndColumn] - current);
+				bool	atEndOfRow = inPixelsToWrite >= rowPixels;
+				if (atEndOfRow)
+				{
+					inPixelsToWrite -= rowPixels;
+				} else
+				{
+					rowPixels = inPixelsToWrite;
+					inPixelsToWrite = 0;
+				}
+				uint32_t*	endOfRow = &current[rowPixels];
+				while (current != endOfRow)
+				{
+					*(current++) = Pixel16To24(*(inPixels++));
+				}
+				if (atEndOfRow)
+				{
+					// Advance to the next row
+					mCurrentRow = (uint32_t*)&((uint8_t*)mCurrentRow)[mBytesPerRow];
+					// Wrap if at last row
+					if (mCurrentRow == mEndRow)
+					{
+						mCurrentRow = mStartRow;
+					}
+					// Point to the start of the new row
+					current = &mCurrentRow[mStartColumn];
+				}
 			}
 		}
 	} else

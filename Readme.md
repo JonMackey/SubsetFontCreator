@@ -19,9 +19,9 @@ SubsetFontCreator has two export formats, binary and C header.  The binary forma
 All of the other export options are selected in the application's main window.  These options are:
 * Font - any ttf or otf font supported by FreeType
 * Font size - the font size in points.
-* Glyph data format - 1 bit, 1 bit rotated, and 8 bit for antialiased text.  8 bit is exported when the 1 bit checkbox is unchecked.
+* Glyph data format - RGB antialiased, 1 bit, 1 bit rotated with either horizontal or vertical addressing.
 * Subset string - a UTF-8 string that defines the set of glyphs to export.   
-* 16 or 32 bit glyph data offsets.  In general 16 should be used.  The XFont class described below currently doesn't handle 32 bit offsets.
+* 16 or 32 bit glyph data offsets.  The option to export 32 bit offsets is no longer exposed in the GUI because XFont only supports 16 bit offsets.
 
 Press "Helper…" to display the subset string helper window.  This window allows you to create the subset string by typing or pasting text containing the characters you plan to use into the helper window's text field.
 
@@ -55,11 +55,11 @@ The same classes used to create the sample are used in the Arduino sketches.  Th
 # Glyph Drawing
 The primary class is XFont.  All of the other classes are used in combination based on the font storage and the display device being targeted.  As noted earlier, subset fonts can be exported in multiple ways depending on where the font data will be stored.
 
-The data storage is abstracted by the use of data streams.  The DataStream base class is pure virtual.  Subclasses allow the data to be read from SRAM, program memory, or on any device for which a subclass of DataStream has been written.  The generic data stream classes are used indirectly by the XFont specific streams, XFontR1BitDataStream and XFont16BitDataStream.  When you choose the export format "C++ Header" without the separate data option, SubsetFontCreator has enough information to generate the C++ code needed to implement the font.  You'll see this auto-generated code at the end of the exported header file.  The comments around this code contain basic usage instructions.  In most cases instantiating a display and connecting it to a font are all that remains to be done.
+The data storage is abstracted by the use of data streams.  The DataStream base class is pure virtual.  Subclasses allow the data to be read from SRAM, program memory, or on any device for which a subclass of DataStream has been written.  The generic data stream classes are used indirectly by the XFont specific streams, XFontR1BitDataStream, XFontRH1BitDataStream and XFont16BitDataStream.  When you choose the export format "C++ Header" without the separate data option, SubsetFontCreator has enough information to generate the C++ code needed to implement the font.  You'll see this auto-generated code at the end of the exported header file.  The comments around this code contain basic usage instructions.  In most cases instantiating a display and connecting it to a font are all that remains to be done.
 
-Like the DataStream classes, all of the display classes are subclassed from a common DisplayController class.  Currently there are classes for the TFT ST777xx family, the OLED SSD1306, and Nokia PCD8544 controllers.  I have a limited number of samples of each.  As you may know the ST777xx family covers quite a few variants so some tweaking may be required.
+Like the DataStream classes, all of the display classes are subclassed from a common DisplayController class.  Currently there are classes for the TFT ST777xx family, LCD ST7567, OLED SSD1306, and Nokia PCD8544 controllers.  I have a limited number of samples of each.  As you may know the ST777xx family covers quite a few variants so some tweaking may be required.
 
-All drawing is done by calling xFont->DrawStr().  DrawStr is passed a UTF-8 string.  You need to call display->MoveTo() prior to calling DrawStr.  DrawStr can optionally simulate a monospace font by passing it the width of the widest glyph in the string being drawn.  This is generally useful for displaying number fields.  XFont has a WidestGlyph function that can be used to calculate the monospace width.  You can also get this number from within SubsetFontCreator by displaying a sample containing the glyphs to be drawn.  A monospace entry in the SubsetFontCreator info view will note when a subset is monospace.  In some fonts numbers are monospace even though the entire font isn't (e.g. MyriadPro.)
+All drawing is done by calling xFont->DrawStr().  DrawStr is passed a UTF-8 string.  You need to call display->MoveTo() or xFont->MoveTo() prior to calling DrawStr.  DrawStr can optionally simulate a monospace font by passing it the width of the widest glyph in the string being drawn.  This is generally useful for displaying number fields for fonts that aren't natively monospace.  XFont has a WidestGlyph function that can be used to calculate the monospace width.  You can also get this number from within SubsetFontCreator by displaying a sample containing the glyphs to be drawn.  A monospace entry in the SubsetFontCreator info view will note when a subset is monospace.  In some fonts numbers are monospace even though the entire font isn't (e.g. MyriadPro.)
 
 XFont allows you to set the text foreground and background colors as well as highlight foreground and background colors.  XFont->EnableHighlighting() is implemented by swapping out the text colors with the highlight colors.
 
@@ -71,7 +71,11 @@ Under the Arduino folder in the repository are the classes described above and a
 
 8 bit data is stored using simple run length encoding.  For each run the data starts with a signed length byte.  If the length byte is positive the next byte should be repeated length times.  If the length byte is negative, -length bytes of unique data should be copied.  This optimizes the case where there are runs of unique values.
 
-XFontR1BitDataStream and XFont16BitDataStream are used to unpack the glyph data.  XFontR1BitDataStream works on rotated 1 bit data as used on monochrome displays such as the OLED SSD1306 and Nokia PCD8544 controllers.  XFont16BitDataStream unpacks both 1 bit unrotated and 8 bit data for use with 16 bit RGB displays.  For 8 bit data the XFont16BitDataStream handles blending the foreground and background colors to implement antialiasing.  Obviously antialiasing should only be used when the resolution of the display is high enough, otherwise 1 bit makes more sense.
+XFontR1BitDataStream, XFontRH1BitDataStream and XFont16BitDataStream are used to unpack the glyph data.  XFontR1BitDataStream and XFontRH1BitDataStream work on rotated 1 bit data as used on monochrome displays such as the OLED SSD1306 and Nokia PCD8544 controllers.
+
+The 'H' in XFontRH1BitDataStream refers to horizontal addressing.  Either horizontal or vertical addressing can be used by any of the 1 bit controllers but it is recommended to use horizontal with the ST7567 controller because it doesn't natively support vertical addressing. When vertically formatted font data is used with the ST7567, each data byte requires 3 additional command bytes in order to set the page and column for the next data byte.
+
+XFont16BitDataStream unpacks both 1 bit unrotated and 8 bit data for use with 16 bit RGB displays.  For 8 bit data the XFont16BitDataStream handles blending the foreground and background colors to implement antialiasing.  Obviously antialiasing should only be used when the resolution of the display is high enough, otherwise 1 bit makes more sense.
 
 If you plan on supporting many fonts in your project, more than the available flash program space available, the glyph data can be stored anywhere.  As a test I wrote a data stream for the AT24Cxxx family of eeproms (included in the Arduino examples.)  The drawing speed is slightly slower, but it works fine otherwise.
 

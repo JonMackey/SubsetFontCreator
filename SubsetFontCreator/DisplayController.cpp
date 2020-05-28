@@ -184,6 +184,7 @@ bool DisplayController::StreamCopyBlock(
 				MoveColumnBy(inColumns); // Advance by inColumns (or wrap to zero if at or past end)
 			} else
 			{
+				MoveToRow(mRow);	// Leave the page unchanged
 				SetRowRange(inRows);
 				// The row index will wrap back to the starting point.
 				// The column won't so it needs to be reset.

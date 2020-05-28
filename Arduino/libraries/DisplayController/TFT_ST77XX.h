@@ -164,6 +164,8 @@ protected:
 
 
 	virtual void			Init(void);
+	void					WriteSleepCmds(void);
+	void					WriteWakeUpCmds(void);
 	void					SetRotation(
 								uint8_t					inRotation);
 	inline void				BeginTransaction(void)

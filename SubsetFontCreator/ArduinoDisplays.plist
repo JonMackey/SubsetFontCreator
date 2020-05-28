@@ -28,6 +28,14 @@
 	</dict>
 	<dict>
 		<key>name</key>
+		<string>1.2&quot; 128 x 64</string>
+		<key>screenSize</key>
+		<string>{27.16, 13.57}</string>
+		<key>deviceSize</key>
+		<string>{128, 64}</string>
+	</dict>
+	<dict>
+		<key>name</key>
 		<string>1.3&quot; 128 x 64</string>
 		<key>screenSize</key>
 		<string>{29.42, 14.7}</string>

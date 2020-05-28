@@ -130,6 +130,8 @@ protected:
 	uint8_t		mEndColumn;		// For windowing (column range)
 	uint8_t		mStartRow;		// For windowing (row range)
 	uint8_t		mEndRow;		// For windowing (row range)
+	uint8_t		mDataRow;		// For windowing (IncCoords & FillPixels)
+	uint8_t		mDataColumn;	// For windowing (IncCoords & FillPixels)
 	volatile uint8_t*	mChipSelPortReg;
 	volatile uint8_t*	mDCPortReg;
 	SPISettings	mSPISettings;
@@ -158,9 +160,7 @@ protected:
 	void					WriteData(
 								const uint8_t*			inData,
 								uint16_t				inDataLen);
-	void					IncCoords(
-								uint8_t&				ioRow,
-								uint8_t&				ioColumn) const;
+	void					IncCoords(void);
 								
 };
 #endif // LCD_PCD8544_h

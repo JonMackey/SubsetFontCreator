@@ -92,7 +92,11 @@ public:
 	*/
 	virtual void			SetAddressingMode(
 								EAddressingMode			inAddressingMode);
+	void					Set1BitRotatedHorizontal(
+								bool					in1BitRotatedHorizontal)
+								{m1BitRotatedHorizontal = in1BitRotatedHorizontal;}
 protected:
+	bool		m1BitRotatedHorizontal;	// 8 pixel high strips (simulates 1 bit horizontal addressing)
 	uint32_t	mBytesPerRow;	// of bitmap
 	uint32_t*	mCurrent;
 	uint32_t*	mCurrentRow;	// Only used in Horizontal address mode

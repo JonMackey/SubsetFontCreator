@@ -36,7 +36,7 @@
 *	By using the DataStream abstraction, the data can be stored anywhere.
 *
 *	The xfnt specification allows for more than 64KB of glyph data.
-*	This implementation only supports up to 64KB of glyph data (FontHeader.wideOffsets = 0).
+*	This implementation only supports up to 64KB of glyph data (16 bit offsets.)
 */
 
 /*********************************** XFont ************************************/
@@ -67,8 +67,12 @@ void XFont::SetFont(
 		memcpy_P(&mFontHeader, mFont->header, sizeof(FontHeader));
 		if (mDisplay)
 		{
-			mFontRows = mFontHeader.rotated ? (mDisplay->BitsPerPixel() == 1 ?
-				(mFontHeader.height + 7)/8 : (mFontHeader.height & 0xF8) + 8) : mFontHeader.height;
+			mFontRows = (mFontHeader.rotated == 0 || (mFontHeader.height & 7) == 0) ?
+										mFontHeader.height : (mFontHeader.height & 0xF8) + 8;
+			if (mDisplay->BitsPerPixel() == 1)
+			{
+				mFontRows = (mFontHeader.height + 7)/8;
+			}
 		}
 	}
 }
@@ -254,6 +258,7 @@ void XFont::DrawStr(
 	const char*	strPtr = inUTF8Str;
 	bool	oneBit = mFontHeader.oneBit;
 	bool	rotated = mFontHeader.rotated;
+	bool	vertical = oneBit && rotated && !mFontHeader.horizontal;
 	DataStream*	glyphData = mFont->glyphData;
 	uint16_t	startRow = mDisplay->GetRow();
 	uint16_t	startColumn = mDisplay->GetColumn();
@@ -308,7 +313,7 @@ void XFont::DrawStr(
 				}
 				/*
 				*	One bit rotated will have the y offset shifted into the data
-				*	by the XFontR1BitDataStream.
+				*	by the XFontR1BitDataStream or XFontRH1BitDataStream.
 				*
 				*	If it's not rotated AND
 				*	the glyph needs to be shifted down THEN
@@ -322,12 +327,12 @@ void XFont::DrawStr(
 					mDisplay->MoveTo(startRow + mGlyph.y, startColumn + mGlyph.x);
 					rowsWritten = mGlyph.y;
 				}
-				if (rotated)
+				if (vertical)
 				{
 					mDisplay->SetAddressingMode(DisplayController::eVertical);
 				}
 				doContinue = mDisplay->StreamCopyBlock(glyphData, rows, columns);
-				if (rotated)
+				if (vertical)
 				{
 					mDisplay->SetAddressingMode(DisplayController::eHorizontal);
 				}
@@ -340,8 +345,10 @@ void XFont::DrawStr(
 					if (columns &&
 						rowsWritten < mFontRows)
 					{
+						uint16_t	savedColumn = mDisplay->GetColumn();
 						mDisplay->MoveTo(startRow + rowsWritten, startColumn+mGlyph.x);
 						mDisplay->FillBlock(mFontRows-rowsWritten, columns, mTextBGColor);
+						mDisplay->MoveToColumn(savedColumn);
 					}
 					mDisplay->MoveToRow(startRow);
 					doContinue = mDisplay->GetColumn() != 0;	// don't wrap
@@ -387,6 +394,7 @@ void XFont::DrawStr(
 	}
 	if (inClearTillEOL &&
 		//startRow == mDisplay->GetRow() &&
+		mDisplay->GetColumn() &&
 		startColumn <= mDisplay->GetColumn())	// in case of wrap to 0
 	{
 		mDisplay->MoveToRow(startRow);

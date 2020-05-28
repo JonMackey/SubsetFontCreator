@@ -101,7 +101,7 @@ void TFT_ST77XX::Init(void)
 	// Per docs: After reset, delay 120ms before sending the next command.
 	// (The controller IC is in the process of writing the defaults.)
 	delay(120);
-	WakeUp();	// By default the controller is asleep after reset.
+	WriteWakeUpCmds();	// By default the controller is asleep after reset.
 }
 
 /********************************** WriteCmd **********************************/
@@ -283,6 +283,14 @@ For both the 89 and 35R the RGB order is BGR.
 /*********************************** Sleep ************************************/
 void TFT_ST77XX::Sleep(void)
 {
+	BeginTransaction();
+	WriteSleepCmds();
+	EndTransaction();
+}
+
+/******************************* WriteSleepCmds *******************************/
+void TFT_ST77XX::WriteSleepCmds(void)
+{
 	WriteCmd(eSLPINCmd);
 	// Per docs: When going to Sleep, delay 120ms before sending the next command.
 	// delay(120);  << This assumes there will be no commands after calling
@@ -296,6 +304,14 @@ void TFT_ST77XX::Sleep(void)
 
 /*********************************** WakeUp ***********************************/
 void TFT_ST77XX::WakeUp(void)
+{
+	BeginTransaction();
+	WriteWakeUpCmds();
+	EndTransaction();
+}
+
+/****************************** WriteWakeUpCmds *******************************/
+void TFT_ST77XX::WriteWakeUpCmds(void)
 {
 	WriteCmd(eSLPOUTCmd);
 	// Per docs: When waking from Sleep, delay 120ms before sending the next command.

@@ -40,8 +40,7 @@ NS_ASSUME_NONNULL_BEGIN
 {
 	IBOutlet NSPathControl*	fontPathControl;
 	IBOutlet NSView*		serialView;
-	IBOutlet NSButton*		oneBitCheckBox;
-	IBOutlet NSButton*		rotateCheckBox;
+	IBOutlet NSPopUpButton*	formatPopupButton;
 	IBOutlet NSPopUpButton*	facePopupButton;
 	IBOutlet NSTextField*	pointSizeTextField;
 	IBOutlet NSTextField*	subsetTextField;
@@ -65,8 +64,6 @@ NS_ASSUME_NONNULL_BEGIN
 - (IBAction)setOffsetWidthRadios:(NSButton*)sender;
 - (IBAction)showHelper:(id)sender;
 - (IBAction)setDisplay:(NSPopUpButton*)sender;
-- (IBAction)oneBitStateChanged:(id)sender;
-- (IBAction)rotateStateChanged:(id)sender;
 - (IBAction)setTextColor:(id)sender;
 - (IBAction)setTextBGColor:(id)sender;
 
@@ -77,7 +74,6 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, strong) NSViewController *formatViewController;
 @property (nonatomic, weak) NSSavePanel *savePanel; // valid only while panel is open
 @property (nonatomic, strong) NSArray<NSDictionary*>* arduinoDisplays;
-@property (nonatomic) BOOL rotateWarningIssued;
 
 - (void)doOpen:(NSURL*)inDocURL;
 
