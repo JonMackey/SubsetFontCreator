@@ -515,6 +515,123 @@
 	return(NO);
 }
 
+/******************************* appendDataDump *******************************/
+/*
+*	unit:
+*	 00	0 - uint8	FF	FF	FF...
+*	 01	1 - int8	-1	-1	-1...
+*	 10	2 - uint16	FFFF FFFF FFFF...
+*	 11	3 - int16	-1	 -1	  -1...
+*	100	4 - uint32	FFFFFFFF FFFFFFFF FFFFFFFF...
+*	101	5 - int32	-1	     -1	      -1...
+*/
+- (LogViewController*)appendDataDump:(const void*)inBuffer length:(NSUInteger)inLength startAddress:(NSInteger)inStartAddress unit:(uint8_t)inUnit
+{
+	if (inUnit > 1 &&
+		(inLength & 1) != 0)
+	{
+		inUnit = inUnit & 1;
+	} else if (inUnit > 3 &&
+		(inLength & 2) != 0)
+	{
+		inUnit = inUnit & 3;
+	}
+	switch (inUnit)
+	{
+		case 0:
+		{
+			const uint8_t*	bufferPtr = (const uint8_t*)inBuffer;
+			int32_t index = 0;
+			while (index < inLength)
+			{
+				if ((index % 16) == 0)
+				{
+					[self appendFormat:@"\n%04lX:", inStartAddress + index];
+				}
+				[self appendFormat:@" %02hhX", bufferPtr[index++]];
+			}
+			break;
+		}
+		case 1:
+		{
+			const int8_t*	bufferPtr = (const int8_t*)inBuffer;
+			int32_t index = 0;
+			while (index < inLength)
+			{
+				if ((index % 16) == 0)
+				{
+					[self appendFormat:@"\n%04lX:", inStartAddress + index];
+				}
+				[self appendFormat:@" %hhd", bufferPtr[index++]];
+			}
+			break;
+		}
+		case 2:
+		{
+			const uint16_t*	bufferPtr = (const uint16_t*)inBuffer;
+			int32_t index = 0;
+			inLength >>= 1;
+			while (index < inLength)
+			{
+				if ((index % 8) == 0)
+				{
+					[self appendFormat:@"\n%04lX:", inStartAddress + index];
+				}
+				[self appendFormat:@" %04hX", bufferPtr[index++]];
+			}
+			break;
+		}
+		case 3:
+		{
+			const int16_t*	bufferPtr = (const int16_t*)inBuffer;
+			int32_t index = 0;
+			inLength >>= 1;
+			while (index < inLength)
+			{
+				if ((index % 8) == 0)
+				{
+					[self appendFormat:@"\n%04lX:", inStartAddress + index];
+				}
+				[self appendFormat:@" %hd", bufferPtr[index++]];
+			}
+			break;
+		}
+		case 4:
+		{
+			const uint32_t*	bufferPtr = (const uint32_t*)inBuffer;
+			int32_t index = 0;
+			inLength >>= 2;
+			while (index < inLength)
+			{
+				if ((index % 4) == 0)
+				{
+					[self appendFormat:@"\n%04lX:", inStartAddress + index];
+				}
+				[self appendFormat:@" %08X", bufferPtr[index++]];
+			}
+			break;
+		}
+		case 5:
+		{
+			const int32_t*	bufferPtr = (const int32_t*)inBuffer;
+			int32_t index = 0;
+			inLength >>= 2;
+			while (index < inLength)
+			{
+				if ((index % 4) == 0)
+				{
+					[self appendFormat:@"\n%04lX:", inStartAddress + index];
+				}
+				[self appendFormat:@" %d", bufferPtr[index++]];
+			}
+			break;
+		}
+	}
+	[self appendFormat:@"\n\n"];
+	
+	return(self);
+}
+
 /***************************** appendHexDump **********************************/
 - (LogViewController*)appendHexDump:(const void*)inBuffer length:(NSUInteger)inLength addPreamble:(BOOL)inAddPreamble
 {

@@ -21,6 +21,8 @@
                 <outlet property="serialView" destination="NeL-Ho-iT5" id="vqh-PX-OqZ"/>
                 <outlet property="simulateMonoCheckbox" destination="NRY-8m-obB" id="tZA-g4-d2D"/>
                 <outlet property="subsetTextField" destination="EKE-Qt-tZA" id="CtL-Hd-rgF"/>
+                <outlet property="suppFacePopupButton" destination="l9J-Gg-vqo" id="7Jh-lE-9KV"/>
+                <outlet property="suppFontPathControl" destination="lkg-8d-hIp" id="cIN-xF-t4D"/>
                 <outlet property="textBGColorButton" destination="sM0-e3-v8n" id="oCB-Wl-3bZ"/>
                 <outlet property="textColorButton" destination="Q89-gN-YfF" id="KZU-AL-XNg"/>
                 <outlet property="window" destination="F0z-JX-Cv5" id="gIp-Ho-8D9"/>
@@ -43,16 +45,16 @@
                         <rect key="frame" x="18" y="438" width="44" height="14"/>
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                         <textFieldCell key="cell" controlSize="small" lineBreakMode="clipping" alignment="right" title="Font:" id="xji-7E-g8b">
-                            <font key="font" metaFont="toolTip"/>
+                            <font key="font" metaFont="label" size="11"/>
                             <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
                             <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
                         </textFieldCell>
                     </textField>
                     <pathControl verticalHuggingPriority="750" fixedFrame="YES" tag="1" allowsExpansionToolTips="YES" translatesAutoresizingMaskIntoConstraints="NO" id="MQw-uv-rRD">
-                        <rect key="frame" x="65" y="435" width="477" height="22"/>
-                        <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES"/>
+                        <rect key="frame" x="65" y="435" width="232" height="22"/>
+                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                         <pathCell key="cell" controlSize="small" selectable="YES" editable="YES" alignment="left" pathStyle="popUp" id="Uba-qV-p0V">
-                            <font key="font" metaFont="toolTip"/>
+                            <font key="font" metaFont="label" size="11"/>
                             <url key="url" string="file:///Library/Fonts/Arial.ttf"/>
                         </pathCell>
                         <connections>
@@ -64,34 +66,34 @@
                         <rect key="frame" x="23" y="412" width="37" height="14"/>
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                         <textFieldCell key="cell" controlSize="small" lineBreakMode="clipping" alignment="right" title="Face:" id="Lwk-pn-uEL">
-                            <font key="font" metaFont="toolTip"/>
+                            <font key="font" metaFont="label" size="11"/>
                             <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
                             <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
                         </textFieldCell>
                     </textField>
                     <popUpButton verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="iUT-Gf-O6o">
                         <rect key="frame" x="68" y="407" width="229" height="22"/>
-                        <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES"/>
+                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                         <popUpButtonCell key="cell" type="push" bezelStyle="rounded" alignment="left" controlSize="small" lineBreakMode="truncatingTail" borderStyle="borderAndBezel" imageScaling="proportionallyDown" inset="2" id="ym7-b7-bKG">
                             <behavior key="behavior" lightByBackground="YES" lightByGray="YES"/>
-                            <font key="font" metaFont="toolTip"/>
+                            <font key="font" metaFont="label" size="11"/>
                             <menu key="menu" id="LcC-OS-AXx"/>
                         </popUpButtonCell>
                     </popUpButton>
                     <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="O1P-S5-VUJ">
-                        <rect key="frame" x="413" y="412" width="37" height="14"/>
+                        <rect key="frame" x="347" y="386" width="37" height="14"/>
                         <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMinY="YES"/>
                         <textFieldCell key="cell" controlSize="small" lineBreakMode="clipping" alignment="right" title="Size:" id="til-MX-TjG">
-                            <font key="font" metaFont="toolTip"/>
+                            <font key="font" metaFont="label" size="11"/>
                             <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
                             <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
                         </textFieldCell>
                     </textField>
                     <comboBox verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="Tha-er-MCt">
-                        <rect key="frame" x="458" y="407" width="60" height="22"/>
+                        <rect key="frame" x="392" y="381" width="60" height="22"/>
                         <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMinY="YES"/>
                         <comboBoxCell key="cell" controlSize="small" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" sendsActionOnEndEditing="YES" borderStyle="bezel" title="12" drawsBackground="YES" completes="NO" numberOfVisibleItems="23" id="35d-JW-2DX">
-                            <font key="font" metaFont="toolTip"/>
+                            <font key="font" metaFont="label" size="11"/>
                             <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
                             <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
                             <objectValues>
@@ -111,10 +113,10 @@
                         </comboBoxCell>
                     </comboBox>
                     <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="YGW-p4-pO0">
-                        <rect key="frame" x="521" y="412" width="25" height="14"/>
+                        <rect key="frame" x="455" y="386" width="25" height="14"/>
                         <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMinY="YES"/>
                         <textFieldCell key="cell" controlSize="small" lineBreakMode="clipping" title="Pt" id="pWU-bf-228">
-                            <font key="font" metaFont="toolTip"/>
+                            <font key="font" metaFont="label" size="11"/>
                             <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
                             <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
                         </textFieldCell>
@@ -123,7 +125,7 @@
                         <rect key="frame" x="18" y="386" width="44" height="14"/>
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                         <textFieldCell key="cell" controlSize="small" lineBreakMode="clipping" alignment="right" title="Data:" id="zmf-b4-7Nc">
-                            <font key="font" metaFont="toolTip"/>
+                            <font key="font" metaFont="label" size="11"/>
                             <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
                             <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
                         </textFieldCell>
@@ -133,7 +135,7 @@
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                         <popUpButtonCell key="cell" type="push" title="RGB Antialiased (8 bit grayscale)" bezelStyle="rounded" alignment="left" controlSize="small" lineBreakMode="truncatingTail" state="on" borderStyle="borderAndBezel" imageScaling="proportionallyDown" inset="2" selectedItem="XjL-YY-pv2" id="wEl-W3-IRE" userLabel="Format">
                             <behavior key="behavior" lightByBackground="YES" lightByGray="YES"/>
-                            <font key="font" metaFont="toolTip"/>
+                            <font key="font" metaFont="label" size="11"/>
                             <menu key="menu" id="iS7-f6-R8I">
                                 <items>
                                     <menuItem title="RGB Antialiased (8 bit grayscale)" state="on" id="XjL-YY-pv2"/>
@@ -149,7 +151,7 @@
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                         <buttonCell key="cell" type="radio" title="16" bezelStyle="regularSquare" imagePosition="left" alignment="left" controlSize="small" inset="2" id="e9f-fj-GSs">
                             <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
-                            <font key="font" metaFont="toolTip"/>
+                            <font key="font" metaFont="label" size="11"/>
                         </buttonCell>
                         <connections>
                             <action selector="setOffsetWidthRadios:" target="-2" id="MAu-Dx-Re7"/>
@@ -160,7 +162,7 @@
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                         <buttonCell key="cell" type="radio" title="32 bits per offset" bezelStyle="regularSquare" imagePosition="left" alignment="left" controlSize="small" inset="2" id="XS6-5i-xnI">
                             <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
-                            <font key="font" metaFont="toolTip"/>
+                            <font key="font" metaFont="label" size="11"/>
                         </buttonCell>
                         <connections>
                             <action selector="setOffsetWidthRadios:" target="-2" id="VZ8-NQ-Kwi"/>
@@ -170,7 +172,7 @@
                         <rect key="frame" x="18" y="360" width="44" height="14"/>
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                         <textFieldCell key="cell" controlSize="small" lineBreakMode="clipping" alignment="right" title="Subset:" id="jOc-oS-IDB">
-                            <font key="font" metaFont="toolTip"/>
+                            <font key="font" metaFont="label" size="11"/>
                             <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
                             <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
                         </textFieldCell>
@@ -179,7 +181,7 @@
                         <rect key="frame" x="68" y="358" width="399" height="19"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES"/>
                         <textFieldCell key="cell" controlSize="small" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" sendsActionOnEndEditing="YES" borderStyle="bezel" title="AZ" drawsBackground="YES" id="t9S-M3-wjL">
-                            <font key="font" metaFont="toolTip"/>
+                            <font key="font" metaFont="label" size="11"/>
                             <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
                             <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
                         </textFieldCell>
@@ -189,7 +191,7 @@
                         <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMinY="YES"/>
                         <buttonCell key="cell" type="push" title="Helper..." bezelStyle="rounded" alignment="center" controlSize="small" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="cgc-im-Tyu">
                             <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
-                            <font key="font" metaFont="toolTip"/>
+                            <font key="font" metaFont="label" size="11"/>
                         </buttonCell>
                         <connections>
                             <action selector="showHelper:" target="-2" id="FHL-EH-v6V"/>
@@ -199,7 +201,7 @@
                         <rect key="frame" x="16" y="334" width="46" height="14"/>
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                         <textFieldCell key="cell" controlSize="small" lineBreakMode="clipping" alignment="right" title="Display:" id="FxC-6a-3Gl">
-                            <font key="font" metaFont="toolTip"/>
+                            <font key="font" metaFont="label" size="11"/>
                             <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
                             <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
                         </textFieldCell>
@@ -209,7 +211,7 @@
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                         <popUpButtonCell key="cell" type="push" bezelStyle="rounded" alignment="left" controlSize="small" lineBreakMode="truncatingTail" borderStyle="borderAndBezel" imageScaling="proportionallyDown" inset="2" id="nWu-67-FjU" userLabel="Display">
                             <behavior key="behavior" lightByBackground="YES" lightByGray="YES"/>
-                            <font key="font" metaFont="toolTip"/>
+                            <font key="font" metaFont="label" size="11"/>
                             <menu key="menu" id="Ng3-Eh-bLK"/>
                         </popUpButtonCell>
                         <connections>
@@ -229,7 +231,7 @@
                         <rect key="frame" x="20" y="20" width="84" height="19"/>
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                         <textFieldCell key="cell" controlSize="small" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" sendsActionOnEndEditing="YES" borderStyle="bezel" title="Sample" drawsBackground="YES" id="aMw-CP-mI6">
-                            <font key="font" metaFont="toolTip"/>
+                            <font key="font" metaFont="label" size="11"/>
                             <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
                             <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
                         </textFieldCell>
@@ -242,7 +244,7 @@
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                         <buttonCell key="cell" type="push" title="Sample" bezelStyle="rounded" alignment="center" controlSize="small" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="siW-ob-7fU">
                             <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
-                            <font key="font" metaFont="toolTip"/>
+                            <font key="font" metaFont="label" size="11"/>
                         </buttonCell>
                         <connections>
                             <action selector="loadSample:" target="-2" id="Wn5-4n-9xv"/>
@@ -253,7 +255,7 @@
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                         <popUpButtonCell key="cell" type="push" title="Monochrome" bezelStyle="rounded" alignment="left" controlSize="small" lineBreakMode="truncatingTail" state="on" borderStyle="borderAndBezel" imageScaling="proportionallyDown" inset="2" selectedItem="fPd-Tl-u3s" id="VLj-33-KLj">
                             <behavior key="behavior" lightByBackground="YES" lightByGray="YES"/>
-                            <font key="font" metaFont="toolTip"/>
+                            <font key="font" metaFont="label" size="11"/>
                             <menu key="menu" id="SiE-Sc-Cls">
                                 <items>
                                     <menuItem title="Monochrome" state="on" id="fPd-Tl-u3s"/>
@@ -270,7 +272,7 @@
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                         <buttonCell key="cell" type="push" bezelStyle="rounded" alignment="center" controlSize="small" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="6e6-m0-aBY" customClass="NSTextButtonCell">
                             <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
-                            <font key="font" metaFont="toolTip"/>
+                            <font key="font" metaFont="label" size="11"/>
                         </buttonCell>
                         <connections>
                             <action selector="setTextColor:" target="-2" id="Ena-AQ-u0Q"/>
@@ -294,12 +296,51 @@
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                         <buttonCell key="cell" type="check" title="Simulate Monospace" bezelStyle="regularSquare" imagePosition="left" controlSize="small" state="on" inset="2" id="iB7-Fa-Cdl">
                             <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
-                            <font key="font" metaFont="toolTip"/>
+                            <font key="font" metaFont="label" size="11"/>
                         </buttonCell>
                         <connections>
                             <binding destination="IWb-1P-B3H" name="value" keyPath="values.simulateMonospace" id="QTn-aj-4wV"/>
                         </connections>
                     </button>
+                    <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="uvb-oS-24c">
+                        <rect key="frame" x="302" y="438" width="80" height="14"/>
+                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                        <textFieldCell key="cell" controlSize="small" lineBreakMode="clipping" alignment="right" title="Supplemental:" id="KGx-IF-rvm">
+                            <font key="font" metaFont="label" size="11"/>
+                            <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
+                            <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
+                        </textFieldCell>
+                    </textField>
+                    <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="oVb-PK-YFs">
+                        <rect key="frame" x="345" y="412" width="37" height="14"/>
+                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                        <textFieldCell key="cell" controlSize="small" lineBreakMode="clipping" alignment="right" title="Face:" id="02C-kS-cDM">
+                            <font key="font" metaFont="label" size="11"/>
+                            <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
+                            <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
+                        </textFieldCell>
+                    </textField>
+                    <pathControl verticalHuggingPriority="750" fixedFrame="YES" tag="10" allowsExpansionToolTips="YES" translatesAutoresizingMaskIntoConstraints="NO" id="lkg-8d-hIp">
+                        <rect key="frame" x="388" y="435" width="156" height="22"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES"/>
+                        <pathCell key="cell" controlSize="small" selectable="YES" editable="YES" alignment="left" pathStyle="popUp" id="wOk-mg-bVw">
+                            <font key="font" metaFont="label" size="11"/>
+                            <url key="url" string="file:///Library/Fonts/Apple"/>
+                        </pathCell>
+                        <connections>
+                            <action selector="supplementalFontPathChanged:" target="-2" id="zgc-4W-OQn"/>
+                            <outlet property="delegate" destination="-2" id="Nak-GJ-rG2"/>
+                        </connections>
+                    </pathControl>
+                    <popUpButton verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="l9J-Gg-vqo">
+                        <rect key="frame" x="388" y="407" width="156" height="22"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES"/>
+                        <popUpButtonCell key="cell" type="push" bezelStyle="rounded" alignment="left" controlSize="small" lineBreakMode="truncatingTail" borderStyle="borderAndBezel" imageScaling="proportionallyDown" inset="2" id="N7G-VL-hch">
+                            <behavior key="behavior" lightByBackground="YES" lightByGray="YES"/>
+                            <font key="font" metaFont="label" size="11"/>
+                            <menu key="menu" id="EGV-GQ-1gb"/>
+                        </popUpButtonCell>
+                    </popUpButton>
                 </subviews>
             </view>
             <connections>

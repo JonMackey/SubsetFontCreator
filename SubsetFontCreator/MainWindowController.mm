@@ -52,14 +52,17 @@ extern "C" {
 #if SANDBOX_ENABLED
 NSString *const kSavedSetsURLBMKey = @"savedSetsURLBM";
 NSString *const kFontURLBMKey = @"fontURLBM";
+NSString *const kSupplementalFontURLBMKey = @"supplementalFontURLBM";
 #else
 NSString *const kSavedSetsPathKey = @"savedSetsPath";
 NSString *const kFontPathKey = @"fontPath";
+NSString *const kSupplementalFontPathKey = @"supplementalFontPath";
 #endif
 
 NSString *const kSubsetFileIdentifierKey = @"subsetFileID";
 NSString *const kSubsetFileIdentifier = @"1521E46C-08C5-4276-913C-2FF08F4DCB1C";
 NSString *const kFontFaceKey = @"fontFace";
+NSString *const kSupplementalFontFaceKey = @"supplementalFontFace";
 NSString *const kFontSizeKey = @"fontSize";
 NSString *const kIs1BitKey = @"is1Bit";
 NSString *const kRotateKey = @"rotate";
@@ -214,9 +217,10 @@ SMenuItemDesc	menuItems[] = {
 /**************************** willDisplayOpenPanel ****************************/
 - (void)pathControl:(NSPathControl *)pathControl willDisplayOpenPanel:(NSOpenPanel *)openPanel
 {
-	if (pathControl.tag == 1)
+	if (pathControl.tag == 1 ||
+		pathControl.tag == 10)
 	{
-		NSURL*	folderURL = [fontPathControl URL];
+		NSURL*	folderURL = [pathControl URL];
 		[openPanel setCanChooseDirectories:NO];
 		[openPanel setCanChooseFiles:YES];
 		[openPanel setAllowsMultipleSelection:NO];
@@ -230,24 +234,30 @@ SMenuItemDesc	menuItems[] = {
 /****************************** fontPathChanged *******************************/
 - (IBAction)fontPathChanged:(id)sender
 {
-	[self loadFacePopup:fontPathControl.URL faceIndex:0];
+	[self loadFacePopup:facePopupButton fontURL:fontPathControl.URL faceIndex:0];
+}
+
+/************************ supplementalFontPathChanged *************************/
+- (IBAction)supplementalFontPathChanged:(id)sender
+{
+	[self loadFacePopup:suppFacePopupButton fontURL:suppFontPathControl.URL faceIndex:0];
 }
 
 /******************************* loadFacePopup ********************************/
--(void)loadFacePopup:(NSURL*)inFontURL faceIndex:(NSInteger)inFaceIndex
+-(void)loadFacePopup:(NSPopUpButton*)inFacePopup fontURL:(NSURL*)inFontURL faceIndex:(NSInteger)inFaceIndex
 {
 	std::vector<std::string>	fontFaces;
 	SubsetFontCreator::GetFaceNames(inFontURL.path.UTF8String, fontFaces);
-	[facePopupButton removeAllItems];
+	[inFacePopup removeAllItems];
 	std::vector<std::string>::iterator	itr = fontFaces.begin();
 	std::vector<std::string>::iterator	itrEnd = fontFaces.end();
 	for (; itr != itrEnd; ++itr)
 	{
-		[facePopupButton addItemWithTitle:[NSString stringWithUTF8String:itr->c_str()]];
+		[inFacePopup addItemWithTitle:[NSString stringWithUTF8String:itr->c_str()]];
 	}
 	if (inFaceIndex <= fontFaces.size())
 	{
-		[facePopupButton selectItemAtIndex:inFaceIndex];
+		[inFacePopup selectItemAtIndex:inFaceIndex];
 	}
 }
 
@@ -273,6 +283,9 @@ SMenuItemDesc	menuItems[] = {
 	{
 		case 1:
 			folderURL = [fontPathControl URL];
+			break;
+		case 10:
+			folderURL = [suppFontPathControl URL];
 			break;
 	}
 	if (folderURL)
@@ -493,6 +506,11 @@ SMenuItemDesc	menuItems[] = {
 				NSURLBookmarkCreationWithSecurityScope |
 					NSURLBookmarkCreationSecurityScopeAllowOnlyReadAccess
 						includingResourceValuesForKeys:NULL relativeToURL:NULL error:&error];
+		NSError*	suppError;
+		NSData* supplementalFontURLBM = [[suppFontPathControl URL] bookmarkDataWithOptions:
+				NSURLBookmarkCreationWithSecurityScope |
+					NSURLBookmarkCreationSecurityScopeAllowOnlyReadAccess
+						includingResourceValuesForKeys:NULL relativeToURL:NULL error:&suppError];
 		if (error)
 		{
 			NSLog(@"%@\n", error);
@@ -508,12 +526,15 @@ SMenuItemDesc	menuItems[] = {
 			[NSNumber numberWithInteger:[offsetWidth32Radio state]], k32BitDataOffsetsKey,
 			[subsetTextField stringValue], kSubsetStrKey,
 			[NSNumber numberWithInteger:facePopupButton.indexOfSelectedItem], kFontFaceKey,
+			[NSNumber numberWithInteger:suppFacePopupButton.indexOfSelectedItem], kSupplementalFontFaceKey,
 			/*[sampleTextField stringValue], kSampleStrKey,
 			[sampleDisplayPopupButton titleOfSelectedItem], kSampleDisplayKey,*/
 #if SANDBOX_ENABLED
 			fontURLBM, kFontURLBMKey,
+			supplementalFontURLBM, kSupplementalFontURLBMKey,
 #else
 			[[fontPathControl URL] path], kFontPathKey,
+			[[suppFontPathControl URL] path], kSupplementalFontPathKey,
 #endif
 			nil];
 
@@ -560,11 +581,15 @@ SMenuItemDesc	menuItems[] = {
 			success = YES;
 			BOOL	bookmarkIsStale = NO;
 #if SANDBOX_ENABLED
+			NSURL*	supplementalFontURL = [NSURL URLByResolvingBookmarkData: [archivedSet objectForKey:kSupplementalFontURLBMKey]
+			options:NSURLBookmarkResolutionWithoutUI+NSURLBookmarkResolutionWithoutMounting+NSURLBookmarkResolutionWithSecurityScope
+					relativeToURL:NULL bookmarkDataIsStale:&bookmarkIsStale error:nil];	// error ignored
 			NSURL*	fontURL = [NSURL URLByResolvingBookmarkData: [archivedSet objectForKey:kFontURLBMKey]
 			options:NSURLBookmarkResolutionWithoutUI+NSURLBookmarkResolutionWithoutMounting+NSURLBookmarkResolutionWithSecurityScope
 					relativeToURL:NULL bookmarkDataIsStale:&bookmarkIsStale error:&error];
 #else
 			NSURL*	fontURL = [NSURL fileURLWithPath:[archivedSet objectForKey:kFontPathKey]];
+			NSURL*	supplementalFontURL = [NSURL fileURLWithPath:[archivedSet objectForKey:kSupplementalFontPathKey]];
 #endif
 			if (error)
 			{
@@ -573,7 +598,12 @@ SMenuItemDesc	menuItems[] = {
 			if (fontURL)
 			{
 				[fontPathControl setURL:fontURL];
-				[self loadFacePopup:fontURL faceIndex:[[archivedSet objectForKey:kFontFaceKey] integerValue]];
+				[self loadFacePopup:facePopupButton fontURL:fontURL faceIndex:[[archivedSet objectForKey:kFontFaceKey] integerValue]];
+				if (supplementalFontURL)
+				{
+					[suppFontPathControl setURL:(supplementalFontURL)];
+					[self loadFacePopup:suppFacePopupButton fontURL:supplementalFontURL faceIndex:[[archivedSet objectForKey:kSupplementalFontFaceKey] integerValue]];
+				}
 				[pointSizeTextField setIntegerValue:[[archivedSet objectForKey:kFontSizeKey] integerValue]];
 				{
 					// The format settings are broken out for backward compatiblity.
@@ -741,6 +771,12 @@ SMenuItemDesc	menuItems[] = {
 			{
 				pointSize = 72;
 			}
+			BOOL	suppFontOK = [[NSFileManager defaultManager] fileExistsAtPath:suppFontPathControl.URL.path isDirectory:&isDirectory] &&
+																		isDirectory == NO;
+			if (!suppFontOK)
+			{
+				warningStr.append("Supplemental Font not found.\n");
+			}
 
 			SubsetFontCreator::CreateFile(
 				(SubsetFontCreator::EFormat)inFormat,
@@ -750,6 +786,8 @@ SMenuItemDesc	menuItems[] = {
 				inOptions,
 				subsetTextField.stringValue.UTF8String,
 				facePopupButton.indexOfSelectedItem,
+				suppFontOK ? suppFontPathControl.URL.path.UTF8String : nil,
+				suppFacePopupButton.indexOfSelectedItem,
 				&errorStr,
 				&warningStr,
 				&infoStr);
@@ -788,6 +826,8 @@ SMenuItemDesc	menuItems[] = {
 			fontURL:fontPathControl.URL
 				options:options
 				faceIndex:facePopupButton.indexOfSelectedItem
+				supplementalFontURL:suppFontPathControl.URL
+				supplementalFaceIndex:suppFacePopupButton.indexOfSelectedItem
 				textColor:isColor ? ((NSTextButtonCell*)textColorButton.cell).fillColor : NSColor.whiteColor
 				textBGColor:isColor ? ((NSTextButtonCell*)textBGColorButton.cell).fillColor : NSColor.blackColor
 				simulateMono:simulateMonoCheckbox.state

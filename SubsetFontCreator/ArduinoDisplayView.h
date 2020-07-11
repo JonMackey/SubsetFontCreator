@@ -53,6 +53,8 @@ NS_ASSUME_NONNULL_BEGIN
 			fontURL:(NSURL*)inFontURL
 			options:(NSInteger)inOptions
 			faceIndex:(NSInteger)inFaceIndex
+			supplementalFontURL:(NSURL*)inSupplementalFontURL
+			supplementalFaceIndex:(NSInteger)inSupplementalFaceIndex
 			textColor:(NSColor*)inTextColor
 			textBGColor:(NSColor*)inTextBGColor
 			simulateMono:(BOOL)inSimulateMono

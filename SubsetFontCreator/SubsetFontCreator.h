@@ -86,6 +86,8 @@ public:
 								int						inOptions,
 								SubsetCharcodeIterator&	inCharcodeItr,
 								long					inFontFaceIndex,
+								const char*				inSupplementalFontFilePath,
+								long					inSupplementalFontFaceIndex,
 								std::string*			outErrorStr = NULL,
 								std::string*			outWarningStr = NULL,
 								std::string*			outInfoStr = NULL);
@@ -97,6 +99,8 @@ public:
 								int						inOptions,
 								const char*				inSubset,
 								long					inFontFaceIndex,
+								const char*				inSupplementalFontFilePath,
+								long					inSupplementalFontFaceIndex,
 								std::string*			outErrorStr = NULL,
 								std::string*			outWarningStr = NULL,
 								std::string*			outInfoStr = NULL);

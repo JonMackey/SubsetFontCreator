@@ -18,6 +18,7 @@ SubsetFontCreator has two export formats, binary and C header.  The binary forma
 
 All of the other export options are selected in the application's main window.  These options are:
 * Font - any ttf or otf font supported by FreeType
+* Supplemental - font used when the main font doesn't contain the desired glyph.
 * Font size - the font size in points.
 * Glyph data format - RGB antialiased, 1 bit, 1 bit rotated with either horizontal or vertical addressing.
 * Subset string - a UTF-8 string that defines the set of glyphs to export.   

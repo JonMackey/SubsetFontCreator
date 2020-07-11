@@ -137,10 +137,12 @@ uint16_t EntryIndexFor(
 			fontURL:(NSURL*)inFontURL
 				options:(NSInteger)inOptions
 					faceIndex:(NSInteger)inFaceIndex
-						textColor:(NSColor*)inTextColor
-							textBGColor:(NSColor*)inTextBGColor
-								simulateMono:(BOOL)inSimulateMono
-									log:(LogViewController*__nullable)inLog
+						supplementalFontURL:(NSURL*)inSupplementalFontURL
+							supplementalFaceIndex:(NSInteger)inSupplementalFaceIndex
+								textColor:(NSColor*)inTextColor
+									textBGColor:(NSColor*)inTextBGColor
+										simulateMono:(BOOL)inSimulateMono
+											log:(LogViewController*__nullable)inLog
 {
 	int createErr = -1;
 	BOOL isDirectory = YES;
@@ -155,9 +157,18 @@ uint16_t EntryIndexFor(
 			SubsetCharcodeIterator	charcodeItr;
 			charcodeItr.InitializeWithText(inSampleText.UTF8String);
 			std::string	errorStr, warningStr, infoStr;
+			BOOL	suppFontOK = [[NSFileManager defaultManager] fileExistsAtPath:inSupplementalFontURL.path isDirectory:&isDirectory] &&
+										isDirectory == NO;
+			if (suppFontOK == NO)
+			{
+				warningStr.append("Supplemental font not found.\n");
+			}
 			createErr = SubsetFontCreator::CreateXfntFile(inFontURL.path.UTF8String,
 								xfntFile, xfntFile, (int32_t)inPointSize, (int)inOptions,
-								charcodeItr, inFaceIndex, &errorStr, &warningStr, &infoStr);
+								charcodeItr, inFaceIndex,
+								inSupplementalFontURL.path.UTF8String,
+								inSupplementalFaceIndex,
+								&errorStr, &warningStr, &infoStr);
 			fclose(xfntFile);
 		#ifndef DEBUG_ARDUINO
 			_bitmapIsRotated = (inOptions & SubsetFontCreator::eRotated) != 0;

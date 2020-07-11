@@ -93,6 +93,7 @@
 - (LogViewController*)appendColoredDate:(NSColor*)inColor;
 - (LogViewController*)appendColoredDate:(NSColor*)inColor date:(NSDate*)inDate;
 - (LogViewController*)appendHexDump:(const void*)inBuffer length:(NSUInteger)inLength addPreamble:(BOOL)inAddPreamble;
+- (LogViewController*)appendDataDump:(const void*)inBuffer length:(NSUInteger)inLength startAddress:(NSInteger)inStartAddress unit:(uint8_t)inUnit;
 - (BOOL)containsNonPrintableChars:(const void*)inBuffer length:(NSUInteger)inLength;
 - (IBAction)clear:(id)sender;
 

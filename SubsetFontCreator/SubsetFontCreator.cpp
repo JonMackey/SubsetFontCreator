@@ -172,6 +172,8 @@ int SubsetFontCreator::CreateFile(
 	int				inOptions,
 	const char*		inSubset,
 	long			inFontFaceIndex,
+	const char*		inSupplementalFontFilePath,
+	long			inSupplementalFontFaceIndex,
 	std::string*	outErrorStr,
 	std::string*	outWarningStr,
 	std::string*	outInfoStr)
@@ -203,6 +205,7 @@ int SubsetFontCreator::CreateFile(
 				{
 					createFileError = CreateXfntFile(inFontFilePath, file, glyphDataFile,
 										inPointSize, inOptions, charcodeIterator, inFontFaceIndex,
+										inSupplementalFontFilePath, inSupplementalFontFaceIndex,
 											outErrorStr, outWarningStr, outInfoStr);
 					if (inExportFormat != eBinaryXfntFormat &&
 						createFileError == eSubsetNoErr)
@@ -314,6 +317,8 @@ int SubsetFontCreator::CreateXfntFile(
 	int						inOptions,
 	SubsetCharcodeIterator&	inCharcodeItr,
 	long					inFontFaceIndex,
+	const char*				inSupplementalFontFilePath,
+	long					inSupplementalFontFaceIndex,
 	std::string*			outErrorStr,
 	std::string*			outWarningStr,
 	std::string*			outInfoStr)
@@ -328,6 +333,7 @@ int SubsetFontCreator::CreateXfntFile(
 		bool	oneBitPerPixel = (inOptions & e1BitPerPixel) != 0;
 		bool	wideOffsets = (inOptions & e32BitDataOffsets) != 0;
 		std::string utf8FontPath(inFontFilePath);
+		std::string utf8SupplementalFontPath(inSupplementalFontFilePath);
 		if (inExportFile && inGlyphDataExportFile)
 		{
 			std::vector<std::string>	faceNameVec;
@@ -337,6 +343,20 @@ int SubsetFontCreator::CreateXfntFile(
 			if (FT_Init_FreeType(&ftLibrary) == 0)
 			{
 				FT_Face	face = NULL;
+				FT_Face	supplementalFace = NULL;
+				if (inSupplementalFontFilePath)
+				{
+					FT_New_Face(ftLibrary, utf8SupplementalFontPath.c_str(), inSupplementalFontFaceIndex, &supplementalFace);
+					if (FT_Set_Char_Size(
+								supplementalFace,	/* handle to face object           */
+								0,		/* char_width in 1/64th of points  */
+								inPointSize*64,	/* char_height in 1/64th of points */
+								72,		/* horizontal device resolution    */
+								72))
+					{
+						supplementalFace = NULL;
+					}
+				}
 				bool success = FT_New_Face(ftLibrary, utf8FontPath.c_str(), inFontFaceIndex, &face) == 0;
 				if (success)
 				{
@@ -349,6 +369,7 @@ int SubsetFontCreator::CreateXfntFile(
 								72);	/* vertical device resolution      */
 					
 					uint32_t	numCharCodes = inCharcodeItr.GetNumCharCodes();
+					FT_Face	charCodeFace = NULL;
 					FontHeader fontHeader;
 					fontHeader.version = 1;
 					//fontHeader.wideOffsets = wideOffsets ? 1:0;
@@ -431,14 +452,24 @@ int SubsetFontCreator::CreateXfntFile(
 						{
 							if (charcode > 0 && charcode < 0xFFFF)
 							{
-								error = FT_Load_Char(face, charcode, loadFlags);
+								FT_UInt	glyphIndex = FT_Get_Char_Index(face, charcode);
+								if (glyphIndex ||
+									supplementalFace == NULL)
+								{
+									error = FT_Load_Glyph(face, glyphIndex, loadFlags);
+									charCodeFace = face;
+								} else
+								{
+									error = FT_Load_Char(supplementalFace, charcode, loadFlags);
+									charCodeFace = supplementalFace;
+								}
 								if (error == 0)
 								{
 									if (maxCharCode < charcode)
 									{
 										maxCharCode = charcode;
 									}
-									FT_GlyphSlot	slot = face->glyph;
+									FT_GlyphSlot	slot = charCodeFace->glyph;
 									FT_Bitmap&		bitmap = slot->bitmap;
 									int32_t			rows = bitmap.rows;
 									int32_t			width = 0;
@@ -877,6 +908,10 @@ int SubsetFontCreator::CreateXfntFile(
 					{
 						outErrorStr->assign("FT_New_Face() failed.");
 					}
+				}
+				if (supplementalFace)
+				{
+					FT_Done_Face(supplementalFace);
 				}
 				FT_Done_FreeType(ftLibrary);
 			} else
