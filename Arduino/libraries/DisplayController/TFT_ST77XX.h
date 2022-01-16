@@ -101,6 +101,10 @@ public:
 								DataStream*				inDataStream,
 								uint16_t				inPixelsToCopy);
 								
+	virtual void			CopyPixels(
+								const void*				inPixels,
+								uint16_t				inPixelsToCopy);
+
 	virtual void			SetAddressingMode(
 								EAddressingMode			inAddressingMode){}
 protected:

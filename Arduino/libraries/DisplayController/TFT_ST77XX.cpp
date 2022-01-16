@@ -420,3 +420,15 @@ void TFT_ST77XX::StreamCopy(
 	}
 	EndTransaction();
 }
+
+/******************************** CopyPixels **********************************/
+void TFT_ST77XX::CopyPixels(
+	const void*		inPixels,
+	uint16_t		inPixelsToCopy)
+{
+	BeginTransaction();
+	WriteData16((const uint16_t*)inPixels, inPixelsToCopy);
+	EndTransaction();
+}
+
+

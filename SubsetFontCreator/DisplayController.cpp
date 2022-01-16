@@ -139,6 +139,69 @@ void DisplayController::FillBlock(
 	}
 }
 
+/********************************** FillRect **********************************/
+void DisplayController::FillRect(
+	uint16_t	inX,
+	uint16_t	inY,
+	uint16_t	inWidth,
+	uint16_t	inHeight,
+	uint16_t	inFillColor)
+{
+	MoveTo(inY, inX);
+	FillBlock(inHeight, inWidth, inFillColor);
+}
+
+/********************************* FillRect8 **********************************/
+void DisplayController::FillRect8(
+	const Rect8_t*	inRect,
+	uint16_t		inFillColor)
+{
+	FillRect(inRect->x, inRect->y, inRect->width, inRect->height, inFillColor);
+}
+
+/********************************* DrawFrame **********************************/
+void DisplayController::DrawFrame(
+	uint16_t	inX,
+	uint16_t	inY,
+	uint16_t	inWidth,
+	uint16_t	inHeight,
+	uint16_t	inColor,
+	uint8_t		inThickness)
+{
+	MoveTo(inY, inX);
+	SetColumnRange(inWidth);
+	FillPixels(inWidth * inThickness, inColor);
+	MoveToRow(inY+inHeight-inThickness);
+	SetColumnRange(inWidth);
+	FillPixels(inWidth * inThickness, inColor);
+	MoveToRow(inY+inThickness);
+	SetColumnRange(inThickness);
+	FillPixels((inHeight-(inThickness*2)) * inThickness, inColor);
+	MoveToColumn(inX + inWidth - inThickness);
+	SetColumnRange(inThickness);
+	FillPixels((inHeight-(inThickness*2)) * inThickness, inColor);
+}
+
+/********************************* DrawFrame8 *********************************/
+void DisplayController::DrawFrame8(
+	const Rect8_t*	inRect,
+	uint16_t		inColor,
+	uint8_t			inThickness)
+{
+	DrawFrame(inRect->x, inRect->y, inRect->width, inRect->height, inColor, inThickness);
+}
+
+/********************************* DrawFrameP *********************************/
+/*void DisplayController::DrawFrameP(
+	const Rect8_t*	inRect,
+	uint16_t		inColor,
+	uint8_t			inThickness)
+{
+	Rect8_t	rect8;
+	memcpy_P(&rect8, inRect, sizeof(Rect8_t));
+	DrawFrame(&rect8, inColor, inThickness);
+}*/
+
 /******************************* SetColumnRange *******************************/
 void DisplayController::SetColumnRange(
 	uint16_t	inRelativeWidth)

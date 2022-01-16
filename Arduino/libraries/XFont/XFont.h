@@ -65,6 +65,8 @@ public:
 	*/
 	void					SetFont(
 								Font*					inFont);
+	Font*					GetFont(void) const
+								{return(mFont);}
 	
 	/*
 	*	Relative move by N text rows and the absolute pixel column.
@@ -203,6 +205,7 @@ public:
 		eBrown		= 0x43D5,
 		ePurple		= 0x9112,
 		eOrange		= 0x049F,
+		eLightBlue	= 0xFD60,
 		eGray		= 0xCE79,
 		eWhite		= 0xFFFF
 	};

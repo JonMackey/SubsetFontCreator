@@ -68,6 +68,7 @@ NS_ASSUME_NONNULL_BEGIN
 - (IBAction)setDisplay:(NSPopUpButton*)sender;
 - (IBAction)setTextColor:(id)sender;
 - (IBAction)setTextBGColor:(id)sender;
+- (IBAction)set565Color:(id)sender;
 
 
 

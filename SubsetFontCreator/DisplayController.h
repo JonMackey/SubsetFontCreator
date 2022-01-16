@@ -24,8 +24,30 @@
 #define DisplayController_h
 
 #include <inttypes.h>
+#include <string.h>
+#ifndef __MACH__
+#include <avr/pgmspace.h>
+#else
+#define memcpy_P memcpy
+#endif
 
 class DataStream;
+
+typedef struct Rect8_t
+{
+	uint8_t	x;
+	uint8_t	y;
+	uint8_t	width;
+	uint8_t	height;
+	
+	inline void				Copy(
+								const Rect8_t&			inRect)
+								{memcpy(this, &inRect, 4);}
+	inline void				Copy_P(
+								const Rect8_t&			inRect)
+								{memcpy_P(this, &inRect, 4);}
+} Rect8_t;
+
 
 class DisplayController
 {
@@ -89,14 +111,45 @@ public:
 								uint16_t				inPixelsToFill,
 								uint16_t				inFillColor) = 0;
 	/*
-	*	ClearBlock: Fills a block defined by inRows x inColumns to inFillColor
+	*	FillBlock: Fills a block defined by inRows x inColumns to inFillColor
 	*	from the current position.  On exit the column will be advanced by
 	*	inColumns, and the current row will remain unchanged.
 	*/
 	void					FillBlock(
 								uint16_t				inRows,
 								uint16_t				inColumns,
-								uint16_t				inFillColor);								
+								uint16_t				inFillColor);
+	
+	void					FillRect(
+								uint16_t				inX,
+								uint16_t				inY,
+								uint16_t				inWidth,
+								uint16_t				inHeight,
+								uint16_t				inFillColor);
+	void					FillRect8(
+								const Rect8_t*			inRect,
+								uint16_t				inFillColor);
+								
+	/*
+	*	DrawFrame: Draws an inThickness pixel frame at (x,y, w, h).  The frame
+	*	is inset.
+	*	NOTE: DrawFrame doesn't work on 1 bit displays.
+	*/
+	void					DrawFrame(
+								uint16_t				inX,
+								uint16_t				inY,
+								uint16_t				inWidth,
+								uint16_t				inHeight,
+								uint16_t				inColor,
+								uint8_t					inThickness = 1);
+	void					DrawFrame8(
+								const Rect8_t*			inRect,
+								uint16_t				inColor,
+								uint8_t					inThickness = 1);
+//	void					DrawFrameP(
+//								const Rect8_t*			inRect,
+//								uint16_t				inColor,
+//								uint8_t					inThickness = 1);
 	/*
 	*	SetColumnRange: Sets a the column clipping relative to the current
 	*	column. (column : column + inRelativeWidth -1)
@@ -154,6 +207,10 @@ public:
 	virtual void			StreamCopy(
 								DataStream*				inDataStream,
 								uint16_t				inPixelsToCopy) = 0;
+								
+	virtual void			CopyPixels(
+								const void*				inPixels,
+								uint16_t				inPixelsToCopy){};
 	enum EAddressingMode
 	{
 		eHorizontal,

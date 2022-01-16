@@ -90,7 +90,9 @@ struct SMenuItemDesc
 SMenuItemDesc	menuItems[] = {
 	{1,10, @selector(open:)},
 	{1,13, @selector(save:)},
-	{1,14, @selector(saveas:)}
+	{1,14, @selector(saveas:)},
+	{3,301, @selector(set565Color:)},
+	{3,302, @selector(set565Color:)}
 };
 
 /******************************* windowDidLoad ********************************/
@@ -209,9 +211,32 @@ SMenuItemDesc	menuItems[] = {
 			isValid = [[NSFileManager defaultManager] fileExistsAtPath:fontPathControl.URL.path isDirectory:&isDirectory] && isDirectory == NO;
 			break;
 		}
+		case 301:
+		case 302:
+		{
+			NSArray<NSValue *> *selection = self.logViewController.receivedDataTextView.selectedRanges;
+			isValid = selection.count == 1 &&
+						selection.firstObject.rangeValue.length == 4;
+			if (isValid)
+			{
+				NSRange	selectedRange = selection.firstObject.rangeValue;
+				const char* utfText = &(self.logViewController.receivedDataTextView.textStorage.string.UTF8String)[selectedRange.location];
+				for (uint32_t i = 0; i < 4; i++)
+				{
+					if (isxdigit(utfText[i]))
+					{
+						continue;
+					}
+					isValid = NO;
+					break;
+				}
+			}
+			break;
+		}
 	}
 	return(isValid);
 }
+
 
 #pragma mark - Path Popup support
 /**************************** willDisplayOpenPanel ****************************/
@@ -864,6 +889,59 @@ SMenuItemDesc	menuItems[] = {
 		textColorButton.needsDisplay = YES;
 		[self updateTextBGColorTextColor];
 		[self.window endSheet:colorPanel];
+	}
+}
+
+/******************************** set565Color *********************************/
+/*
+*	This sets the selected 565 color as either the text back or fore color
+*	depending on the value of sender (an NSMenuItem)
+*/
+- (IBAction)set565Color:(id)sender
+{
+	NSMenuItem*	menuItem = sender;
+	BOOL isFore = menuItem.tag == 301;
+	NSArray<NSValue *> *selection = self.logViewController.receivedDataTextView.selectedRanges;
+	if (selection.count == 1 &&
+		selection.firstObject.rangeValue.length == 4)
+	{
+		uint16_t color565 = 0;
+		NSRange	selectedRange = selection.firstObject.rangeValue;
+		const char* utfText = &(self.logViewController.receivedDataTextView.textStorage.string.UTF8String)[selectedRange.location];
+		BOOL	isGood = YES;
+		for (uint32_t i = 0; i < 4; i++)
+		{
+			char	digit = utfText[i];
+			if (isxdigit(digit))
+			{
+				color565 <<= 4;
+				color565 += ((digit <= '9') ? (digit - '0') : ((digit |  ' ') - 'a' + 0xA));
+				continue;
+			}
+			isGood = NO;
+			break;
+		}
+		if (isGood)
+		{
+			CGFloat	r, g, b;
+			b = ((CGFloat)((color565 & 0xF800) >> 8))/255;
+			g = ((CGFloat)((color565 & 0x7E0) >> 3))/255;
+			r = ((CGFloat)((color565 & 0x1F) << 3))/255;
+			NSColor*	color = [NSColor colorWithDeviceRed:r green:g blue:b alpha:1 ];
+			NSData* colorData = [NSKeyedArchiver archivedDataWithRootObject:color requiringSecureCoding:NO error:nil];
+			if (isFore)
+			{
+				[[NSUserDefaults standardUserDefaults] setObject:colorData forKey:kSampleTextColorStrKey];
+				((NSTextButtonCell*)textColorButton.cell).fillColor = color;
+				textColorButton.needsDisplay = YES;
+				[self updateTextBGColorTextColor];
+			} else
+			{
+				[[NSUserDefaults standardUserDefaults] setObject:colorData forKey:kSampleTextBGColorStrKey];
+				((NSTextButtonCell*)textBGColorButton.cell).fillColor = color;
+				textBGColorButton.needsDisplay = YES;
+			}
+		}
 	}
 }
 

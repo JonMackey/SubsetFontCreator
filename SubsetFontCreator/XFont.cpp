@@ -161,26 +161,35 @@ uint16_t XFont::FindGlyph(
 			{
 				charcodeRun = &charcodeRuns[current];
 				break;
-			} else if (cmpResult > 0)
+			} else if (cmpResult <= 0)
+			{
+				leftIndex = current + 1;
+			} else if (current)
 			{
 				rightIndex = current - 1;
 			} else
 			{
-				leftIndex = current + 1;
+				break;
 			}
 		}
 	}
 	uint16_t	entryIndex;
 	if (!charcodeRun)
 	{
-		charcodeRun = &charcodeRuns[leftIndex-1];
-		entryIndex = pgm_read_word_near(&charcodeRun->entryIndex) +
-						inCharcode - pgm_read_word_near(&charcodeRun->start);
-		// Sanity check...
-		// If the calculated entry index is less than the next run's entry index
-		// then the calculated entry index is valid.
-		// An invalid charcode does not have a corresponding glyph.
-		if (entryIndex >= pgm_read_word_near(&charcodeRun[1].entryIndex))
+		if (leftIndex)
+		{
+			charcodeRun = &charcodeRuns[leftIndex-1];
+			entryIndex = pgm_read_word_near(&charcodeRun->entryIndex) +
+							inCharcode - pgm_read_word_near(&charcodeRun->start);
+			// Sanity check...
+			// If the calculated entry index is less than the next run's entry index
+			// then the calculated entry index is valid.
+			// An invalid charcode does not have a corresponding glyph.
+			if (entryIndex >= pgm_read_word_near(&charcodeRun[1].entryIndex))
+			{
+				entryIndex = 0xFFFF;
+			}
+		} else
 		{
 			entryIndex = 0xFFFF;
 		}
@@ -270,7 +279,7 @@ void XFont::DrawStr(
 	for (uint16_t charcode = NextChar(strPtr); charcode;
 								charcode = NextChar(strPtr))
 	{
-		if (charcode != '\n')
+		if (charcode >= ' ')
 		{
 			bool doContinue = LoadGlyph(charcode) != 0xFFFF;
 			if (doContinue)
@@ -374,7 +383,7 @@ void XFont::DrawStr(
 			{
 				continue;
 			}
-		} else
+		} else if (charcode == '\n')
 		{
 			if (inClearTillEOL &&
 				//startRow == mDisplay->GetRow() &&
@@ -389,6 +398,10 @@ void XFont::DrawStr(
 				startColumn = 0;	// if empty line & inClearTillEOL
 				continue;
 			}
+		} else
+		{
+			// Ignore unsupported control characters
+			continue;
 		}
 		break;
 	}
@@ -556,7 +569,7 @@ bool XFont::MeasureStr(
 	for (uint16_t charcode = NextChar(strPtr); charcode;
 								charcode = NextChar(strPtr))
 	{
-		if (charcode != '\n')
+		if (charcode >= ' ')
 		{
 			allGlyphsExist = LoadGlyph(charcode) != 0xFFFF;
 			if (allGlyphsExist)
@@ -571,7 +584,7 @@ bool XFont::MeasureStr(
 				continue;
 			}
 			break;
-		} else
+		} else if (charcode == '\n')
 		{
 			if (lineWidth > outWidth)
 			{
@@ -584,7 +597,7 @@ bool XFont::MeasureStr(
 			lineCount++;
 			lineWidth = 0;
 			outHeight += adjustedHeight;
-		}
+		}	// else ignore unsupported control characters
 	}
 	if (lineWidth > outWidth)
 	{
