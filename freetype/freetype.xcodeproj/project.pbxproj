@@ -7,6 +7,19 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		DA34FAAB2821DA5900E46005 /* ftsdfcommon.h in Headers */ = {isa = PBXBuildFile; fileRef = DA34FAA22821DA5900E46005 /* ftsdfcommon.h */; };
+		DA34FAAC2821DA5900E46005 /* ftsdf.c in Sources */ = {isa = PBXBuildFile; fileRef = DA34FAA32821DA5900E46005 /* ftsdf.c */; };
+		DA34FAAD2821DA5900E46005 /* ftsdfcommon.c in Sources */ = {isa = PBXBuildFile; fileRef = DA34FAA42821DA5900E46005 /* ftsdfcommon.c */; };
+		DA34FAAE2821DA5900E46005 /* ftsdferrs.h in Headers */ = {isa = PBXBuildFile; fileRef = DA34FAA52821DA5900E46005 /* ftsdferrs.h */; };
+		DA34FAAF2821DA5900E46005 /* ftsdfrend.c in Sources */ = {isa = PBXBuildFile; fileRef = DA34FAA62821DA5900E46005 /* ftsdfrend.c */; };
+		DA34FAB02821DA5900E46005 /* ftsdfrend.h in Headers */ = {isa = PBXBuildFile; fileRef = DA34FAA72821DA5900E46005 /* ftsdfrend.h */; };
+		DA34FAB12821DA5900E46005 /* sdf.c in Sources */ = {isa = PBXBuildFile; fileRef = DA34FAA82821DA5900E46005 /* sdf.c */; };
+		DA34FAB22821DA5900E46005 /* ftsdf.h in Headers */ = {isa = PBXBuildFile; fileRef = DA34FAA92821DA5900E46005 /* ftsdf.h */; };
+		DA34FAB32821DA5900E46005 /* ftbsdf.c in Sources */ = {isa = PBXBuildFile; fileRef = DA34FAAA2821DA5900E46005 /* ftbsdf.c */; };
+		DA34FAB82821DABF00E46005 /* svgtypes.h in Headers */ = {isa = PBXBuildFile; fileRef = DA34FAB42821DABF00E46005 /* svgtypes.h */; };
+		DA34FAB92821DABF00E46005 /* ftsvg.h in Headers */ = {isa = PBXBuildFile; fileRef = DA34FAB52821DABF00E46005 /* ftsvg.h */; };
+		DA34FABA2821DABF00E46005 /* svg.c in Sources */ = {isa = PBXBuildFile; fileRef = DA34FAB62821DABF00E46005 /* svg.c */; };
+		DA34FABB2821DABF00E46005 /* ftsvg.c in Sources */ = {isa = PBXBuildFile; fileRef = DA34FAB72821DABF00E46005 /* ftsvg.c */; };
 		DA7F2D4621C063CC009BFE30 /* ftconfig.h in Headers */ = {isa = PBXBuildFile; fileRef = DA7F2D4521C063CC009BFE30 /* ftconfig.h */; };
 		DA7F2D4C21C063E0009BFE30 /* ftstdlib.h in Headers */ = {isa = PBXBuildFile; fileRef = DA7F2D4721C063E0009BFE30 /* ftstdlib.h */; };
 		DA7F2D4D21C063E0009BFE30 /* ftheader.h in Headers */ = {isa = PBXBuildFile; fileRef = DA7F2D4821C063E0009BFE30 /* ftheader.h */; };
@@ -54,14 +67,25 @@
 		DA7F2DA221C0646C009BFE30 /* ftwinfnt.c in Sources */ = {isa = PBXBuildFile; fileRef = DA7F2D8A21C0646C009BFE30 /* ftwinfnt.c */; };
 		DA7F2DA321C0646C009BFE30 /* sfnt.c in Sources */ = {isa = PBXBuildFile; fileRef = DA7F2D8B21C0646C009BFE30 /* sfnt.c */; };
 		DA7F2DA421C0646C009BFE30 /* ftpatent.c in Sources */ = {isa = PBXBuildFile; fileRef = DA7F2D8C21C0646C009BFE30 /* ftpatent.c */; };
-		DA7F2DAB21C07876009BFE30 /* infblock.c in Sources */ = {isa = PBXBuildFile; fileRef = DA7F2DAA21C07876009BFE30 /* infblock.c */; };
-		DA7F2DAD21C07881009BFE30 /* infcodes.c in Sources */ = {isa = PBXBuildFile; fileRef = DA7F2DAC21C07881009BFE30 /* infcodes.c */; };
 		DA7F2DAF21C07888009BFE30 /* inftrees.c in Sources */ = {isa = PBXBuildFile; fileRef = DA7F2DAE21C07888009BFE30 /* inftrees.c */; };
 		DA7F2DB521C079C8009BFE30 /* inflate.c in Sources */ = {isa = PBXBuildFile; fileRef = DA7F2DB421C079C8009BFE30 /* inflate.c */; };
 		DA7F2DB721C07BCC009BFE30 /* zutil.c in Sources */ = {isa = PBXBuildFile; fileRef = DA7F2DB621C07BCB009BFE30 /* zutil.c */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		DA34FAA22821DA5900E46005 /* ftsdfcommon.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ftsdfcommon.h; path = src/sdf/ftsdfcommon.h; sourceTree = SOURCE_ROOT; };
+		DA34FAA32821DA5900E46005 /* ftsdf.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = ftsdf.c; path = src/sdf/ftsdf.c; sourceTree = SOURCE_ROOT; };
+		DA34FAA42821DA5900E46005 /* ftsdfcommon.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = ftsdfcommon.c; path = src/sdf/ftsdfcommon.c; sourceTree = SOURCE_ROOT; };
+		DA34FAA52821DA5900E46005 /* ftsdferrs.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ftsdferrs.h; path = src/sdf/ftsdferrs.h; sourceTree = SOURCE_ROOT; };
+		DA34FAA62821DA5900E46005 /* ftsdfrend.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = ftsdfrend.c; path = src/sdf/ftsdfrend.c; sourceTree = SOURCE_ROOT; };
+		DA34FAA72821DA5900E46005 /* ftsdfrend.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ftsdfrend.h; path = src/sdf/ftsdfrend.h; sourceTree = SOURCE_ROOT; };
+		DA34FAA82821DA5900E46005 /* sdf.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = sdf.c; path = src/sdf/sdf.c; sourceTree = SOURCE_ROOT; };
+		DA34FAA92821DA5900E46005 /* ftsdf.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ftsdf.h; path = src/sdf/ftsdf.h; sourceTree = SOURCE_ROOT; };
+		DA34FAAA2821DA5900E46005 /* ftbsdf.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = ftbsdf.c; path = src/sdf/ftbsdf.c; sourceTree = SOURCE_ROOT; };
+		DA34FAB42821DABF00E46005 /* svgtypes.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = svgtypes.h; path = src/svg/svgtypes.h; sourceTree = SOURCE_ROOT; };
+		DA34FAB52821DABF00E46005 /* ftsvg.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ftsvg.h; path = src/svg/ftsvg.h; sourceTree = SOURCE_ROOT; };
+		DA34FAB62821DABF00E46005 /* svg.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = svg.c; path = src/svg/svg.c; sourceTree = SOURCE_ROOT; };
+		DA34FAB72821DABF00E46005 /* ftsvg.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = ftsvg.c; path = src/svg/ftsvg.c; sourceTree = SOURCE_ROOT; };
 		DA35ABF721C0625C00573AB9 /* libfreetype.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libfreetype.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		DA7F2D4521C063CC009BFE30 /* ftconfig.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ftconfig.h; path = include/freetype/config/ftconfig.h; sourceTree = SOURCE_ROOT; };
 		DA7F2D4721C063E0009BFE30 /* ftstdlib.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ftstdlib.h; path = include/freetype/config/ftstdlib.h; sourceTree = SOURCE_ROOT; };
@@ -110,8 +134,6 @@
 		DA7F2D8A21C0646C009BFE30 /* ftwinfnt.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = ftwinfnt.c; path = src/base/ftwinfnt.c; sourceTree = SOURCE_ROOT; };
 		DA7F2D8B21C0646C009BFE30 /* sfnt.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = sfnt.c; path = src/sfnt/sfnt.c; sourceTree = SOURCE_ROOT; };
 		DA7F2D8C21C0646C009BFE30 /* ftpatent.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = ftpatent.c; path = src/base/ftpatent.c; sourceTree = SOURCE_ROOT; };
-		DA7F2DAA21C07876009BFE30 /* infblock.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = infblock.c; path = src/gzip/infblock.c; sourceTree = SOURCE_ROOT; };
-		DA7F2DAC21C07881009BFE30 /* infcodes.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = infcodes.c; path = src/gzip/infcodes.c; sourceTree = SOURCE_ROOT; };
 		DA7F2DAE21C07888009BFE30 /* inftrees.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = inftrees.c; path = src/gzip/inftrees.c; sourceTree = SOURCE_ROOT; };
 		DA7F2DB421C079C8009BFE30 /* inflate.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = inflate.c; path = src/gzip/inflate.c; sourceTree = SOURCE_ROOT; };
 		DA7F2DB621C07BCB009BFE30 /* zutil.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = zutil.c; path = src/gzip/zutil.c; sourceTree = SOURCE_ROOT; };
@@ -175,8 +197,6 @@
 				DA7F2D5B21C06456009BFE30 /* ftglyph.c */,
 				DA7F2D5921C06456009BFE30 /* ftgzip.c */,
 				DA7F2DB421C079C8009BFE30 /* inflate.c */,
-				DA7F2DAA21C07876009BFE30 /* infblock.c */,
-				DA7F2DAC21C07881009BFE30 /* infcodes.c */,
 				DA7F2DAE21C07888009BFE30 /* inftrees.c */,
 				DA7F2DB621C07BCB009BFE30 /* zutil.c */,
 				DA7F2D5421C06455009BFE30 /* ftinit.c */,
@@ -184,6 +204,19 @@
 				DA7F2D5521C06455009BFE30 /* ftstroke.c */,
 				DA7F2D5E21C06456009BFE30 /* ftsystem.c */,
 				DA7F2D5F21C06456009BFE30 /* smooth.c */,
+				DA34FAAA2821DA5900E46005 /* ftbsdf.c */,
+				DA34FAA32821DA5900E46005 /* ftsdf.c */,
+				DA34FAA92821DA5900E46005 /* ftsdf.h */,
+				DA34FAA42821DA5900E46005 /* ftsdfcommon.c */,
+				DA34FAA22821DA5900E46005 /* ftsdfcommon.h */,
+				DA34FAA52821DA5900E46005 /* ftsdferrs.h */,
+				DA34FAA62821DA5900E46005 /* ftsdfrend.c */,
+				DA34FAA72821DA5900E46005 /* ftsdfrend.h */,
+				DA34FAA82821DA5900E46005 /* sdf.c */,
+				DA34FAB72821DABF00E46005 /* ftsvg.c */,
+				DA34FAB52821DABF00E46005 /* ftsvg.h */,
+				DA34FAB62821DABF00E46005 /* svg.c */,
+				DA34FAB42821DABF00E46005 /* svgtypes.h */,
 			);
 			name = src;
 			path = "New Group";
@@ -229,8 +262,14 @@
 			files = (
 				DA7F2D5021C063E0009BFE30 /* ft2build.h in Headers */,
 				DA7F2D4E21C063E0009BFE30 /* ftmodule.h in Headers */,
+				DA34FAAB2821DA5900E46005 /* ftsdfcommon.h in Headers */,
+				DA34FAB92821DABF00E46005 /* ftsvg.h in Headers */,
 				DA7F2D4C21C063E0009BFE30 /* ftstdlib.h in Headers */,
+				DA34FAAE2821DA5900E46005 /* ftsdferrs.h in Headers */,
 				DA7F2D4F21C063E0009BFE30 /* ftoption.h in Headers */,
+				DA34FAB22821DA5900E46005 /* ftsdf.h in Headers */,
+				DA34FAB82821DABF00E46005 /* svgtypes.h in Headers */,
+				DA34FAB02821DA5900E46005 /* ftsdfrend.h in Headers */,
 				DA7F2D4621C063CC009BFE30 /* ftconfig.h in Headers */,
 				DA7F2D4D21C063E0009BFE30 /* ftheader.h in Headers */,
 			);
@@ -292,16 +331,20 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				DA34FABB2821DABF00E46005 /* ftsvg.c in Sources */,
+				DA34FAAD2821DA5900E46005 /* ftsdfcommon.c in Sources */,
 				DA7F2D6E21C06456009BFE30 /* cff.c in Sources */,
-				DA7F2DAD21C07881009BFE30 /* infcodes.c in Sources */,
 				DA7F2D9B21C0646C009BFE30 /* type42.c in Sources */,
+				DA34FAB12821DA5900E46005 /* sdf.c in Sources */,
 				DA7F2D9421C0646C009BFE30 /* ftbbox.c in Sources */,
 				DA7F2D6821C06456009BFE30 /* ftcid.c in Sources */,
+				DA34FABA2821DABF00E46005 /* svg.c in Sources */,
 				DA7F2D9921C0646C009BFE30 /* psaux.c in Sources */,
 				DA7F2D7221C06456009BFE30 /* ftfstype.c in Sources */,
 				DA7F2D9821C0646C009BFE30 /* pfr.c in Sources */,
 				DA7F2D6A21C06456009BFE30 /* ftgzip.c in Sources */,
 				DA7F2D9121C0646C009BFE30 /* ftotval.c in Sources */,
+				DA34FAAF2821DA5900E46005 /* ftsdfrend.c in Sources */,
 				DA7F2D7421C06456009BFE30 /* ftbitmap.c in Sources */,
 				DA7F2DA321C0646C009BFE30 /* sfnt.c in Sources */,
 				DA7F2D9721C0646C009BFE30 /* fttype1.c in Sources */,
@@ -323,14 +366,15 @@
 				DA7F2DB721C07BCC009BFE30 /* zutil.c in Sources */,
 				DA7F2DA421C0646C009BFE30 /* ftpatent.c in Sources */,
 				DA7F2D6D21C06456009BFE30 /* bdf.c in Sources */,
-				DA7F2DAB21C07876009BFE30 /* infblock.c in Sources */,
 				DA7F2DAF21C07888009BFE30 /* inftrees.c in Sources */,
 				DA7F2D6521C06456009BFE30 /* ftinit.c in Sources */,
 				DA7F2D8D21C0646C009BFE30 /* ftsynth.c in Sources */,
 				DA7F2D6B21C06456009BFE30 /* ftgasp.c in Sources */,
 				DA7F2DA221C0646C009BFE30 /* ftwinfnt.c in Sources */,
 				DA7F2D9C21C0646C009BFE30 /* ftlcdfil.c in Sources */,
+				DA34FAAC2821DA5900E46005 /* ftsdf.c in Sources */,
 				DA7F2D9F21C0646C009BFE30 /* ftpfr.c in Sources */,
+				DA34FAB32821DA5900E46005 /* ftbsdf.c in Sources */,
 				DA7F2D6F21C06456009BFE30 /* ftsystem.c in Sources */,
 				DA7F2DA021C0646C009BFE30 /* pshinter.c in Sources */,
 				DA7F2D9621C0646C009BFE30 /* ftgxval.c in Sources */,
@@ -458,9 +502,10 @@
 		DA35ABFC21C0625C00573AB9 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
 				CODE_SIGN_STYLE = Automatic;
 				EXECUTABLE_PREFIX = lib;
-				GCC_PREFIX_HEADER = "$(SOURCE_ROOT)/include/freetype/config/ftoption.h";
+				GCC_PREFIX_HEADER = "$(SOURCE_ROOT)/include/freetype/config/ftconfig.h";
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"$(GCC_PREPROCESSOR_DEFINITIONS)",
 					FT2_BUILD_LIBRARY,
@@ -481,9 +526,10 @@
 		DA35ABFD21C0625C00573AB9 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
 				CODE_SIGN_STYLE = Automatic;
 				EXECUTABLE_PREFIX = lib;
-				GCC_PREFIX_HEADER = "$(SOURCE_ROOT)/include/freetype/config/ftoption.h";
+				GCC_PREFIX_HEADER = "$(SOURCE_ROOT)/include/freetype/config/ftconfig.h";
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"$(GCC_PREPROCESSOR_DEFINITIONS)",
 					FT2_BUILD_LIBRARY,
