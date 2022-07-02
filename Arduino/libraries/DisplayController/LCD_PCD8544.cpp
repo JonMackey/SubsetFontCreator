@@ -169,7 +169,7 @@ void LCD_PCD8544::WakeUp(void)
 
 /********************************* FillPixels *********************************/
 void LCD_PCD8544::FillPixels(
-	uint16_t	inPixelsToFill,
+	uint32_t	inPixelsToFill,
 	uint16_t	inFillColor)
 {
 	mDataRow = mRow;

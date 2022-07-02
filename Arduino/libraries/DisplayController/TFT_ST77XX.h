@@ -32,21 +32,22 @@ class TFT_ST77XX : public DisplayController
 public:
 							TFT_ST77XX(
 								uint8_t					inDCPin,
-								int8_t					inResetPin,	
+								int8_t					inResetPin,
 								int8_t					inCSPin,
 								int8_t					inBacklightPin,
 								uint16_t				inHeight,
 								uint16_t				inWidth,
 								bool					inCentered,
-								bool					inIsBGR);
+								bool					inIsBGR,
+								bool					inInvColAddrOrder = false);
 
 							// Rotation, one of 0, 1, 2, or 3.
 							// Corresponds to MADCTL in doc
-							//			MY	MX	MV	
-							// 0	0	0	0	0	
-							// 1	90	0	1	1	
-							// 2	180	1	1	0	
-							// 3	270	1	0	1	
+							//			MY	MX	MV
+							// 0	0	0	0	0
+							// 1	90	0	1	1
+							// 2	180	1	1	0
+							// 3	270	1	0	1
 	void					begin(
 								uint8_t					inRotation = 0,
 								bool					inResetLevel = LOW);
@@ -71,9 +72,9 @@ public:
 	*	current position and column clipping.
 	*/
 	virtual void			FillPixels(
-								uint16_t				inPixelsToFill,
+								uint32_t				inPixelsToFill,
 								uint16_t				inFillColor);
-								
+
 	/*
 	/*
 	*	SetColumnRange: Sets a the absolute column clipping to inStartColumn to
@@ -82,7 +83,7 @@ public:
 	virtual void			SetColumnRange(
 								uint16_t				inStartColumn,
 								uint16_t				inEndColumn);
-								
+
 	/*
 	*	SetRowRange: Sets a the absolute row range clipping to
 	*	inStartRow to inEndRow.
@@ -100,7 +101,7 @@ public:
 	virtual void			StreamCopy(
 								DataStream*				inDataStream,
 								uint16_t				inPixelsToCopy);
-								
+
 	virtual void			CopyPixels(
 								const void*				inPixels,
 								uint16_t				inPixelsToCopy);
@@ -147,8 +148,8 @@ protected:
 		ePWCTR4Cmd			= 0xC3,	// Power Control 4 (in Idle mode/ 8-colors)
 		ePWCTR5Cmd			= 0xC4,	// Power Control 5 (in Partial mode/ full-colors)
 		eVMCTR1Cmd			= 0xC5, // VCOM Control 1
-		eGMCTRP1Cmd			= 0xE0,	// Gamma (‘+’polarity) Correction Characteristics Setting
-		eGMCTRN1CMD			= 0xE1	// Gamma (‘-’polarity) Correction Characteristics Setting
+		eGMCTRP1Cmd			= 0xE0,	// Positive Gamma Correction
+		eGMCTRN1Cmd			= 0xE1	// Negative Gamma Correction
 	};
 	int8_t		mCSPin;
 	uint8_t		mDCPin;
@@ -162,6 +163,7 @@ protected:
 	bool		mCentered;	// Display pixels are physically centered within the controllers memory space.
 							// When false the the display pixel origin is 0,0 at 0 degree rotation
 	bool		mResetLevel;// Allows the reset pin value to be inverted when run through an inverting level shifter.
+	bool		mInvColAddrOrder; // Set to reverse the col address order (for ILI9341)
 	volatile uint8_t*	mChipSelPortReg;
 	volatile uint8_t*	mDCPortReg;
 	SPISettings	mSPISettings;

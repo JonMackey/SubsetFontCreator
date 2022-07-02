@@ -40,14 +40,15 @@ TFT_ST77XX::TFT_ST77XX(
 	uint16_t	inHeight,
 	uint16_t	inWidth,
 	bool		inCentered,
-	bool		inIsBGR)
+	bool		inIsBGR,
+	bool		inInvColAddrOrder)
 	: DisplayController(inHeight, inWidth),
 	// According to the docs for the 35 and 89 controllers, the min write
 	// cycle is 66ns or approximately 15Mhz
 	  mSPISettings(15000000, MSBFIRST, SPI_MODE3),
 	  mCSPin(inCSPin), mDCPin(inDCPin), mResetPin(inResetPin),
 	  mBacklightPin(inBacklightPin), mRowOffset(0), mColOffset(0),
-	  mCentered(inCentered), mIsBGR(inIsBGR)
+	  mCentered(inCentered), mIsBGR(inIsBGR), mInvColAddrOrder(inInvColAddrOrder)
 {
 	// Setting the CS pin mode and state was moved from begin to avoid
 	// interference with other SPI devices on the bus.
@@ -141,12 +142,18 @@ void TFT_ST77XX::WriteCmds(
 		{
 			WriteCmd(cmd);
 			cmdDataLen = pgm_read_byte(inCmds++);
+			bool delayNext = (cmdDataLen & 0x80) != 0;
+			cmdDataLen &= 0x7F;
 			if (cmdDataLen)
 			{
 				do 
 				{
 					SPI.transfer(pgm_read_byte(inCmds++));
 				} while (--cmdDataLen);
+			}
+			if (delayNext)
+			{
+ 				delay(150);
 			}
 			continue;
 		}
@@ -204,7 +211,7 @@ void TFT_ST77XX::SetRotation(
 	uint8_t	inRotation)
 {
 /*
-	MADCTL
+	MADCTL for ST77XX.  For the ILI9340 display I have MX is inverted.
 		MY	MX	MV	
 [0]	0	0	0	0	
 [1]	90	0	1	1	
@@ -212,12 +219,12 @@ void TFT_ST77XX::SetRotation(
 [3]	270	1	0	1	
 
 	Bit mask
-MY  = 0x80
-MX  = 0x40
-MV  = 0x20
-ML  = 0x10 (when set it's bottom to top)
-RGB = 0x08 (when set it's BGR)
-MH  = 0x04 (when set it's right to left)
+MY  = 0x80 Row Address Order
+MX  = 0x40 Column Address Order
+MV  = 0x20 Row / Column Exchange
+ML  = 0x10 Vertical Refresh Order (when set it's bottom to top)
+RGB = 0x08 RGB-BGR Order (when set it's BGR)
+MH  = 0x04 Horizontal Refresh Order (when set it's right to left)
 
 For both the 89 and 35R the RGB order is BGR.
 
@@ -239,11 +246,18 @@ For both the 89 and 35R the RGB order is BGR.
 	*
 	*	This is the reason for the mCentered flag.
 	*/
+	//											0    90    180   270
 	static const uint8_t cmdData[] PROGMEM = {0x08, 0x68, 0xC8, 0xA8};
 	uint8_t	madctlParam = pgm_read_byte(&cmdData[inRotation]);
 	if (mIsBGR)
 	{
 		madctlParam &= ~8;
+	}
+	if (mInvColAddrOrder)
+	{
+		// Added for TFT_ILI9341.  The ILI9340 board I have needs this inverted.
+		// I'll assume all of the boards using this driver family need this.
+		madctlParam ^= 0x40;
 	}
 	BeginTransaction();
 	WriteCmd(eMADCTLCmd);
@@ -325,7 +339,7 @@ void TFT_ST77XX::WriteWakeUpCmds(void)
 
 /********************************* FillPixels *********************************/
 void TFT_ST77XX::FillPixels(
-	uint16_t	inPixelsToFill,
+	uint32_t	inPixelsToFill,
 	uint16_t	inFillColor)
 {
 	uint8_t	msb = inFillColor >> 8;

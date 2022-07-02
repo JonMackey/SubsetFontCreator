@@ -108,7 +108,7 @@ public:
 	*	current position and column clipping.
 	*/
 	virtual void			FillPixels(
-								uint16_t				inPixelsToFill,
+								uint32_t				inPixelsToFill,
 								uint16_t				inFillColor) = 0;
 	/*
 	*	FillBlock: Fills a block defined by inRows x inColumns to inFillColor

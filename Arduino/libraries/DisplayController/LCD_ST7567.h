@@ -1,6 +1,6 @@
 /*
-*	LCD_PCD8544.h, Copyright Jonathan Mackey 2019
-*	Class to control the LCD PCD8544 display controller used by the Nokia 5110.
+*	LCD_ST7567.h, Copyright Jonathan Mackey 2020
+*	Class to control an SPI LCD ST7567 display controller.
 *
 *	GNU license:
 *	This program is free software: you can redistribute it and/or modify
@@ -20,26 +20,34 @@
 *	notices in any redistribution of this code.
 *
 */
-#ifndef LCD_PCD8544_h
-#define LCD_PCD8544_h
+#ifndef LCD_ST7567_h
+#define LCD_ST7567_h
 #include <SPI.h>
 #include "DisplayController.h"
 
 class DataStream;
 
-class LCD_PCD8544 : public DisplayController
+class LCD_ST7567 : public DisplayController
 {
 public:
-							LCD_PCD8544(
+							LCD_ST7567(
 								uint8_t					inDCPin,
 								int8_t					inResetPin,	
-								int8_t					inCSPin);
+								int8_t					inCSPin,
+								int8_t					inBacklightPin = -1,
+								uint16_t				inHeight = 64,
+								uint16_t				inWidth = 128);
 
 	virtual uint8_t			BitsPerPixel(void) const
 								{return(1);}
+							// Rotation, one of 0, 1, 2, or 3.
+							//			MY	MX	
+							// 0	0	1	0	
+							// 1	90	Unsuported	
+							// 2	180	0	1	
+							// 3	270	Unsuported	
 	void					begin(
-								uint8_t					inContrast = 63,
-								uint8_t					inBias = 3);
+								uint8_t					inRotation = 0);
 	virtual void			MoveTo(
 								uint16_t				inRow,
 								uint16_t				inColumn);
@@ -93,39 +101,49 @@ public:
 								
 	virtual void			SetAddressingMode(
 								EAddressingMode			inAddressingMode);
+								
+	void					Invert(
+								bool					inInvert);
 protected:
 	enum ECmds
 	{
-		// Read commands are not included because the MISO pin isn't generally available.
-		eFunctionSetCmd		= 0x20,	// Function set
-			eExtendedInst	= 0x01,	// Instruction 1 = extended, 0 = basic
-			eVAddressingMode = 0x02,// Addressing mode 2 = vertical, 0 = horizontal
-			ePowerDownChip	= 0x04, // 0 = chip is active, 4 = power down/sleep
-									// Note: must clear screen before entering sleep
-		// Basic instructions (H = 0)
-		eDisplayContCmd		= 0x08,	// Display control
-			eDisplayBlank	= 0,
-			eNormalMode		= 0x04,	// Normal mode
-			eAllSegOn		= 0x01,	// All segments on
-			eInvert			= 0x05,	// Invert mode
-		eSetYAddrCmd		= 0x40,	// Set y address, lower 3 bits = bank 0 to 5
-		eSetXAddrCmd		= 0x80,	// Set x address, lower 7 bits = x
-		// Extended instructions (H = 1)
-		eBiasSystemCmd		= 0x10,	// Bias system
-			eBiasMask		= 0x07,	// Bits BS0 to 2 (0 to 7)
-		eTempContCmd		= 0x04,	// Temperature control
-			eTempCoef0		= 0,	// Coefficient 0
-			eTempCoef1		= 1,	// Coefficient 1
-			eTempCoef2		= 2,	// Coefficient 2
-			eTempCoef3		= 3,	// Coefficient 3
-		eSetVOPCmd			= 0x80,	// VOP or contrast
-			eVOPMask		= 0x3F	// Bits Vop0 to 6 (0 to 63)
+		eDisplayOffCmd		= 0xAE,	// Display Off
+		eDisplayOnCmd		= 0xAF,	// Display On
+		eSetStartLineCmd	= 0x40,	// Start line, + 5 bits that define the line (0 to 63)
+		eSetPageStartCmd	= 0xB0,	// Start page, + 4 bits that define the page (0 to 8)
+		eSetColAddrCmd		= 0x10,	// Set Column, + 4 MSB, followed by the 4 LSB in a separate byte.
+		eSegDirNormalCmd	= 0xA0,	// Normal direction.  X auto increments to 128
+		eSegDirInvertedCmd	= 0xA1,	// Inverse direction.  X auto decrements to 0
+		eInvertDispOnCmd	= 0xA7,	// Invert Display
+		eInvertDispOffCmd	= 0xA6,	// Normal Dislpay (not inverted)
+		eAllPixelsOnCmd		= 0xA5,	// Set all pixels on
+		eAllPixelsNormalCmd	= 0xA4,	// Normal Dislpay (not forced on)
+		eSet1_7BiasRatioCmd	= 0xA3,	// Set Bias ratio 1/7
+		eSet1_9BiasRatioCmd	= 0xA2,	// Set Bias ratio 1/9
+		eSWResetCmd			= 0xE2,	// Software Reset
+		eComDirNormalCmd	= 0xC0,	// Normal direction.  Page auto increments to 8
+		eComDirInvertedCmd	= 0xC8,	// Inverse direction.  Page auto decrements to 0
+		ePowerControlOnCmd	= 0x2F,	// Controls power regulation.  Off after reset (should be on for operation)
+		ePowerControlOffCmd	= 0x28,	// Controls power regulation.  Off after reset (should be on for operation)
+		eRegulationRatioCmd	= 0x20,	// Regulation ratio.  + 3 bits (0 to 7) that correspond to the ratio 3.0 to 6.5 respectively.
+				eRatio3_0	= 0,
+				eRatio3_5,
+				eRatio4_0,
+				eRatio4_5,
+				eRatio5_0,
+				eRatio5_5,
+				eRatio6_0,
+				eRatio6_5,
+		eSetContrastCmd		= 0x81,	// Set contrast.  Followed by contrast byte, 0 to 63 (0x3F)
+			
 	};
 	int8_t		mCSPin;
 	uint8_t		mDCPin;
 	uint8_t		mResetPin;
+	int8_t		mBacklightPin;
 	uint8_t		mChipSelBitMask;
 	uint8_t		mDCBitMask;
+	uint8_t		mColOffset;
 	uint8_t		mStartColumn;	// For windowing (column range)
 	uint8_t		mEndColumn;		// For windowing (column range)
 	uint8_t		mStartRow;		// For windowing (row range)
@@ -137,6 +155,11 @@ protected:
 	SPISettings	mSPISettings;
 
 
+	virtual void			Init(void);
+	void					WriteSleepCmds(void);
+	void					WriteWakeUpCmds(void);
+	void					SetRotation(
+								uint8_t					inRotation);
 	inline void				BeginTransaction(void)
 							{
 								SPI.beginTransaction(mSPISettings);
@@ -155,12 +178,22 @@ protected:
 								SPI.endTransaction();
 							}
 
+	void					WriteSetPageStartCmd(
+								uint8_t					inPage) const;
+	void					WriteSetColAddrCmd(
+								uint8_t					inColumn) const;
 	inline void				WriteCmd(
 								uint8_t					inCmd) const;
+	void					WriteCmd(
+								uint8_t					inCmd,
+								uint8_t					inCmdData) const;
 	void					WriteData(
 								const uint8_t*			inData,
 								uint16_t				inDataLen);
 	void					IncCoords(void);
-								
+	virtual uint16_t		VerticalRes(void) const
+								{return(65);}
+	virtual uint16_t		HorizontalRes(void) const
+								{return(132);}
 };
-#endif // LCD_PCD8544_h
+#endif // LCD_ST7567_h

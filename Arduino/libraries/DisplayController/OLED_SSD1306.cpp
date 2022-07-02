@@ -180,7 +180,7 @@ void OLED_SSD1306::WakeUp(void)
 
 /********************************* FillPixels *********************************/
 void OLED_SSD1306::FillPixels(
-	uint16_t	inBytesToFill,
+	uint32_t	inBytesToFill,
 	uint16_t	inFillColor)
 {
 	uint8_t	fillData = inFillColor ? 0xFF : 0;

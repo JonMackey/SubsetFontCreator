@@ -60,7 +60,7 @@ public:
 	*	value.
 	*/
 	virtual void			FillPixels(
-								uint16_t				inBytesToFill,
+								uint32_t				inBytesToFill,
 								uint16_t				inFillColor);
 
 	/*

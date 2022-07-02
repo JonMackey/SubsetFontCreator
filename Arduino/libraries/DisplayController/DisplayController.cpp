@@ -110,7 +110,7 @@ void DisplayController::Fill(
 	*/
 	MoveTo(0, 0);	// After clear the page and column will wrap to zero (no need to call MoveTo again at end.)
 	SetColumnRange(0, mColumns-1);	// Reset the range in case it's been clipped.
-	FillPixels(mRows*mColumns, inFillColor);
+	FillPixels((uint32_t)mRows*mColumns, inFillColor);
 }
 
 /********************************* FillBlock **********************************/
@@ -132,7 +132,7 @@ void DisplayController::FillBlock(
 		SetColumnRange(inColumns);
 		// The column index will wrap back to the starting point.
 		// The page won't so it needs to be reset.
-		FillPixels(inRows * inColumns, inFillColor);
+		FillPixels((uint32_t)inRows * inColumns, inFillColor);
 		SetColumnRange(0, mColumns-1);	// Remove the column range clipping
 		MoveToRow(mRow);	// Leave the page unchanged
 		MoveColumnBy(inColumns); // Advance by inColumns (or wrap to zero if at or past end)
