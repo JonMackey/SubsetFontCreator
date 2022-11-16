@@ -163,7 +163,7 @@ uint8_t* SubsetFontCreator::CreateRotatedData(
 	return(rotatedData);
 }
 
-/******************************* createFile ***********************************/
+/******************************* CreateFile ***********************************/
 int SubsetFontCreator::CreateFile(
 	EFormat			inExportFormat,
 	const char*		inFontFilePath,
@@ -332,6 +332,36 @@ int SubsetFontCreator::CreateXfntFile(
 		bool	horizontal = (inOptions & eHorizontal) != 0;
 		bool	oneBitPerPixel = (inOptions & e1BitPerPixel) != 0;
 		bool	wideOffsets = (inOptions & e32BitDataOffsets) != 0;
+		bool	minimizeHeight = (inOptions & eMinimizeHeight) != 0;
+		GlyphHeader	xGlyphHeader;
+		
+		if (minimizeHeight)
+		{
+			FontHeader			xFontHeader;
+			int errorCode = PreviewFont(inFontFilePath, inPointSize, inOptions,
+								inCharcodeItr, inFontFaceIndex, inSupplementalFontFilePath,
+								inSupplementalFontFaceIndex, xFontHeader, xGlyphHeader,
+								outErrorStr);
+			if (errorCode)
+			{
+				minimizeHeight = false;
+			}/* else
+			{
+				fprintf(stderr, "ascent = %d\n"
+							"descent = %d\n"
+							"height = %d\n"
+							"width = %d\n"
+							"y = %d\n"
+							"rows = %d\n",
+							(int)xFontHeader.ascent,
+							(int)xFontHeader.descent,
+							(int)xFontHeader.height,
+							(int)xFontHeader.width,
+							(int)xGlyphHeader.y,
+							(int)xGlyphHeader.rows);
+			}*/
+		}
+		
 		std::string utf8FontPath(inFontFilePath);
 		std::string utf8SupplementalFontPath(inSupplementalFontFilePath);
 		if (inExportFile && inGlyphDataExportFile)
@@ -378,7 +408,16 @@ int SubsetFontCreator::CreateXfntFile(
 					fontHeader.rotated = rotated ? 1:0;
 					fontHeader.ascent = face->size->metrics.ascender/64;
 					fontHeader.descent = face->size->metrics.descender/64;
-					fontHeader.height = face->size->metrics.height/64;
+					uint32_t	actualFontHeight;
+					if (!minimizeHeight)
+					{
+						actualFontHeight = (uint32_t)(face->size->metrics.height/64);
+					} else
+					{
+						// If there's any kerning the fonts may clip.
+						actualFontHeight = xGlyphHeader.rows;
+					}
+					fontHeader.height = actualFontHeight;
 					fontHeader.numCharcodeRuns = inCharcodeItr.GetNumRuns() +1;
 					fontHeader.numCharCodes = numCharCodes;
 					FT_ULong	maxCharCode = 0;
@@ -389,6 +428,8 @@ int SubsetFontCreator::CreateXfntFile(
 					uint32_t*	glyphDataOffsets32Ptr = glyphDataOffsets;
 					uint16_t*	glyphDataOffsets16Ptr = (uint16_t*)glyphDataOffsets;
 					uint8_t		widestGlyph = 0;
+					uint8_t		tallestGlyph = 0;
+					uint8_t		minGlyphY = 255;
 					uint8_t		isMonospaced = 1;
 					bool		containsKerning = false;
 					// Reserve space for the header
@@ -514,6 +555,10 @@ int SubsetFontCreator::CreateXfntFile(
 									glyphHdr.advanceX = advanceX;
 									glyphHdr.x = slot->bitmap_left;
 									glyphHdr.y = ascent - slot->bitmap_top;
+									if (minimizeHeight)
+									{
+										glyphHdr.y -= xGlyphHeader.y;
+									}
 									if (glyphHdr.x < 0 ||
 										glyphHdr.y < 0)
 									{
@@ -524,6 +569,16 @@ int SubsetFontCreator::CreateXfntFile(
 										containsKerning = true;
 										advanceX = abs(glyphHdr.x) + glyphHdr.columns;
 									}
+									if (tallestGlyph < glyphHdr.rows)
+									{
+										tallestGlyph = glyphHdr.rows;
+									}
+									
+									if (minGlyphY > glyphHdr.y)
+									{
+										minGlyphY = glyphHdr.y;
+									}
+									
 									if (advanceX != widestGlyph)
 									{
 										if (widestGlyph)
@@ -875,6 +930,8 @@ int SubsetFontCreator::CreateXfntFile(
 							"Max charcode = %04XU\n"
 							"Monospace = %s\n"
 							"Widest glyph = %d\n"
+							"Tallest glyph = %d\n"
+							"Min glyph.y = %d\n"
 							"Height = %dpx, or %d 1-bit rows\n"
 							"Glyph data length = %d\n"
 							"Largest glyph length = %d\n",
@@ -884,6 +941,8 @@ int SubsetFontCreator::CreateXfntFile(
 							(uint32_t)maxCharCode,
 							isMonospaced ? "true" : "false",
 							(int)widestGlyph,
+							(int)tallestGlyph,
+							(int)minGlyphY,
 							(int)fontHeader.height,
 							(int)(fontHeader.height + 7)/8,
 							(uint32_t)glyphDataOffset,
@@ -897,6 +956,15 @@ int SubsetFontCreator::CreateXfntFile(
 								"Some glyphs in this font apply kerning (when a glyph's x or y is negative, or the "
 								"abs(x) + columns is greater than the advance X.)  "
 								"XFont handles kerning by zeroing the x and/or increasing the advance X.");
+						}
+					}
+					if (outErrorStr)
+					{
+						if (fontHeader.height != actualFontHeight)
+						{
+							outErrorStr->assign("Font size too large.  "
+								"Resulting font height is greater than 255.  "
+								"Choose a smaller font size.");
 						}
 					}
 					delete [] glyphDataOffsets;
@@ -1273,6 +1341,210 @@ int SubsetFontCreator::XFntToC_Header(
 	return(0);
 }
 
+/******************************** PreviewFont *********************************/
+/*
+*	This routine was implemented to support the Minimize Height feature. When
+*	enabled, Minimize Height trims the font ascent descent and overall font
+*	height.  It also adjusts each GlyphHeader.y by the amount removed from the
+*	ascent.
+*	This only is useful on horizontal fonts.
+*	outFontHeader is filled in as if the header were to be written to a file,
+*	except for monospaced and width which are set to 0.
+*	outGlyphHeader contains the maximum values except for GlyphHeader.y.
+*	GlyphHeader.y contains the minimum value.  GlyphHeader.y is used to
+*	determine how much the GlyphHeader.y and ascent can be trimmed.
+*/
+int SubsetFontCreator::PreviewFont(
+	const char*				inFontFilePath,
+	int32_t					inPointSize,
+	int						inOptions,
+	SubsetCharcodeIterator&	inCharcodeItr,
+	long					inFontFaceIndex,
+	const char*				inSupplementalFontFilePath,
+	long					inSupplementalFontFaceIndex,
+	FontHeader&				outFontHeader,
+	GlyphHeader&			outGlyphHeader,
+	std::string*			outErrorStr)
+{
+	int	createFileError = eSubsetNoErr;
+	bool	success = inCharcodeItr.IsValid();
+	
+	outGlyphHeader.advanceX = 0;
+	outGlyphHeader.x = 0;
+	outGlyphHeader.y = 127;
+	outGlyphHeader.rows = 0;
+	outGlyphHeader.columns = 0;
+	
+	if (success)
+	{
+		bool	rotated = (inOptions & (e1BitPerPixel+eRotated)) == e1BitPerPixel+eRotated;
+		bool	horizontal = (inOptions & eHorizontal) != 0;
+		bool	oneBitPerPixel = (inOptions & e1BitPerPixel) != 0;
+		std::string utf8FontPath(inFontFilePath);
+		std::string utf8SupplementalFontPath(inSupplementalFontFilePath);
+		{
+			std::vector<std::string>	faceNameVec;
+			GetFaceNames(utf8FontPath.c_str(), faceNameVec);
+			
+			FT_Library ftLibrary = NULL;
+			if (FT_Init_FreeType(&ftLibrary) == 0)
+			{
+				FT_Face	face = NULL;
+				FT_Face	supplementalFace = NULL;
+				if (inSupplementalFontFilePath)
+				{
+					FT_New_Face(ftLibrary, utf8SupplementalFontPath.c_str(), inSupplementalFontFaceIndex, &supplementalFace);
+					if (FT_Set_Char_Size(
+								supplementalFace,	/* handle to face object           */
+								0,		/* char_width in 1/64th of points  */
+								inPointSize*64,	/* char_height in 1/64th of points */
+								72,		/* horizontal device resolution    */
+								72))
+					{
+						supplementalFace = NULL;
+					}
+				}
+				bool success = FT_New_Face(ftLibrary, utf8FontPath.c_str(), inFontFaceIndex, &face) == 0;
+				if (success)
+				{
+					
+					FT_Error error = FT_Set_Char_Size(
+								face,	/* handle to face object           */
+								0,		/* char_width in 1/64th of points  */
+								inPointSize*64,	/* char_height in 1/64th of points */
+								72,		/* horizontal device resolution    */
+								72);	/* vertical device resolution      */
+					
+					uint32_t	numCharCodes = inCharcodeItr.GetNumCharCodes();
+					FT_Face	charCodeFace = NULL;
+					outFontHeader.version = 1;
+					outFontHeader.horizontal = (rotated && horizontal) ? 1:0;
+					outFontHeader.oneBit = oneBitPerPixel ? 1:0;
+					outFontHeader.rotated = rotated ? 1:0;
+					outFontHeader.ascent = face->size->metrics.ascender/64;
+					outFontHeader.descent = face->size->metrics.descender/64;
+					outFontHeader.height = (uint32_t)(face->size->metrics.height/64);;
+					outFontHeader.numCharcodeRuns = inCharcodeItr.GetNumRuns() +1;
+					outFontHeader.numCharCodes = numCharCodes;
+					outFontHeader.monospaced = 0;
+					outFontHeader.width = 0;
+					uint32_t	maxHeight = 0;
+					int32_t ascent = (int32_t)(outFontHeader.ascent);
+
+					if (error == 0)
+					{
+						FT_ULong	charcode;
+						FT_Int32	loadFlags = FT_LOAD_RENDER;
+						if (oneBitPerPixel)
+						{
+							loadFlags |= FT_LOAD_TARGET_MONO;
+						}	// else grayscale
+						charcode = inCharcodeItr.Current();
+						while (inCharcodeItr.IsValid() &&
+							createFileError == eSubsetNoErr)
+						{
+							if (charcode > 0 && charcode < 0xFFFF)
+							{
+								FT_UInt	glyphIndex = FT_Get_Char_Index(face, charcode);
+								if (glyphIndex ||
+									supplementalFace == NULL)
+								{
+									error = FT_Load_Glyph(face, glyphIndex, loadFlags);
+									charCodeFace = face;
+								} else
+								{
+									error = FT_Load_Char(supplementalFace, charcode, loadFlags);
+									charCodeFace = supplementalFace;
+								}
+								if (error == 0)
+								{
+									FT_GlyphSlot	slot = charCodeFace->glyph;
+									FT_Bitmap&		bitmap = slot->bitmap;
+									int32_t			rows = bitmap.rows;
+
+
+									if (outGlyphHeader.x < slot->bitmap_left)
+									{
+										outGlyphHeader.x = slot->bitmap_left;
+									}
+									int8_t	thisGlyphY = ascent - slot->bitmap_top;
+									if (outGlyphHeader.y > thisGlyphY)
+									{
+										outGlyphHeader.y = thisGlyphY;
+									}
+									if (outGlyphHeader.rows < rows)
+									{
+										outGlyphHeader.rows = rows;
+									}
+									if (maxHeight < (rows + thisGlyphY))
+									{
+										maxHeight = rows + thisGlyphY;
+									}
+									if (outGlyphHeader.columns < bitmap.width)
+									{
+										outGlyphHeader.columns = bitmap.width;
+									}
+
+									uint8_t		advanceX = slot->advance.x/64;
+									if (outGlyphHeader.advanceX < advanceX)
+									{
+										outGlyphHeader.advanceX = advanceX;
+									}
+								} else
+								{
+									createFileError = eFTLoadCharFailedErr;
+									if (outErrorStr)
+									{
+										outErrorStr->assign("FT_Load_Char failed.");
+									}
+								}
+							}
+							charcode = inCharcodeItr.Next();
+						}
+						maxHeight -= outGlyphHeader.y;
+						if (maxHeight > outGlyphHeader.rows)
+						{
+							outGlyphHeader.rows = maxHeight;
+						}
+					} else
+					{
+						createFileError = eFTSetCharSizeFailedErr;
+						if (outErrorStr)
+						{
+							outErrorStr->assign("FT_Set_Char_Size() failed.");
+						}
+					}
+					FT_Done_Face(face);
+				} else
+				{
+					createFileError = eFTNewFaceFailedErr;
+					if (outErrorStr)
+					{
+						outErrorStr->assign("FT_New_Face() failed.");
+					}
+				}
+				if (supplementalFace)
+				{
+					FT_Done_Face(supplementalFace);
+				}
+				FT_Done_FreeType(ftLibrary);
+			} else
+			{
+				createFileError = eFTInitFreeTypeFailedErr;
+				if (outErrorStr)
+				{
+					outErrorStr->assign("FT_Init_FreeType() failed.");
+				}
+			}
+		}
+		inCharcodeItr.MoveToStart();
+	} else
+	{
+		createFileError = inCharcodeItr.GetError();
+	}
+	return(createFileError);
+}
+
 /************************* SubsetCharcodeIterator *****************************/
 SubsetCharcodeIterator::SubsetCharcodeIterator(
 	const char*		inSubset,
@@ -1409,6 +1681,21 @@ uint32_t SubsetCharcodeIterator::Next(void)
 		mIsValid = mIndexVecItr.Next() != IndexVecIterator::end;
 	}
 	return((uint32_t)mIndexVecItr.Current());
+}
+
+/******************************** MoveToStart *********************************/
+size_t SubsetCharcodeIterator::MoveToStart(void)
+{
+	size_t	current = mIndexVecItr.MoveToStart();
+	mIsValid = current != IndexVecIterator::end;
+	return(current);
+}
+
+/********************************* MoveToEnd *********************************/
+size_t SubsetCharcodeIterator::MoveToEnd(void)
+{
+	mIsValid = false;
+	return(mIndexVecItr.MoveToEnd());
 }
 
 /***************************** GetNumCharCodes ********************************/

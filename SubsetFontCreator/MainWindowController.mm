@@ -331,7 +331,8 @@ SMenuItemDesc	menuItems[] = {
 /******************************* setDisplay ***********************************/
 - (IBAction)setDisplay:(NSPopUpButton*)sender
 {
-	[arduinoDisplayView setDisplay:[_arduinoDisplays objectAtIndex: sender.indexOfSelectedItem]];
+	[arduinoDisplayView setDisplay:[_arduinoDisplays objectAtIndex: sampleDisplayPopupButton.indexOfSelectedItem]
+										isVertical:displayOrientationPopupButton.selectedTag == 1];
 }
 
 /******************************* showHelper ***********************************/
@@ -723,6 +724,8 @@ SMenuItemDesc	menuItems[] = {
 						options = glyphDataSeparatelyCheckBox.state == NSControlStateValueOn ? SubsetFontCreator::eGlyphDataSeparately : 0;
 						[[NSUserDefaults standardUserDefaults] setObject:[NSNumber numberWithInt:options] forKey:kLastExportOptionsKey];
 						options |= (int)(self->formatPopupButton.selectedTag);
+						options |= self->minimizeHeightCheckbox.state == NSControlStateValueOn ? SubsetFontCreator::eMinimizeHeight : 0;
+						
 						//options |= self->offsetWidth32Radio.state == NSControlStateValueOn ? SubsetFontCreator::e32BitDataOffsets : 0;
 						[self.savePanel orderOut:nil];
 						if (options & SubsetFontCreator::eGlyphDataSeparately &&
@@ -792,9 +795,19 @@ SMenuItemDesc	menuItems[] = {
 			if (pointSize < 4)
 			{
 				pointSize = 4;
-			} else if (pointSize > 72)
+			/*
+			*	The max font size is limited by the FontHeader struct where the
+			*	FontHeader.height must be less than 255.  Note that even if this
+			*	limitation is removed by changing the FontHeader to use uint16_t rather
+			*	than uint8_t, there would still be issues with other structures such as
+			*	CharcodeRun where CharcodeRun.start could overrun after several glyphs
+			*	due to the increased size of each glyph.  Also glyphDataOffset in the
+			*	generated header file would also eventually overrun depending on the
+			*	number of glyphs.
+			*/
+			} else if (pointSize > 212)
 			{
-				pointSize = 72;
+				pointSize = 212;
 			}
 			BOOL	suppFontOK = [[NSFileManager defaultManager] fileExistsAtPath:suppFontPathControl.URL.path isDirectory:&isDirectory] &&
 																		isDirectory == NO;
@@ -840,13 +853,24 @@ SMenuItemDesc	menuItems[] = {
 	if (pointSize < 4)
 	{
 		pointSize = 4;
-	} else if (pointSize > 72)
+	/*
+	*	The max font size is limited by the FontHeader struct where the
+	*	FontHeader.height must be less than 255.  Note that even if this
+	*	limitation is removed by changing the FontHeader to use uint16_t rather
+	*	than uint8_t, there would still be issues with other structures such as
+	*	CharcodeRun where CharcodeRun.start could overrun after several glyphs
+	*	due to the increased size of each glyph.  Also glyphDataOffset in the
+	*	generated header file would also eventually overrun depending on the
+	*	number of glyphs.
+	*/
+	} else if (pointSize > 212)
 	{
-		pointSize = 72;
+		pointSize = 212;
 	}
 	[_logViewController clear:self];
 	BOOL	isColor = sampleCSPopupButton.indexOfSelectedItem == 1;
 	NSInteger	options = formatPopupButton.selectedTag;
+	options |= self->minimizeHeightCheckbox.state == NSControlStateValueOn ? SubsetFontCreator::eMinimizeHeight : 0;
 	[arduinoDisplayView loadSample:sampleTextField.stringValue pointSize:pointSize
 			fontURL:fontPathControl.URL
 				options:options

@@ -44,7 +44,7 @@ struct FontHeader
 				rotated : 1,	// each data byte represents 8 pixels of a column (applies to 1 bit only)
 				horizontal : 1,	// addressing for rotated data, else vertical (applies to 1 bit only)
 				monospaced : 1;	// fixed width font (for this subset)
-	int8_t 		ascent;			// font in pixels
+	uint8_t 	ascent;			// font in pixels
 	int8_t 		descent;		// font in pixels
 	uint8_t 	height;			// font height (ascent+descent+leading) in pixels
 	uint8_t		width;			// widest glyph within subset in pixels

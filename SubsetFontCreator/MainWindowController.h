@@ -52,7 +52,9 @@ NS_ASSUME_NONNULL_BEGIN
 	IBOutlet NSButton*		textColorButton;
 	IBOutlet NSButton*		textBGColorButton;
 	IBOutlet NSPopUpButton*	sampleCSPopupButton;
+	IBOutlet NSPopUpButton*	displayOrientationPopupButton;
 	IBOutlet NSButton*		simulateMonoCheckbox;
+	IBOutlet NSButton*		minimizeHeightCheckbox;
 	IBOutlet NSPathControl*	suppFontPathControl;
 	IBOutlet NSPopUpButton*	suppFacePopupButton;
 

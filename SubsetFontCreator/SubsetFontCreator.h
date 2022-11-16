@@ -76,7 +76,12 @@ public:
 		*	create 32 bit offsets.  If this flag is exposed then attempting to
 		*	create a C file header will produce garbage.
 		*/
-		e32BitDataOffsets		= 0x10
+		e32BitDataOffsets		= 0x10,
+		/*
+		*	Minimize Height trims the overall height of the font to min y +
+		*	tallest glyph.  This is useful for very large fonts.
+		*/
+		eMinimizeHeight			= 0x20
 	};
 	static int				CreateXfntFile(
 								const char*				inFontFilePath,
@@ -122,7 +127,19 @@ protected:
 								int						inYOffset,
 								bool					inMSBTop,
 								bool					inHorizontal,
-								size_t&					outDataLen);};
+								size_t&					outDataLen);
+	static int				PreviewFont(
+								const char*				inFontFilePath,
+								int32_t					inPointSize,
+								int						inOptions,
+								SubsetCharcodeIterator&	inCharcodeItr,
+								long					inFontFaceIndex,
+								const char*				inSupplementalFontFilePath,
+								long					inSupplementalFontFaceIndex,
+								FontHeader&				outFontHeader,
+								GlyphHeader&			outGlyphHeader,
+								std::string*			outErrorStr);
+};
 
 class SubsetCharcodeIterator
 {
@@ -143,6 +160,8 @@ public:
 								{return(mSubsetVec);}
 	uint32_t				GetNumRuns(void) const;
 	uint32_t				Next(void);
+	size_t					MoveToStart(void);	// Rewind
+	size_t					MoveToEnd(void);	// Halt iteration
 	ESubsetErr				GetError(void)
 								{return(mError);}
 	std::string&			GetSubset(

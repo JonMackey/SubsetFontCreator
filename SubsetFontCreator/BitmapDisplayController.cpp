@@ -89,7 +89,7 @@ uint32_t Pixel16To24(
 
 /********************************* FillPixels *********************************/
 void BitmapDisplayController::FillPixels(
-	uint16_t	inPixelsToFill,
+	uint32_t	inPixelsToFill,
 	uint16_t	inFillColor)
 {
 	uint32_t*	current = mCurrent;

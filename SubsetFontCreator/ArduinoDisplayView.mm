@@ -67,10 +67,20 @@
 *	0.96"		160x80		21.696 x 10.8
 *	0.91"		128x32		22.38 x 5.58mm
 */
-- (void)setDisplay:(NSDictionary*)inDisplayDict
+- (void)setDisplay:(NSDictionary*)inDisplayDict  isVertical:(BOOL)inIsVertical
 {
 	_screenSize = NSSizeFromString([inDisplayDict objectForKey: @"screenSize"]);
 	_deviceSize = NSSizeFromString([inDisplayDict objectForKey: @"deviceSize"]);
+	BOOL	swapSizes = inIsVertical ? (_deviceSize.width > _deviceSize.height) : (_deviceSize.width < _deviceSize.height);
+	if (swapSizes)
+	{
+		CGFloat	tempDim = _deviceSize.width;
+		_deviceSize.width = _deviceSize.height;
+		_deviceSize.height = tempDim;
+		tempDim = _screenSize.width;
+		_screenSize.width = _screenSize.height;
+		_screenSize.height = tempDim;
+	}
 	_displayPPMM = _deviceSize.width/_screenSize.width;
 	self.needsDisplay = YES;
 }

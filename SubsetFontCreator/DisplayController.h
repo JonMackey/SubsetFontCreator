@@ -23,13 +23,7 @@
 #ifndef DisplayController_h
 #define DisplayController_h
 
-#include <inttypes.h>
-#include <string.h>
-#ifndef __MACH__
-#include <avr/pgmspace.h>
-#else
-#define memcpy_P memcpy
-#endif
+#include "PlatformDefs.h"
 
 class DataStream;
 
@@ -108,7 +102,7 @@ public:
 	*	current position and column clipping.
 	*/
 	virtual void			FillPixels(
-								uint16_t				inPixelsToFill,
+								uint32_t				inPixelsToFill,
 								uint16_t				inFillColor) = 0;
 	/*
 	*	FillBlock: Fills a block defined by inRows x inColumns to inFillColor
@@ -150,6 +144,9 @@ public:
 //								const Rect8_t*			inRect,
 //								uint16_t				inColor,
 //								uint8_t					inThickness = 1);
+
+	void					DrawAlignmentPoints(void);
+
 	/*
 	*	SetColumnRange: Sets a the column clipping relative to the current
 	*	column. (column : column + inRelativeWidth -1)

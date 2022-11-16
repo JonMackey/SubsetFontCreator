@@ -46,7 +46,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @property (nonatomic, strong) NSBitmapImageRep* bitmapImageRep;
 
-- (void)setDisplay:(NSDictionary*)inDisplayDict;
+- (void)setDisplay:(NSDictionary*)inDisplayDict isVertical:(BOOL)inIsVertical;
 - (CGFloat)ppmm;	// monitor's native pixels per mm
 - (void)loadSample:(NSString*)inSampleText
 			pointSize:(NSUInteger)inPointSize

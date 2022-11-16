@@ -12,11 +12,43 @@
 	</dict>
 	<dict>
 		<key>name</key>
-		<string>Nokia 5110</string>
+		<string>0.91&quot; 32 x 128</string>
 		<key>screenSize</key>
-		<string>{29, 19}</string>
+		<string>{5.58, 22.38}</string>
 		<key>deviceSize</key>
-		<string>{84, 48}</string>
+		<string>{32, 128}</string>
+	</dict>
+	<dict>
+		<key>name</key>
+		<string>0.96&quot; 80 x 160 </string>
+		<key>screenSize</key>
+		<string>{10.8, 21.696}</string>
+		<key>deviceSize</key>
+		<string>{80, 160}</string>
+	</dict>
+	<dict>
+		<key>name</key>
+		<string>0.96&quot; 64 x 128</string>
+		<key>screenSize</key>
+		<string>{10.864, 21.744}</string>
+		<key>deviceSize</key>
+		<string>{64, 128}</string>
+	</dict>
+	<dict>
+		<key>name</key>
+		<string>1.2&quot; 64 x 128</string>
+		<key>screenSize</key>
+		<string>{13.57, 27.16}</string>
+		<key>deviceSize</key>
+		<string>{64, 128}</string>
+	</dict>
+	<dict>
+		<key>name</key>
+		<string>1.3&quot; 64 x 128</string>
+		<key>screenSize</key>
+		<string>{14.7, 29.42}</string>
+		<key>deviceSize</key>
+		<string>{64, 128}</string>
 	</dict>
 	<dict>
 		<key>name</key>
@@ -28,43 +60,83 @@
 	</dict>
 	<dict>
 		<key>name</key>
-		<string>1.2&quot; 128 x 64</string>
+		<string>1.8&quot; 128 x 160 AKA 1.77&quot;</string>
 		<key>screenSize</key>
-		<string>{27.16, 13.57}</string>
+		<string>{28.03, 35.04}</string>
 		<key>deviceSize</key>
-		<string>{128, 64}</string>
+		<string>{128, 160}</string>
 	</dict>
 	<dict>
 		<key>name</key>
-		<string>1.3&quot; 128 x 64</string>
+		<string>2.0&quot; 240 x 320</string>
 		<key>screenSize</key>
-		<string>{29.42, 14.7}</string>
+		<string>{30.6, 40.37}</string>
 		<key>deviceSize</key>
-		<string>{128, 64}</string>
+		<string>{240, 320}</string>
 	</dict>
 	<dict>
 		<key>name</key>
-		<string>0.96&quot; 160 x 80</string>
+		<string>2.2&quot; 240 x 320</string>
 		<key>screenSize</key>
-		<string>{21.696, 10.8}</string>
+		<string>{33.84, 45.12}</string>
 		<key>deviceSize</key>
-		<string>{160, 80}</string>
+		<string>{240, 320}</string>
 	</dict>
 	<dict>
 		<key>name</key>
-		<string>0.96&quot; 128 x 64</string>
+		<string>2.4&quot; 240 x 320</string>
 		<key>screenSize</key>
-		<string>{21.744, 10.864}</string>
+		<string>{36.72, 48.96}</string>
 		<key>deviceSize</key>
-		<string>{128, 64}</string>
+		<string>{240, 320}</string>
 	</dict>
 	<dict>
 		<key>name</key>
-		<string>0.91&quot; 128 x 32</string>
+		<string>2.7&quot; 240 x 960</string>
 		<key>screenSize</key>
-		<string>{22.38, 5.58}</string>
+		<string>{33.06, 58.8}</string>
 		<key>deviceSize</key>
-		<string>{128, 32}</string>
+		<string>{240, 960}</string>
+	</dict>
+	<dict>
+		<key>name</key>
+		<string>2.8&quot; 240 x 320</string>
+		<key>screenSize</key>
+		<string>{43.2, 57.6}</string>
+		<key>deviceSize</key>
+		<string>{240, 320}</string>
+	</dict>
+	<dict>
+		<key>name</key>
+		<string>3.2&quot; 240 x 320</string>
+		<key>screenSize</key>
+		<string>{48.6, 64.8}</string>
+		<key>deviceSize</key>
+		<string>{240, 320}</string>
+	</dict>
+	<dict>
+		<key>name</key>
+		<string>3.5&quot; 320 x 480</string>
+		<key>screenSize</key>
+		<string>{48.96, 73.44}</string>
+		<key>deviceSize</key>
+		<string>{320, 480}</string>
+	</dict>
+	<dict>
+		<key>name</key>
+		<string>4&quot; 320 x 480</string>
+		<key>screenSize</key>
+		<string>{55.68, 83.52}</string>
+		<key>deviceSize</key>
+		<string>{320, 480}</string>
+	</dict>
+	<dict>
+		<key>name</key>
+		<string>Nokia 5110</string>
+		<key>screenSize</key>
+		<string>{19, 29}</string>
+		<key>deviceSize</key>
+		<string>{48, 84}</string>
 	</dict>
 </array>
 </plist>
