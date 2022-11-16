@@ -31,9 +31,9 @@ class LCD_PCD8544 : public DisplayController
 {
 public:
 							LCD_PCD8544(
-								uint8_t					inDCPin,
-								int8_t					inResetPin,	
-								int8_t					inCSPin);
+								pin_t					inDCPin,
+								pin_t					inResetPin,	
+								pin_t					inCSPin);
 
 	virtual uint8_t			BitsPerPixel(void) const
 								{return(1);}
@@ -121,19 +121,19 @@ protected:
 		eSetVOPCmd			= 0x80,	// VOP or contrast
 			eVOPMask		= 0x3F	// Bits Vop0 to 6 (0 to 63)
 	};
-	int8_t		mCSPin;
-	uint8_t		mDCPin;
-	uint8_t		mResetPin;
-	uint8_t		mChipSelBitMask;
-	uint8_t		mDCBitMask;
+	pin_t		mCSPin;
+	pin_t		mDCPin;
+	pin_t		mResetPin;
+	port_t		mChipSelBitMask;
+	port_t		mDCBitMask;
 	uint8_t		mStartColumn;	// For windowing (column range)
 	uint8_t		mEndColumn;		// For windowing (column range)
 	uint8_t		mStartRow;		// For windowing (row range)
 	uint8_t		mEndRow;		// For windowing (row range)
 	uint8_t		mDataRow;		// For windowing (IncCoords & FillPixels)
 	uint8_t		mDataColumn;	// For windowing (IncCoords & FillPixels)
-	volatile uint8_t*	mChipSelPortReg;
-	volatile uint8_t*	mDCPortReg;
+	volatile port_t*	mChipSelPortReg;
+	volatile port_t*	mDCPortReg;
 	SPISettings	mSPISettings;
 
 

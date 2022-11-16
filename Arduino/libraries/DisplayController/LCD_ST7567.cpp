@@ -33,10 +33,10 @@
 *	Note that without as CS pin you can only have one SPI device.
 */
 LCD_ST7567::LCD_ST7567(
-	uint8_t		inDCPin,
-	int8_t		inResetPin,	
-	int8_t		inCSPin,
-	int8_t		inBacklightPin,
+	pin_t		inDCPin,
+	pin_t		inResetPin,	
+	pin_t		inCSPin,
+	pin_t		inBacklightPin,
 	uint16_t	inHeight,
 	uint16_t	inWidth)
 	: DisplayController(inHeight/8, inWidth),

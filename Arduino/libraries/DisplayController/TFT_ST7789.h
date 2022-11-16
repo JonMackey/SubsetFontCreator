@@ -29,10 +29,10 @@ class TFT_ST7789 : public TFT_ST77XX
 {
 public:
 							TFT_ST7789(
-								uint8_t					inDCPin,
-								int8_t					inResetPin = -1,	
-								int8_t					inCSPin = -1,
-								int8_t					inBacklightPin = -1,
+								pin_t					inDCPin,
+								pin_t					inResetPin = -1,	
+								pin_t					inCSPin = -1,
+								pin_t					inBacklightPin = -1,
 								uint16_t				inHeight = 240,
 								uint16_t				inWidth = 240,
 								bool					inCentered = false,

@@ -33,10 +33,10 @@
 *	Note that without as CS pin you can only have one SPI device.
 */
 TFT_ST77XX::TFT_ST77XX(
-	uint8_t		inDCPin,
-	int8_t		inResetPin,	
-	int8_t		inCSPin,
-	int8_t		inBacklightPin,
+	pin_t		inDCPin,
+	pin_t		inResetPin,	
+	pin_t		inCSPin,
+	pin_t		inBacklightPin,
 	uint16_t	inHeight,
 	uint16_t	inWidth,
 	bool		inCentered,
@@ -99,20 +99,20 @@ void TFT_ST77XX::Init(void)
 	{
 		WriteCmd(eSWRESETCmd);
 	}
-	// Per docs: After reset, delay 120ms before sending the next command.
+	// Per docs: After reset, delay 150ms before sending the next command.
 	// (The controller IC is in the process of writing the defaults.)
-	delay(120);
+	delay(150);
 	WriteWakeUpCmds();	// By default the controller is asleep after reset.
 }
 
 /********************************** WriteCmd **********************************/
-inline void TFT_ST77XX::WriteCmd(
+/*void TFT_ST77XX::WriteCmd(
 	uint8_t	inCmd) const
 {
 	*mDCPortReg &= ~mDCBitMask;	// Command mode (LOW)
 	SPI.transfer(inCmd);
 	*mDCPortReg |= mDCBitMask;	// Data mode (HIGH)
-}
+}*/
 
 /********************************** WriteCmd **********************************/
 void TFT_ST77XX::WriteCmd(
@@ -195,6 +195,25 @@ void TFT_ST77XX::WriteData16(
 {
 	if (inDataLen)
 	{
+	#if 1
+		uint8_t	buffer[96*2];
+		const uint32_t	kMaxPixels = sizeof(buffer)/2;
+		const uint8_t*	data = (const uint8_t*)inData;
+
+		while (inDataLen)
+		{
+			uint32_t	bufferLen = inDataLen > kMaxPixels ? kMaxPixels : inDataLen;
+			uint8_t*	bufferPtr = buffer;
+			for (uint32_t i = 0; i < bufferLen; i++)
+			{
+				uint8_t	lsb = *(data++);
+				*(bufferPtr++) = *(data++);
+				*(bufferPtr++) = lsb;
+			}
+			inDataLen -= bufferLen;
+			SPI.transfer(buffer, bufferLen*2);
+		}
+	#else
 		const uint8_t*	data = (const uint8_t*)inData;
 		const uint8_t*	endData = data + (inDataLen*2);
 		do
@@ -203,6 +222,7 @@ void TFT_ST77XX::WriteData16(
 			SPI.transfer(*(data++));
 			SPI.transfer(lsb);
 		} while (data < endData);
+	#endif
 	}
 }
 
@@ -264,8 +284,8 @@ For both the 89 and 35R the RGB order is BGR.
 	SPI.transfer(madctlParam);
 	EndTransaction();
 	{
-		uint8_t	vDelta = VerticalRes() - mRows;
-		uint8_t	hDelta = HorizontalRes() - mColumns;
+		uint16_t	vDelta = VerticalRes() - mRows;
+		uint16_t	hDelta = HorizontalRes() - mColumns;
 		if (mCentered)
 		{
 			mRowOffset = vDelta /= 2;
@@ -328,8 +348,9 @@ void TFT_ST77XX::WakeUp(void)
 void TFT_ST77XX::WriteWakeUpCmds(void)
 {
 	WriteCmd(eSLPOUTCmd);
-	// Per docs: When waking from Sleep, delay 120ms before sending the next command.
-	delay(120);
+	// Per docs: When waking from Sleep, delay 150ms before sending the next command.
+	// Some of the displays are as low as 5ms.
+	delay(150);
 	if (mBacklightPin >= 0)
 	{
 		digitalWrite(mBacklightPin, HIGH);	// On
@@ -342,6 +363,27 @@ void TFT_ST77XX::FillPixels(
 	uint32_t	inPixelsToFill,
 	uint16_t	inFillColor)
 {
+#if 1
+	uint8_t	buffer[96*2];
+	const uint32_t	kMaxPixels = sizeof(buffer)/2;
+	uint8_t	msb = inFillColor >> 8;
+	uint8_t	lsb = inFillColor;
+	BeginTransaction();
+
+	while (inPixelsToFill)
+	{
+		uint32_t	bufferLen = inPixelsToFill > kMaxPixels ? kMaxPixels : inPixelsToFill;
+		uint8_t*	bufferPtr = buffer;
+		for (uint32_t i = 0; i < bufferLen; i++)
+		{
+			*(bufferPtr++) = msb;
+			*(bufferPtr++) = lsb;
+		}
+		inPixelsToFill -= bufferLen;
+		SPI.transfer(buffer, bufferLen*2);
+	}
+	EndTransaction();
+#else
 	uint8_t	msb = inFillColor >> 8;
 	uint8_t	lsb = inFillColor;
 	BeginTransaction();
@@ -351,6 +393,7 @@ void TFT_ST77XX::FillPixels(
 		SPI.transfer(lsb);
 	}
 	EndTransaction();
+#endif
 }
 
 /*********************************** MoveTo ***********************************/
@@ -368,8 +411,10 @@ void TFT_ST77XX::MoveTo(
 void TFT_ST77XX::MoveToRow(
 	uint16_t inRow)
 {
-	uint16_t	rows[] = {inRow + mRowOffset, mRows + mRowOffset -1};
-
+	uint16_t	rows[2];
+	rows[0] = inRow + mRowOffset;
+	rows[1] = mRows + mRowOffset -1;
+	
 	BeginTransaction();
 	WriteCmd(eRASETCmd);
 	WriteData16(rows, 2);
@@ -393,7 +438,9 @@ void TFT_ST77XX::SetColumnRange(
 	uint16_t	inStartColumn,
 	uint16_t	inEndColumn)
 {
-	uint16_t	columns[] = {inStartColumn + mColOffset, inEndColumn + mColOffset};
+	uint16_t	columns[2];
+	columns[0] = inStartColumn + mColOffset;
+	columns[1] = inEndColumn + mColOffset;
 
 	BeginTransaction();
 	WriteCmd(eCASETCmd);
@@ -408,7 +455,9 @@ void TFT_ST77XX::SetRowRange(
 	uint16_t	inStartRow,
 	uint16_t	inEndRow)
 {
-	uint16_t	rows[] = {inStartRow + mRowOffset, inEndRow + mRowOffset};
+	uint16_t	rows[2];
+	rows[0] = inStartRow + mRowOffset;
+	rows[1] = inEndRow + mRowOffset;
 
 	BeginTransaction();
 	WriteCmd(eRASETCmd);
@@ -424,10 +473,10 @@ void TFT_ST77XX::StreamCopy(
 	uint16_t	inPixelsToCopy)
 {
 	BeginTransaction();
-	uint16_t	buffer[32];
+	uint16_t	buffer[96];
 	while (inPixelsToCopy)
 	{
-		uint16_t pixelsToWrite = inPixelsToCopy > 32 ? 32 : inPixelsToCopy;
+		uint16_t pixelsToWrite = inPixelsToCopy > 96 ? 96 : inPixelsToCopy;
 		inPixelsToCopy -= pixelsToWrite;
 		inDataStream->Read(pixelsToWrite, buffer);
 		WriteData16(buffer, pixelsToWrite);

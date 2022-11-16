@@ -24,7 +24,7 @@
 #ifdef __MACH__
 #include "pgmspace_stub.h"
 #else
-#include <avr/pgmspace.h>
+//#include <avr/pgmspace.h>
 #include <Arduino.h>
 #endif
 #include <string.h>

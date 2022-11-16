@@ -31,10 +31,10 @@ class TFT_ST77XX : public DisplayController
 {
 public:
 							TFT_ST77XX(
-								uint8_t					inDCPin,
-								int8_t					inResetPin,
-								int8_t					inCSPin,
-								int8_t					inBacklightPin,
+								pin_t					inDCPin,
+								pin_t					inResetPin,
+								pin_t					inCSPin,
+								pin_t					inBacklightPin,
 								uint16_t				inHeight,
 								uint16_t				inWidth,
 								bool					inCentered,
@@ -151,21 +151,21 @@ protected:
 		eGMCTRP1Cmd			= 0xE0,	// Positive Gamma Correction
 		eGMCTRN1Cmd			= 0xE1	// Negative Gamma Correction
 	};
-	int8_t		mCSPin;
-	uint8_t		mDCPin;
-	uint8_t		mResetPin;
-	int8_t		mBacklightPin;
-	uint8_t		mChipSelBitMask;
-	uint8_t		mDCBitMask;
-	uint8_t		mRowOffset;
-	uint8_t		mColOffset;
+	pin_t		mCSPin;
+	pin_t		mDCPin;
+	pin_t		mResetPin;
+	pin_t		mBacklightPin;
+	port_t		mChipSelBitMask;
+	port_t		mDCBitMask;
+	uint16_t	mRowOffset;
+	uint16_t	mColOffset;
 	bool		mIsBGR;		// Set when display pixel RGB order is opposite of the controller docs (bug fix)
 	bool		mCentered;	// Display pixels are physically centered within the controllers memory space.
 							// When false the the display pixel origin is 0,0 at 0 degree rotation
 	bool		mResetLevel;// Allows the reset pin value to be inverted when run through an inverting level shifter.
 	bool		mInvColAddrOrder; // Set to reverse the col address order (for ILI9341)
-	volatile uint8_t*	mChipSelPortReg;
-	volatile uint8_t*	mDCPortReg;
+	volatile port_t*	mChipSelPortReg;
+	volatile port_t*	mDCPortReg;
 	SPISettings	mSPISettings;
 
 
@@ -181,6 +181,7 @@ protected:
 								{
 									*mChipSelPortReg &= ~mChipSelBitMask;
 								}
+								
 							}
 
 	inline void				EndTransaction(void)
@@ -193,7 +194,13 @@ protected:
 							}
 
 	inline void				WriteCmd(
-								uint8_t					inCmd) const;
+								uint8_t					inCmd) const
+							{
+								*mDCPortReg &= ~mDCBitMask;	// Command mode (LOW)
+								SPI.transfer(inCmd);
+								*mDCPortReg |= mDCBitMask;	// Data mode (HIGH)
+							}
+
 	void					WriteCmd(
 								uint8_t					inCmd,
 								const uint8_t*			inCmdData,

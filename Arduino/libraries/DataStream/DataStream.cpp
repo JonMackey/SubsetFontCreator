@@ -24,8 +24,13 @@
 #ifdef __MACH__
 #include "pgmspace_stub.h"
 #else
-#include <avr/pgmspace.h>
-#include <EEPROM.h>
+	#include <Arduino.h>
+	#ifdef ESP_H
+		#include <pgmspace.h>
+	#else
+		#include <avr/pgmspace.h>
+		#include <EEPROM.h>
+	#endif
 #endif
 #include <string.h>
 

@@ -28,10 +28,10 @@
 
 /******************************** TFT_ST7789 ********************************/
 TFT_ST7789::TFT_ST7789(
-	uint8_t		inDCPin,
-	int8_t		inResetPin,	
-	int8_t		inCSPin,
-	int8_t		inBacklightPin,
+	pin_t		inDCPin,
+	pin_t		inResetPin,	
+	pin_t		inCSPin,
+	pin_t		inBacklightPin,
 	uint16_t	inHeight,
 	uint16_t	inWidth,
 	bool		inCentered,

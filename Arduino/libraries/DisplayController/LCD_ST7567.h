@@ -31,10 +31,10 @@ class LCD_ST7567 : public DisplayController
 {
 public:
 							LCD_ST7567(
-								uint8_t					inDCPin,
-								int8_t					inResetPin,	
-								int8_t					inCSPin,
-								int8_t					inBacklightPin = -1,
+								pin_t					inDCPin,
+								pin_t					inResetPin,	
+								pin_t					inCSPin,
+								pin_t					inBacklightPin = -1,
 								uint16_t				inHeight = 64,
 								uint16_t				inWidth = 128);
 
@@ -137,12 +137,12 @@ protected:
 		eSetContrastCmd		= 0x81,	// Set contrast.  Followed by contrast byte, 0 to 63 (0x3F)
 			
 	};
-	int8_t		mCSPin;
-	uint8_t		mDCPin;
-	uint8_t		mResetPin;
-	int8_t		mBacklightPin;
-	uint8_t		mChipSelBitMask;
-	uint8_t		mDCBitMask;
+	pin_t		mCSPin;
+	pin_t		mDCPin;
+	pin_t		mResetPin;
+	pin_t		mBacklightPin;
+	port_t		mChipSelBitMask;
+	port_t		mDCBitMask;
 	uint8_t		mColOffset;
 	uint8_t		mStartColumn;	// For windowing (column range)
 	uint8_t		mEndColumn;		// For windowing (column range)
@@ -150,8 +150,8 @@ protected:
 	uint8_t		mEndRow;		// For windowing (row range)
 	uint8_t		mDataRow;		// For windowing (IncCoords & FillPixels)
 	uint8_t		mDataColumn;	// For windowing (IncCoords & FillPixels)
-	volatile uint8_t*	mChipSelPortReg;
-	volatile uint8_t*	mDCPortReg;
+	volatile port_t*	mChipSelPortReg;
+	volatile port_t*	mDCPortReg;
 	SPISettings	mSPISettings;
 
 

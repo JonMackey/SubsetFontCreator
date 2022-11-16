@@ -27,7 +27,7 @@
 #endif
 
 
-/******************************** DisplayController ********************************/
+/***************************** DisplayController ******************************/
 DisplayController::DisplayController(
 	uint16_t	inRows,
 	uint16_t	inColumns)
@@ -261,4 +261,25 @@ bool DisplayController::StreamCopyBlock(
 	return(success);
 }
 
+/**************************** DrawAlignmentPoints *****************************/
+/*
+*	Used to draw 9 points inset by 20 pixels:	*	*	*
+*												*	*	*
+*												*	*	*
+*
+*	See XPT2046::Align() for use case.
+*/
+void DisplayController::DrawAlignmentPoints(void)
+{
+	const uint16_t	kInset = 20;
+	uint16_t	iX = (mColumns - (kInset*2))/2;
+	uint16_t	iY = (mRows - (kInset*2))/2;
+	for (uint16_t y = kInset; y < mRows; y+= iY)
+	{
+		for (uint16_t x = kInset; x < mColumns; x+= iX)
+		{
+			FillRect(x, y, 2, 2, 0x1F);
+		}
+	}
+}
 

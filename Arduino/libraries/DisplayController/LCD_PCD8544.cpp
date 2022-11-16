@@ -31,9 +31,9 @@
 *	Note that without as CS pin you can only have one SPI device.
 */
 LCD_PCD8544::LCD_PCD8544(
-	uint8_t		inDCPin,
-	int8_t		inResetPin,	
-	int8_t		inCSPin)
+	pin_t		inDCPin,
+	pin_t		inResetPin,	
+	pin_t		inCSPin)
 	: DisplayController(48/8, 84),
 	// According to the docs the maximum clock frequency is 4MHz
 	  mSPISettings(4000000, MSBFIRST, SPI_MODE0),
@@ -41,7 +41,7 @@ LCD_PCD8544::LCD_PCD8544(
 	  mStartColumn(0), mEndColumn(83), mStartRow(0), mEndRow(5)
 
 {
-	if (mCSPin >= 0)
+	if (mCSPin != 0xFF)
 	{
 		mChipSelBitMask = digitalPinToBitMask(mCSPin);
 		mChipSelPortReg = portOutputRegister(digitalPinToPort(mCSPin));
@@ -55,7 +55,7 @@ void LCD_PCD8544::begin(
 	uint8_t	inContrast,
 	uint8_t	inBias)
 {
-	if (mCSPin >= 0 &&
+	if (mCSPin != 0xFF &&
 		mCSPin != SS)	// If it's SS, SPI.begin() takes care of initializing it.
 	{
 		digitalWrite(mCSPin, HIGH);
@@ -65,7 +65,7 @@ void LCD_PCD8544::begin(
 	digitalWrite(mDCPin, HIGH);
 	pinMode(mDCPin, OUTPUT);
 
-	if (mResetPin >= 0)
+	if (mResetPin != 0xFF)
 	{
 		pinMode(mResetPin, OUTPUT);
 		digitalWrite(mResetPin, HIGH);
