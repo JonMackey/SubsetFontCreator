@@ -105,6 +105,14 @@ public:
 	virtual void			CopyPixels(
 								const void*				inPixels,
 								uint16_t				inPixelsToCopy);
+	virtual void			CopyTintedPattern(
+								uint16_t				inX,
+								uint16_t				inY,
+								const uint8_t*			inPattern,
+								uint16_t				inPatternLen,
+								uint16_t				inReps,
+								bool					inVertical,
+								bool					inReverseOrder);
 
 	virtual void			SetAddressingMode(
 								EAddressingMode			inAddressingMode){}

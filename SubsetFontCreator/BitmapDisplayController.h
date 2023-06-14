@@ -38,6 +38,11 @@ class BitmapDisplayController : public DisplayController
 {
 public:
 							BitmapDisplayController(
+								uint16_t				inRows = 0,
+								uint16_t				inColumns = 0,
+								uint16_t				inBytesPerRow = 0,
+								uint8_t*				inData=nullptr);
+	void					Initialize(
 								uint16_t				inRows,
 								uint16_t				inColumns,
 								uint16_t				inBytesPerRow,
@@ -87,6 +92,18 @@ public:
 	virtual void			StreamCopy(
 								DataStream*				inDataStream,
 								uint16_t				inPixelsToCopy);
+	virtual void			CopyPixels(
+								const void*				inPixels,
+								uint16_t				inPixelsToCopy)
+								{WritePixels((const uint16_t*)inPixels, inPixelsToCopy);}
+	virtual void			CopyTintedPattern(
+								uint16_t				inX,
+								uint16_t				inY,
+								const uint8_t*			inPattern,
+								uint16_t				inPatternLen,
+								uint16_t				inReps,
+								bool					inVertical,
+								bool					inReverseOrder);
 	/*
 	*	Simulate either vertical or horizontal display addressing
 	*/

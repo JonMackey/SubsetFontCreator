@@ -110,10 +110,13 @@ void TFT_ILI9488::Init(void)
 
 /*
 	Before optimizing FillPixels 320x480 pixels.
-	Fill time = 2184036
+	Fill time = 2184036	(2.1s)
 	
-	After optimizing
-	Fill time =  886859
+	After optimizing for 18-bit fill
+	Fill time =  886859 (88.7ms)
+	
+	After optimizing for 3-bit fill
+	Fill time = 153860	(15ms)
 */
 /********************************* FillPixels *********************************/
 /*
@@ -125,34 +128,130 @@ void TFT_ILI9488::FillPixels(
 	uint16_t	inFillColor)
 {
 #if 1
-	// Note: I tried quadrupling the buffer size from 288 to 1152.  The time
-	// savings was negligable.
-	uint8_t	buffer[288];	// 96 24-bit pixels (96 = 480/5)
-	const uint32_t	kMaxPixels = sizeof(buffer)/3;
-	uint8_t r = k5To6Bit[(inFillColor >> 11)];
-	uint8_t g = (inFillColor >> 3) & 0xFC;
-	uint8_t b = k5To6Bit[inFillColor & 0x1F];
-	BeginTransaction();
+	bool use3Bit = true;
+	uint8_t fillColor = 0;
 	/*
-	*	There are ways to do this more efficiently on a ESP32 or STM32 mcu.
-	*	For ESP32 there's an option to copy a pattern.
-	*	For STM32 there's an option to not receive on the transfer so you only
-	*	have to fill the buffer once.
+	*	This switch determines if 3-bit can be used.
 	*/
-	while (inPixelsToFill)
+	switch (inFillColor)	// BGR
 	{
-		uint32_t	bufferLen = inPixelsToFill > kMaxPixels ? kMaxPixels : inPixelsToFill;
-		uint8_t*	bufferPtr = buffer;
-		for (uint32_t i = 0; i < bufferLen; i++)
+		case 0:			// 000	Black
+			break;
+		case 0x001F:	// 001	Red
+			fillColor = 0b001001;	// Two 3-bit pixels of red
+			break;
+		case 0x07E0:	// 010	Green
+			fillColor = 0b010010;
+			break;
+		case 0x07FF:	// 011	Yellow
+			fillColor = 0b011011;
+			break;
+		case 0xF800:	// 100	Blue
+			fillColor = 0b100100;
+			break;
+		case 0xF81F:	// 101	Magenta
+			fillColor = 0b101101;
+			break;
+		case 0xFFFE:	// 110	Cyan
+			fillColor = 0b110110;
+			break;
+		case 0xFFFF:	// 111	White
+			fillColor = 0b111111;
+			break;
+		default:
+		/*
+		*	The default 18-bit fill is used when inFillColor is not 100% white,
+		*	black, red, green, blue, cyan, magenta or yellow.  These are the
+		*	only colors supported by the 3-bit pixel format.
+		*/
 		{
-			*(bufferPtr++) = r;
-			*(bufferPtr++) = g;
-			*(bufferPtr++) = b;
+			use3Bit = false;
+			// Note: I tried quadrupling the buffer size from 288 to 1152.
+			//		 The time savings was negligable.
+			uint8_t	buffer[288];	// 96 18-bit pixels (96 = 480/5)
+			const uint32_t	kMaxPixels = sizeof(buffer)/3;
+			uint8_t b = k5To6Bit[(inFillColor >> 11)];
+			uint8_t g = (inFillColor >> 3) & 0xFC;
+			uint8_t r = k5To6Bit[inFillColor & 0x1F];
+			BeginTransaction();
+			/*
+			*	There are ways to do this more efficiently on a ESP32 or STM32 mcu.
+			*	For ESP32 there's an option to copy a pattern.
+			*	For STM32 there's an option to not receive on the transfer so you only
+			*	have to fill the buffer once.
+			*/
+			while (inPixelsToFill)
+			{
+				uint32_t	bufferLen = inPixelsToFill > kMaxPixels ? kMaxPixels : inPixelsToFill;
+				uint8_t*	bufferPtr = buffer;
+				for (uint32_t i = 0; i < bufferLen; i++)
+				{
+					*(bufferPtr++) = b;
+					*(bufferPtr++) = g;
+					*(bufferPtr++) = r;
+				}
+				inPixelsToFill -= bufferLen;
+				SPI.transfer(buffer, bufferLen*3);
+			}
+			EndTransaction();
+			break;
 		}
-		inPixelsToFill -= bufferLen;
-		SPI.transfer(buffer, bufferLen*3);
 	}
-	EndTransaction();
+	if (use3Bit)
+	{
+		/*
+		*	Optimization for 3-bit pixels.
+		*/
+		uint8_t	buffer[240];	// 480 3-bit pixels
+		bool	oddPixel = (inPixelsToFill & 1) != 0;
+		uint32_t	pixelPairs = inPixelsToFill/2;
+	
+		BeginTransaction();
+		/*
+		*	If there are an odd number of pixels THEN
+		*	write the odd pixel first.
+		*
+		*	Because in 3-bit format, each byte sent represents two pixels, the
+		*	odd pixel needs to be written as an 18-bit pixel, followed by the
+		*	pixel pairs.  This is done because the row range isn't set prior to
+		*	calling FillPixels, so the memory address won't wrap back to the
+		*	start of the block.  If the row range was set then you could just
+		*	wrap around and write the first pixel twice.
+		*/
+		if (oddPixel)
+		{
+			buffer[0]=fillColor & 4 ? 0xFC : 0;
+			buffer[1]=fillColor & 2 ? 0xFC : 0;
+			buffer[2]=fillColor & 1 ? 0xFC : 0;
+			SPI.transfer(buffer, 3);
+		}
+		if (pixelPairs)
+		{
+			WriteCmd(eCOLMODCmd);	// Set Interface Pixel Format
+			SPI.transfer(0x61);		// to 3-bit
+			WriteCmd(eWRMEMCCmd);	// Continue with write
+			/*
+			*	There are ways to do this more efficiently on a ESP32 or STM32 mcu.
+			*	For ESP32 there's an option to copy a pattern.
+			*	For STM32 there's an option to not receive on the transfer so you only
+			*	have to fill the buffer once.
+			*/
+			while (pixelPairs)
+			{
+				uint32_t	bufferLen = pixelPairs > sizeof(buffer) ? sizeof(buffer) : pixelPairs;
+				for (uint32_t i = 0; i < bufferLen; i++)
+				{
+					buffer[i] = fillColor;	// Lower 6 bits used (2 pixels)
+				}
+				pixelPairs -= bufferLen;
+				SPI.transfer(buffer, bufferLen);
+			}
+			WriteCmd(eCOLMODCmd);	// Set Interface Pixel Format
+			SPI.transfer(0x66);		// back to 18-bit
+			//WriteCmd(eRAMWRCmd);
+		}
+		EndTransaction();
+	}
 #else
 	// Least efficient
 	uint8_t r = k5To6Bit[(inFillColor >> 11)];
@@ -217,7 +316,7 @@ void TFT_ILI9488::WritePixelData(
 	if (inDataLen)
 	{
 #if 1
-		uint8_t	buffer[288];	// 96 24-bit pixels (96 = 480/5)
+		uint8_t	buffer[288];	// 96 18-bit pixels (96 = 480/5)
 		const uint32_t	kMaxPixels = sizeof(buffer)/3;
 
 		while (inDataLen)

@@ -29,7 +29,7 @@
 XFontRH1BitDataStream::XFontRH1BitDataStream(
 	XFont*		inXFont,
 	DataStream*	inSourceStream)
-	: mXFont(inXFont), mSourceStream(inSourceStream)
+	: XFontDataStream(inXFont, inSourceStream)
 {
 }
 

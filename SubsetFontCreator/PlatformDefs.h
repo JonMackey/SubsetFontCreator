@@ -33,14 +33,16 @@
 	#elif  defined _STM32_DEF_
 		#include <pgmspace.h>
 		typedef uint32_t port_t;
-		typedef int16_t pin_t;
+		typedef uint32_t pin_t;
 	#else
 		#include <avr/pgmspace.h>
 		typedef uint8_t port_t;
 		typedef int8_t pin_t;
 	#endif
 #else
-#define memcpy_P memcpy
+#ifndef memcpy_P
+	#define memcpy_P memcpy
 #endif
-
+#include <math.h>
+#endif
 #endif // PlatformDefs_h

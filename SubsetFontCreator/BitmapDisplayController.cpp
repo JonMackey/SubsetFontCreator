@@ -43,9 +43,26 @@ BitmapDisplayController::BitmapDisplayController(
 	uint16_t	inColumns,
 	uint16_t	inBytesPerRow,
 	uint8_t*	inData)
-	: DisplayController(inRows, inColumns),
-	  mBytesPerRow(inBytesPerRow), mData(inData), m1BitRotatedHorizontal(false)
+	: DisplayController(inRows, inColumns), m1BitRotatedHorizontal(false)
 {
+	Initialize(inRows, inColumns, inBytesPerRow, inData);
+}
+
+/********************************* Initialize *********************************/
+/*
+*	This was added to allow for initialization after construction.
+*	In some cases the bitmap "display" isn't available prior to contruction.
+*/
+void BitmapDisplayController::Initialize(
+	uint16_t	inRows,
+	uint16_t	inColumns,
+	uint16_t	inBytesPerRow,
+	uint8_t*	inData)
+{
+	mRows = inRows;
+	mColumns = inColumns;
+	mBytesPerRow = inBytesPerRow;
+	mData = inData;
 	mCurrentRow = mStartRow = mCurrent = (uint32_t*)mData;
 	mStartColumn = 0;
 	mEndOfData = mEndRow = (uint32_t*)&mData[mBytesPerRow * inRows];
@@ -80,11 +97,49 @@ void BitmapDisplayController::SetAddressingMode(
 	}
 }
 
+/*
+*	k5To8Bit is 0 to 31 mapped to 0 to 255.
+*	k6To8Bit is 0 to 63 mapped to 0 to 255.
+*	The values are rounded to the nearest integer rather
+*	than a simple integer mapping which looses precision.
+
+	for (int32_t i = 0; i <= 63; i++)
+	{
+		double j = i;
+		j = ((j/63)*255)+0.5;
+		int32_t k = j;
+		
+		//int32_t k = map(i, 0, 0x1F, 0, 0xFF); << less precise.
+		fprintf(stderr, "0x%X, ", k);
+	}
+*/
+const uint8_t k5To8Bit[] =
+{
+	0x00, 0x08, 0x10, 0x19, 0x21, 0x29, 0x31, 0x3A,
+	0x42, 0x4A, 0x52, 0x5A, 0x63, 0x6B, 0x73, 0x7B,
+	0x84, 0x8C, 0x94, 0x9C, 0xA5, 0xAD, 0xB5, 0xBD,
+	0xC5, 0xCE, 0xD6, 0xDE, 0xE6, 0xEF, 0xF7, 0xFF
+};
+
+const uint8_t k6To8Bit[] =
+{
+	0x00, 0x04, 0x08, 0x0C, 0x10, 0x14, 0x18, 0x1C,
+	0x20, 0x24, 0x28, 0x2D, 0x31, 0x35, 0x39, 0x3D,
+	0x41, 0x45, 0x49, 0x4D, 0x51, 0x55, 0x59, 0x5D,
+	0x61, 0x65, 0x69, 0x6D, 0x71, 0x75, 0x79, 0x7D,
+	0x82, 0x86, 0x8A, 0x8E, 0x92, 0x96, 0x9A, 0x9E,
+	0xA2, 0xA6, 0xAA, 0xAE, 0xB2, 0xB6, 0xBA, 0xBE,
+	0xC2, 0xC6, 0xCA, 0xCE, 0xD2, 0xD7, 0xDB, 0xDF,
+	0xE3, 0xE7, 0xEB, 0xEF, 0xF3, 0xF7, 0xFB, 0xFF
+};
+
 /******************************* Pixel16To24 ***********************************/
 uint32_t Pixel16To24(
 	uint16_t	inPixel16)
 {
-	return(0xFF000000 + ((inPixel16 & 0xF800) << 8) + ((inPixel16 & 0x7E0) << 5) + ((inPixel16 & 0x1F) << 3));
+	
+	return(0xFF000000 + (((uint32_t)k5To8Bit[inPixel16 >> 11]) << 16) + (((uint32_t)k6To8Bit[((inPixel16>>5) & 0x3F)])<<8) + k5To8Bit[inPixel16 & 0x1F]);
+	//return(0xFF000000 + ((inPixel16 & 0xF800) << 8) + ((inPixel16 & 0x7E0) << 5) + ((inPixel16 & 0x1F) << 3));
 }
 
 /********************************* FillPixels *********************************/
@@ -333,3 +388,80 @@ void BitmapDisplayController::StreamCopy(
 		WritePixels(buffer, pixelsToWrite);
 	}
 }
+
+/***************************** CopyTintedPattern ******************************/
+/*
+*	Added as an optimization for drawing anti-aliased lines.  The pattern is
+*	copied inReps times in either the horizontal or vertical direction.
+*
+*	The foreground and background colors need to be set using SetFGColor and
+*	SetBGColor prior to calling this routine.
+*
+*	inTintPattern is an array of tint values (0 to 255.) The tints are converted
+*	to colors using the foreground and background colors. When inReverseOrder is
+*	true, the tint conversion to color values starts at offset inPatternLen-1
+*	and ends at offset 0.
+*/
+void BitmapDisplayController::CopyTintedPattern(
+	uint16_t		inX,
+	uint16_t		inY,
+	const uint8_t*	inTintPattern,
+	uint16_t		inPatternLen,
+	uint16_t		inReps,
+	bool			inVertical,
+	bool			inReverseOrder)
+{
+	//fprintf(stderr, "\t\tMoveTo(%hd, %hd); [%hd]:\n\t\t", inX, inY, inPatternLen);
+	
+	uint16_t	colorPattern[inPatternLen];
+	uint8_t		thisTint;
+	uint8_t		lastTint;
+	uint16_t	color = 0;
+	//fprintf(stderr, "(%hd, %hd) ", inX, inY);
+	if (inReverseOrder)
+	{
+		const uint8_t*	patternPtr = &inTintPattern[inPatternLen-1];
+		lastTint = *patternPtr + 1;
+		for (uint16_t i = 0; i < inPatternLen; i++)
+		{
+			thisTint = *(patternPtr--);
+			//fprintf(stderr, "%hhu ", thisTint);
+			if (lastTint != thisTint)
+			{
+				lastTint = thisTint;
+				color = Calc565Color(mFGColor, mBGColor, thisTint);
+			}
+			colorPattern[i] = color;
+		}
+	} else
+	{
+		lastTint = inTintPattern[0] + 1;
+		for (uint16_t i = 0; i < inPatternLen; i++)
+		{
+			thisTint = inTintPattern[i];
+			//fprintf(stderr, "%hhu ", thisTint);
+			if (lastTint != thisTint)
+			{
+				lastTint = thisTint;
+				color = Calc565Color(mFGColor, mBGColor, thisTint);
+			}
+			colorPattern[i] = color;
+		}
+	}
+	//fprintf(stderr, "\n");
+	uint16_t	relativeWidth = inVertical ? 1 : inPatternLen;
+	for (uint16_t i = inReps; i; i--)
+	{
+		MoveTo(inY, inX);
+		DisplayController::SetColumnRange(relativeWidth);
+		if (inVertical)
+		{
+			inX++;
+		} else
+		{
+			inY++;
+		}
+		CopyPixels(colorPattern, inPatternLen);
+	}
+}
+

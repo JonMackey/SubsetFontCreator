@@ -29,7 +29,7 @@
 XFont16BitDataStream::XFont16BitDataStream(
 	XFont*		inXFont,
 	DataStream*	inSourceStream)
-	: mXFont(inXFont), mSourceStream(inSourceStream)
+	: XFontDataStream(inXFont, inSourceStream)
 {
 }
 

@@ -37,7 +37,7 @@ uint32_t AT24CDataStream::Read(
 	uint32_t	inLength,
 	void*		outBuffer)
 {
-	uint32_t	bytesRead = mAT24C->Read((uint16_t)mCurrent, Clip(inLength), (uint8_t*)outBuffer);
+	uint32_t	bytesRead = mAT24C->Read((uint32_t)mCurrent, Clip(inLength), (uint8_t*)outBuffer);
 	mCurrent+=bytesRead;
 	return(bytesRead);
 }
@@ -49,7 +49,7 @@ uint32_t AT24CDataStream::Write(
 {
 	// Space needs to be preallocated via the constructor, the end doesn't
 	// automatically extend.
-	uint32_t	bytesWritten = mAT24C->Write((uint16_t)mCurrent, Clip(inLength), (const uint8_t*)inBuffer);
+	uint32_t	bytesWritten = mAT24C->Write((uint32_t)mCurrent, Clip(inLength), (const uint8_t*)inBuffer);
 	mCurrent+=bytesWritten;
 	return(bytesWritten);
 }

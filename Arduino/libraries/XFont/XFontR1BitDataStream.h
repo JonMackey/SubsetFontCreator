@@ -24,10 +24,9 @@
 #ifndef XFontR1BitDataStream_h
 #define XFontR1BitDataStream_h
 
-#include "DataStream.h"
-class XFont;
+#include "XFontDataStream.h"
 
-class XFontR1BitDataStream : public DataStream
+class XFontR1BitDataStream : public XFontDataStream
 {
 public:
 							XFontR1BitDataStream(
@@ -50,8 +49,6 @@ public:
 								uint32_t				inLength) const;
 protected:
 	bool		mReadGlyphHeader;
-	XFont*		mXFont;
-	DataStream*	mSourceStream;
 	
 	// State data
 	uint8_t		mBitsInByteIn;

@@ -23,10 +23,9 @@
 #ifndef XFont16BitDataStream_h
 #define XFont16BitDataStream_h
 
-#include "DataStream.h"
-class XFont;
+#include "XFontDataStream.h"
 
-class XFont16BitDataStream : public DataStream
+class XFont16BitDataStream : public XFontDataStream
 {
 public:
 							XFont16BitDataStream(
@@ -50,8 +49,6 @@ public:
 protected:
 	bool		mOneBit;
 	bool		mReadGlyphHeader;
-	XFont*		mXFont;
-	DataStream*	mSourceStream;
 	
 	// State data
 	union

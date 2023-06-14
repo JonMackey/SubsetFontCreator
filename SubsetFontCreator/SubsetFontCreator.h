@@ -119,7 +119,8 @@ protected:
 								const char*				inExportPath,
 								FILE*					inOutputFile,
 								std::string&			inSubsetStr,
-								bool					inIncludeGlyphData);
+								bool					inIncludeGlyphData,
+								int						inOptions);
 	static uint8_t* 		CreateRotatedData(
 								const uint8_t*			inBitmap,
 								int						inRows,

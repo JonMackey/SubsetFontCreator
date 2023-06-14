@@ -494,4 +494,73 @@ void TFT_ST77XX::CopyPixels(
 	EndTransaction();
 }
 
+/***************************** CopyTintedPattern ******************************/
+/*
+*	Added as an optimization for drawing anti-aliased lines.  The pattern is
+*	copied inReps times in either the horizontal or vertical direction.
+*
+*	The foreground and background colors need to be set using SetFGColor and
+*	SetBGColor prior to calling this routine.
+*
+*	inTintPattern is an array of tint values (0 to 255.) The tints are converted
+*	to colors using the foreground and background colors. When inReverseOrder is
+*	true, the tint conversion to color values starts at offset inPatternLen-1
+*	and ends at offset 0.
+*/
+void TFT_ST77XX::CopyTintedPattern(
+	uint16_t		inX,
+	uint16_t		inY,
+	const uint8_t*	inTintPattern,
+	uint16_t		inPatternLen,
+	uint16_t		inReps,
+	bool			inVertical,
+	bool			inReverseOrder)
+{	
+	uint16_t	colorPattern[inPatternLen];
+	uint8_t		thisTint;
+	uint8_t		lastTint;
+	uint16_t	color = 0;
+	if (inReverseOrder)
+	{
+		const uint8_t*	patternPtr = &inTintPattern[inPatternLen-1];
+		lastTint = *patternPtr + 1;
+		for (uint16_t i = 0; i < inPatternLen; i++)
+		{
+			thisTint = *(patternPtr--);
+			if (lastTint != thisTint)
+			{
+				lastTint = thisTint;
+				color = Calc565Color(mFGColor, mBGColor, thisTint);
+			}
+			colorPattern[i] = color;
+		}
+	} else
+	{
+		lastTint = inTintPattern[0] + 1;
+		for (uint16_t i = 0; i < inPatternLen; i++)
+		{
+			thisTint = inTintPattern[i];
+			if (lastTint != thisTint)
+			{
+				lastTint = thisTint;
+				color = Calc565Color(mFGColor, mBGColor, thisTint);
+			}
+			colorPattern[i] = color;
+		}
+	}
+	uint16_t	relativeWidth = inVertical ? 1 : inPatternLen;
+	for (uint16_t i = inReps; i; i--)
+	{
+		MoveTo(inY, inX);
+		DisplayController::SetColumnRange(relativeWidth);
+		if (inVertical)
+		{
+			inX++;
+		} else
+		{
+			inY++;
+		}
+		CopyPixels(colorPattern, inPatternLen);
+	}
+}
 

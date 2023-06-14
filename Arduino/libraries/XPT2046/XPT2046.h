@@ -45,14 +45,32 @@ public:
 	void					begin(
 								uint8_t					inRotation = 0);
 	
-	bool					DisplayTouched(void);
+	bool					PenStateChanged(void);
+	inline bool				PenIsDown(void) const
+								{return(!digitalRead(mPenIRQPin));}
 	bool					Read(
 								uint16_t&				outX,
 								uint16_t&				outY,
 								uint16_t&				outZ);
 	bool					Align(
 								uint16_t				inDesiredOffset = 20);
+	void					StartAlign(void);
+	bool					AlignmentReady(void) const;
 	void					DumpMinMax(void) const;
+	
+	inline bool				InvertX(void) const
+								{return(mInvertX);}
+	void					ToggleInvertX(void);
+	
+	
+	inline bool				InvertY(void) const
+								{return(mInvertY);}
+	void					ToggleInvertY(void);
+	
+	void					GetMinMax(
+								uint16_t				outMinMax[4]) const;
+	void					SetMinMax(
+								const uint16_t			inMinMax[4]);
 	
 protected:
 	pin_t		mCSPin;
@@ -60,6 +78,7 @@ protected:
 	uint8_t		mRotation;
 	uint16_t	mRows;
 	uint16_t	mColumns;
+	bool		mPenStateIsDown;
 	/*
 	*	One of the modules I have has X inverted, opposite of the display.
 	*/
@@ -78,7 +97,7 @@ protected:
 	volatile port_t*	mChipSelPortReg;
 	port_t		mChipSelBitMask;
 	SPISettings	mSPISettings;
-	static volatile bool	sDisplayTouched;
+	static volatile bool	sPenStateChanged;
 
 
 	bool					ReadRaw(
@@ -106,7 +125,7 @@ protected:
 								SPI.endTransaction();
 							}
 
-	static void				DisplayTouchedISR(void);
+	static void				PenStateChangedISR(void);
 
 };
 #endif // XPT2046_h

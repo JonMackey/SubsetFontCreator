@@ -1,5 +1,5 @@
 /*
-*	XFont.cpp, Copyright Jonathan Mackey 2019
+*	XFont.cpp, Copyright Jonathan Mackey 2019-2023
 *	Class for displaying subset bitmap fonts on select common displays.
 *
 *	GNU license:
@@ -39,12 +39,13 @@
 *	This implementation only supports up to 64KB of glyph data (16 bit offsets.)
 */
 
+const uint16_t	XFont::kEllipsisCharcode = 0x2026;
+
 /*********************************** XFont ************************************/
 XFont::XFont(void)
 	: mDisplay(nullptr), mFontRows(0),
 	  mHighlightEnabled(false), mFont(nullptr),
-	  mTextColor(0xFFFF), mTextBGColor(0),
-	  mHighlightColor(0), mBGHighlightColor(0xFFFF)
+	  mTextColor(0xFFFF), mTextBGColor(0), mStartCol(0)
 {
 }
 
@@ -54,6 +55,7 @@ void XFont::SetDisplay(
 	Font*				inFont)
 {
 	mDisplay = inDisplay;
+	mFont = nullptr;	// Force a load
 	SetFont(inFont);
 }
 
@@ -61,80 +63,24 @@ void XFont::SetDisplay(
 void XFont::SetFont(
 	Font*	inFont)
 {
-	mFont = inFont;
-	if (inFont)
+	if (inFont != mFont)
 	{
-		memcpy_P(&mFontHeader, mFont->header, sizeof(FontHeader));
-		if (mDisplay)
+		mFont = inFont;
+		mCharcode = 0;
+		if (inFont)
 		{
-			mFontRows = (mFontHeader.rotated == 0 || (mFontHeader.height & 7) == 0) ?
-										mFontHeader.height : (mFontHeader.height & 0xF8) + 8;
-			if (mDisplay->BitsPerPixel() == 1)
+			memcpy_P(&mFontHeader, mFont->header, sizeof(FontHeader));
+			if (mDisplay)
 			{
-				mFontRows = (mFontHeader.height + 7)/8;
+				mFontRows = (mFontHeader.rotated == 0 || (mFontHeader.height & 7) == 0) ?
+											mFontHeader.height : (mFontHeader.height & 0xF8) + 8;
+				if (mDisplay->BitsPerPixel() == 1)
+				{
+					mFontRows = (mFontHeader.height + 7)/8;
+				}
 			}
+			mEllipsisWidth = LoadGlyph(kEllipsisCharcode) ? mGlyph.advanceX : 0;
 		}
-	}
-}
-
-/**************************** EnableHighlighting ******************************/
-/*
-*	Highlighting works by swapping the text color with the highlight color.
-*/
-void XFont::EnableHighlighting(
-	bool	inEnable)
-{
-	if (inEnable != mHighlightEnabled)
-	{
-		mHighlightEnabled = inEnable;
-		uint16_t	temp = mTextColor;
-		mTextColor = mHighlightColor;
-		mHighlightColor = temp;
-		temp = mTextBGColor;
-		mTextBGColor = mBGHighlightColor;
-		mBGHighlightColor = temp;
-	}
-}
-
-/******************************* SetTextColor *********************************/
-void XFont::SetTextColor(
-	uint16_t	inTextColor)
-{
-	if (!mHighlightEnabled)
-	{
-		mTextColor = inTextColor;
-	} else
-	{
-		mHighlightColor = inTextColor;
-	}
-}
-
-/****************************** SetBGTextColor ********************************/
-void XFont::SetBGTextColor(
-	uint16_t	inBGTextColor)
-{
-	if (!mHighlightEnabled)
-	{
-		mTextBGColor = inBGTextColor;
-	} else
-	{
-		mBGHighlightColor = inBGTextColor;
-	}
-}
-
-/**************************** SetHighlightColors ******************************/
-void XFont::SetHighlightColors(
-	uint16_t	inHighlightColor,
-	uint16_t	inBGHighlightColor)
-{
-	if (mHighlightEnabled)
-	{
-		mTextColor = inHighlightColor;
-		mTextBGColor = inBGHighlightColor;
-	} else
-	{
-		mHighlightColor = inHighlightColor;
-		mBGHighlightColor = inBGHighlightColor;
 	}
 }
 
@@ -236,145 +182,179 @@ bool XFont::LoadGlyphHeader(
 /********************************* LoadGlyph **********************************/
 /*
 *	Seeks the DataStream mGlyphData to point to the glyph data for inCharcode.
-*	Returns entryIndex within the glyphDataOffsets if the glyph was loaded.
+*	Returns true if the glyph was loaded.
 *	mGlyph is initialized from the stream.
-*	0xFFFF is returned if the glyph doesn't exist.
 */
-uint16_t XFont::LoadGlyph(
+bool XFont::LoadGlyph(
 	uint16_t	inCharcode)
 {
-	uint16_t	entryIndex = FindGlyph(inCharcode);
-	if (LoadGlyphHeader(entryIndex))
+	bool	success = true;
+	uint16_t	entryIndex = mCharcode != inCharcode ? FindGlyph(inCharcode) : mCharcodeIndex;
+	/*
+	*	Note that LoadGlyphHeader needs to be called before each DrawCharcode
+	*	call because of a kluge in XFontDataStream::Read that uses the first
+	*	read as a flag to initialize state variables.  If this wasn't the case
+	*	then the loading could be skipped as an optimization. 
+	*/
+	if (entryIndex != 0xFFFF &&
+		LoadGlyphHeader(entryIndex))
 	{
-		mCharcode = inCharcode;	// For future optimization
+		mCharcode = inCharcode;
+		mCharcodeIndex = entryIndex;
+	} else
+	{
+		success = false;
 	}
-	return(entryIndex);
+	return(success);
 }
+
+/******************************** DrawCharcode ********************************/
+/*
+*	Draws a single glyph at the current display position.
+*	The display column is advanced.
+*	Do not pass control characters.
+*	Do not set inFakeMonospaceWidth if the font is already monospace.
+*/
+bool XFont::DrawCharcode(
+	uint16_t	inCharcode,
+	uint8_t		inFakeMonospaceWidth)
+{
+	bool doContinue = LoadGlyph(inCharcode);
+	while (doContinue)
+	{
+		bool	rotated = mFontHeader.rotated;
+		bool	vertical = false;
+		uint16_t	startRow = mDisplay->GetRow();
+		uint8_t	rows = mGlyph.rows;
+		uint8_t	columns = mGlyph.columns;
+		if (inFakeMonospaceWidth)
+		{
+			mGlyph.x = (inFakeMonospaceWidth - columns)/2;
+			mGlyph.advanceX = inFakeMonospaceWidth;
+		}
+		if (mFontHeader.oneBit)
+		{
+			vertical = rotated && !mFontHeader.horizontal;
+			if (mDisplay->BitsPerPixel() == 1)
+			{
+				if (rotated)
+				{
+					rows = (rows + mGlyph.y + 7)/8;
+				} else
+				{
+					columns = (columns + 7)/8;
+				}
+			} else if (rotated)
+			{
+		#ifdef __MACH__
+				rows = ((rows + mGlyph.y + 7)/8) * 8;
+		#else
+				doContinue = false;
+				break;	// rotated only supported by 1 bit displays
+		#endif
+			}
+		}
+		uint16_t	startColumn = mDisplay->GetColumn();
+		uint16_t	rowsWritten = 0;
+		/*
+		*	Clear the pixels before the glyph...
+		*/
+		if (mGlyph.x)
+		{
+			mDisplay->FillBlock(mFontRows, mGlyph.x, mTextBGColor);
+		}
+		/*
+		*	One bit rotated will have the y offset shifted into the data
+		*	by the XFontR1BitDataStream or XFontRH1BitDataStream.
+		*
+		*	If it's not rotated AND
+		*	the glyph needs to be shifted down THEN
+		*	Clear the pixels above the glyph and adjust the top row.
+		*/
+		if (!rotated &&
+			mGlyph.y &&
+			columns)
+		{
+			mDisplay->FillBlock(mGlyph.y, columns, mTextBGColor);
+			mDisplay->MoveTo(startRow + mGlyph.y, startColumn + mGlyph.x);
+			rowsWritten = mGlyph.y;
+		}
+		if (vertical)
+		{
+			mDisplay->SetAddressingMode(DisplayController::eVertical);
+		}
+		doContinue = mDisplay->StreamCopyBlock(mFont->glyphData, rows, columns);
+		if (vertical)
+		{
+			mDisplay->SetAddressingMode(DisplayController::eHorizontal);
+		}
+		if (doContinue)
+		{
+			rowsWritten += rows;
+			/*
+			*	Fill the pixels below the glyph with the BG color...
+			*/
+			if (columns &&
+				rowsWritten < mFontRows)
+			{
+				uint16_t	savedColumn = mDisplay->GetColumn();
+				mDisplay->MoveTo(startRow + rowsWritten, startColumn+mGlyph.x);
+				mDisplay->FillBlock(mFontRows-rowsWritten, columns, mTextBGColor);
+				mDisplay->MoveToColumn(savedColumn);
+			}
+			mDisplay->MoveToRow(startRow);
+			doContinue = mDisplay->GetColumn() != 0;	// don't wrap
+			/*
+			*	Fill the pixels after the glyph (advance) with the BG color...
+			*/
+			if (doContinue)
+			{
+				if (mGlyph.advanceX > (mGlyph.x + columns))
+				{
+					mDisplay->FillBlock(mFontRows, mGlyph.advanceX - mGlyph.x - columns, mTextBGColor);
+					doContinue = mDisplay->GetColumn() != 0;	// don't wrap
+				}
+				mDisplay->MoveToColumn(startColumn+mGlyph.advanceX);
+			}
+		}
+		break;
+	}
+	return(doContinue);
+}
+	
 //#include <stdio.h>
 /********************************** DrawStr ***********************************/
 /*
 *	inUTF8Str is the string to be drawn starting at the current x,y position
 *	of the display.  A glyph will only be drawn if it completely fits without
-*	being truncated.  Drawing stops on the first truncation or the end of string
-*	whichever occurs first.
+*	being truncated.  Drawing stops on the first truncation, the end of string,
+*	or the character limit, whichever occurs first.
+*	A character limit of value 0 is unlimited.
 */
 void XFont::DrawStr(
 	const char*	inUTF8Str,
 	bool		inClearTillEOL,
-	uint8_t		inFakeMonospaceWidth)
+	uint8_t		inFakeMonospaceWidth,
+	uint8_t		inCharacterLimit)
 {
-	uint16_t strStartColumn = mDisplay->GetColumn();
 	const char*	strPtr = inUTF8Str;
-	bool	oneBit = mFontHeader.oneBit;
-	bool	rotated = mFontHeader.rotated;
-	bool	vertical = oneBit && rotated && !mFontHeader.horizontal;
-	DataStream*	glyphData = mFont->glyphData;
 	uint16_t	startRow = mDisplay->GetRow();
-	uint16_t	startColumn = mDisplay->GetColumn();
+	uint16_t	strStartColumn = mDisplay->GetColumn();
+	mStartCol = strStartColumn;
+	uint16_t	startColumn = strStartColumn;
 
 	if (inFakeMonospaceWidth && mFontHeader.monospaced)
 	{
 		inFakeMonospaceWidth = 0;
 	}
-	for (uint16_t charcode = NextChar(strPtr); charcode;
-								charcode = NextChar(strPtr))
+	uint8_t	charactersDrawn = 0;
+	for (uint16_t charcode = NextChar(strPtr);
+			charcode && (inCharacterLimit == 0 || charactersDrawn < inCharacterLimit);
+				charcode = NextChar(strPtr), charactersDrawn++)
 	{
 		if (charcode >= ' ')
 		{
-			bool doContinue = LoadGlyph(charcode) != 0xFFFF;
-			if (doContinue)
-			{
-				uint8_t	rows = mGlyph.rows;
-				uint8_t	columns = mGlyph.columns;
-				if (inFakeMonospaceWidth)
-				{
-					mGlyph.x = (inFakeMonospaceWidth - columns)/2;
-					mGlyph.advanceX = inFakeMonospaceWidth;
-				}
-				if (oneBit)
-				{
-					if (mDisplay->BitsPerPixel() == 1)
-					{
-						if (rotated)
-						{
-							rows = (rows + mGlyph.y + 7)/8;
-						} else
-						{
-							columns = (columns + 7)/8;
-						}
-					} else if (rotated)
-					{
-				#ifdef __MACH__
-						rows = ((rows + mGlyph.y + 7)/8) * 8;
-				#else
-						break;	// rotated only supported by 1 bit displays
-				#endif
-					}
-				}
-				startColumn = mDisplay->GetColumn();
-				uint16_t	rowsWritten = 0;
-				/*
-				*	Clear the pixels before the glyph...
-				*/
-				if (mGlyph.x)
-				{
-					mDisplay->FillBlock(mFontRows, mGlyph.x, mTextBGColor);
-				}
-				/*
-				*	One bit rotated will have the y offset shifted into the data
-				*	by the XFontR1BitDataStream or XFontRH1BitDataStream.
-				*
-				*	If it's not rotated AND
-				*	the glyph needs to be shifted down THEN
-				*	Clear the pixels above the glyph and adjust the top row.
-				*/
-				if (!rotated &&
-					mGlyph.y &&
-					columns)
-				{
-					mDisplay->FillBlock(mGlyph.y, columns, mTextBGColor);
-					mDisplay->MoveTo(startRow + mGlyph.y, startColumn + mGlyph.x);
-					rowsWritten = mGlyph.y;
-				}
-				if (vertical)
-				{
-					mDisplay->SetAddressingMode(DisplayController::eVertical);
-				}
-				doContinue = mDisplay->StreamCopyBlock(glyphData, rows, columns);
-				if (vertical)
-				{
-					mDisplay->SetAddressingMode(DisplayController::eHorizontal);
-				}
-				if (doContinue)
-				{
-					rowsWritten += rows;
-					/*
-					*	Clear the pixels below the glyph...
-					*/
-					if (columns &&
-						rowsWritten < mFontRows)
-					{
-						uint16_t	savedColumn = mDisplay->GetColumn();
-						mDisplay->MoveTo(startRow + rowsWritten, startColumn+mGlyph.x);
-						mDisplay->FillBlock(mFontRows-rowsWritten, columns, mTextBGColor);
-						mDisplay->MoveToColumn(savedColumn);
-					}
-					mDisplay->MoveToRow(startRow);
-					doContinue = mDisplay->GetColumn() != 0;	// don't wrap
-					/*
-					*	Clear the pixels after the glyph...
-					*/
-					if (doContinue)
-					{
-						if (mGlyph.advanceX > (mGlyph.x + columns))
-						{
-							mDisplay->FillBlock(mFontRows, mGlyph.advanceX - mGlyph.x - columns, mTextBGColor);
-							doContinue = mDisplay->GetColumn() != 0;	// don't wrap
-						}
-						mDisplay->MoveToColumn(startColumn+mGlyph.advanceX);
-					}
-				}
-			}
+			bool doContinue = DrawCharcode(charcode, inFakeMonospaceWidth);
 			if (!doContinue)
 			{
 				doContinue = SkipToNextLine(strPtr);
@@ -422,6 +402,10 @@ void XFont::EraseTillEndOfLine(void)
 }
 
 /****************************** EraseTillColumn *******************************/
+/*
+*	Erases the area from the current column (which is generally the end column
+*	of the last call to DrawStr), till inColumn.
+*/
 void XFont::EraseTillColumn(
 	uint16_t	inColumn)
 {
@@ -431,6 +415,130 @@ void XFont::EraseTillColumn(
 		// FillBlock will clip the requested colunms if wider than the display.
 		mDisplay->FillBlock(mFontRows, inColumn-column, mTextBGColor);
 	}
+}
+
+/****************************** EraseFromColumn *******************************/
+/*
+*	Erase from the inColumn to the starting column of the last call to DrawStr().
+*	This is used for centered and right justified strings to erase an area to
+*	the left of the string.  For centered strings you may need to call both
+*	EraseFromColumn and EraseTillColumn, calling EraseTillColumn first.
+*/
+void XFont::EraseFromColumn(
+	uint16_t	inColumn)
+{
+	if (inColumn < mStartCol)
+	{
+		mDisplay->MoveToColumn(inColumn);
+		mDisplay->FillBlock(mFontRows, mStartCol-inColumn, mTextBGColor);
+	}
+}
+
+/******************************** DrawAligned *********************************/
+/*
+*	Note: This is an updated Draw routine that combines DrawStr,
+*	DrawRightJustified, and DrawCentered, with the option of inserting an
+*	ellipsis.  This only supports strings without control characters.
+*
+*	inUTF8Str is the string to be drawn.
+*	inTextAlignment determines the drawing alignment.
+*	inUseEllipsis determines whether the text is truncated with or without an
+*	ellipsis.
+*
+*	Not supported by 1 bit displays.
+*/
+void XFont::DrawAligned(
+	const char*				inUTF8Str,
+	int32_t					inX,
+	int32_t					inY,
+	int32_t					inWidth,
+	XFont::ETextAlignment	inAlignment,
+	bool					inEraseUnusedArea)
+{
+	mDisplay->ClipX(inX, inWidth);
+	const char*	strPtr = inUTF8Str;
+	
+	/*
+	*	Measure each character and stop when the width is exceeded or the end
+	*	of the string, which ever occurs first.
+	*/
+	uint16_t	width = 0;
+	uint16_t 	charcode = NextChar(strPtr);
+	uint16_t	prevCharcode = 0;
+	uint16_t	charCount = 0;
+	uint16_t	ellipsisCharCount = 0;
+	uint16_t	truncatedWidth = 0;
+	bool		needsTruncation = false;
+	for (; charcode; charcode = NextChar(strPtr), charCount++)
+	{
+		if (charcode >= ' ')
+		{
+			if (prevCharcode == charcode ||
+				LoadGlyph(charcode))
+			{
+				prevCharcode = charcode;
+				width += mGlyph.advanceX;
+				if (width <= inWidth)
+				{
+					/*
+					*	In case truncation may be needed, save the char count
+					*	at which the ellipsis will fit.
+					*/
+					if (!truncatedWidth &&
+						(width + mEllipsisWidth) > inWidth)
+					{
+						ellipsisCharCount = charCount +1;
+						truncatedWidth = width - mGlyph.advanceX + mEllipsisWidth;
+					}
+					continue;
+				}
+				/*
+				*	At this point the string is too wide.
+				*
+				*	If this was the last charcode AND
+				*	removing the width of the ellipsis allows the string to fit THEN
+				*	exit the loop, the string doesn't need to be truncated.
+				*/
+				if (ellipsisCharCount)
+				{
+					charCount = ellipsisCharCount-1;
+					width = truncatedWidth;
+					needsTruncation = true;
+				}
+			}
+		/*
+		*	Else, charcode is not supported by this routine, exit loop
+		*/
+		}
+		break;
+	}
+	int32_t	x = inX;
+	if (inAlignment == eAlignRight)
+	{
+		x += (inWidth - width);
+	} else if (inAlignment == eAlignCenter)
+	{
+		x += ((inWidth - width)/2);
+	}
+	mDisplay->MoveTo(inY, x);
+	DrawStr(inUTF8Str, false, 0, charCount);
+	if (needsTruncation &&
+		inWidth > mEllipsisWidth)
+	{
+		DrawCharcode(kEllipsisCharcode);
+	}
+	if (inEraseUnusedArea)
+	{
+		if (inAlignment != eAlignRight)
+		{
+			EraseTillColumn(inX+inWidth);
+		}
+		if (inAlignment != eAlignLeft)
+		{
+			EraseFromColumn(inX);
+		}
+	}
+
 }
 
 /***************************** DrawRightJustified *****************************/
@@ -535,6 +643,14 @@ uint8_t XFont::WidestGlyph(
 	return(widestGlyph);
 }
 
+/******************************* LoadFirstGlyph *******************************/
+bool XFont::LoadFirstGlyph(
+	const char*	inUTF8Str)
+{
+	uint16_t charcode = NextChar(inUTF8Str);
+	return(charcode != 0 && LoadGlyph(charcode));
+}
+
 /********************************* MeasureStr *********************************/
 bool XFont::MeasureStr(
 	const char*	inUTF8Str,
@@ -571,7 +687,7 @@ bool XFont::MeasureStr(
 	{
 		if (charcode >= ' ')
 		{
-			allGlyphsExist = LoadGlyph(charcode) != 0xFFFF;
+			allGlyphsExist = LoadGlyph(charcode);
 			if (allGlyphsExist)
 			{
 				if (inFakeMonospaceWidth)
@@ -716,35 +832,21 @@ bool XFont::MoveTo(
 uint16_t XFont::Calc565Color(
 	uint8_t		inTint)
 {
-	return(Calc565Color(mTextColor, mTextBGColor, inTint));
+	return(DisplayController::Calc565Color(mTextColor, mTextBGColor, inTint));
 }
 
-/******************************** Calc565Color ********************************/
-uint16_t XFont::Calc565Color(
-	uint16_t	inFG,
-	uint16_t	inBG,
-	uint8_t		inTint)
+/****************************** XFontDataStream *******************************/
+XFontDataStream::XFontDataStream(
+	XFont*		inXFont,
+	DataStream*	inSourceStream)
+	: mXFont(inXFont), mSourceStream(inSourceStream)
 {
-	uint16_t color;
-	if (inTint == 0xFF)
-	{
-		color = inFG;
-	} else if (inTint == 0)
-	{
-		color = inBG;
-	} else if (inBG != 0)
-	{
-		uint8_t	bgTint = 255 - inTint;
-		color = ((((inFG >> 11) * inTint + (inBG >> 11) * bgTint) / 255) << 11) +
-				(((((inFG >> 5) & 0x3F) * inTint + ((inBG >> 5) & 0x3F) * bgTint) / 255) << 5) +
-				(((inFG & 0x1F) * inTint + (inBG & 0x1F) * bgTint) / 255);
-	} else
-	{
-		color = ((((inFG >> 11) * inTint) / 255) << 11) +
-				(((((inFG >> 5) & 0x3F) * inTint) / 255) << 5) +
-				((((inFG & 0x1F) * inTint) / 255));
-	}
-	return(color);
 }
 
-
+/******************************** MakeCurrent *********************************/
+XFont* XFont::Font::MakeCurrent(void)
+{
+	XFont* xFont = GetXFont();
+	xFont->SetFont(this);
+	return(xFont);
+}

@@ -1,5 +1,5 @@
 /*
-*	DisplayController.h, Copyright Jonathan Mackey 2019
+*	DisplayController.h, Copyright Jonathan Mackey 2019-2023
 *	Base class for a display controller.
 *
 *	GNU license:
@@ -42,7 +42,6 @@ typedef struct Rect8_t
 								{memcpy_P(this, &inRect, 4);}
 } Rect8_t;
 
-
 class DisplayController
 {
 public:
@@ -75,6 +74,17 @@ public:
 	bool					WillFit(
 								uint16_t				inRows,
 								uint16_t				inColumns);
+	static int32_t			Clip(
+								int32_t&				ioCoord,
+								int32_t&				ioLen,
+								int32_t					inMaxCoord);
+	int32_t					ClipX(
+								int32_t&				ioXCoord,
+								int32_t&				ioWidth);
+	int32_t					ClipY(
+								int32_t&				ioYCoord,
+								int32_t&				ioHeight);
+
 	uint16_t				GetRow(void) const
 								{return(mRow);}
 	uint16_t				GetColumn(void) const
@@ -120,6 +130,12 @@ public:
 								uint16_t				inWidth,
 								uint16_t				inHeight,
 								uint16_t				inFillColor);
+	void					FillTintedRect(
+								uint16_t				inX,
+								uint16_t				inY,
+								uint16_t				inWidth,
+								uint16_t				inHeight,
+								uint8_t					inTint);
 	void					FillRect8(
 								const Rect8_t*			inRect,
 								uint16_t				inFillColor);
@@ -136,6 +152,13 @@ public:
 								uint16_t				inHeight,
 								uint16_t				inColor,
 								uint8_t					inThickness = 1);
+	void					DrawTintedFrame(
+								uint16_t				inX,
+								uint16_t				inY,
+								uint16_t				inWidth,
+								uint16_t				inHeight,
+								uint8_t					inTint,
+								uint8_t					inThickness = 1);
 	void					DrawFrame8(
 								const Rect8_t*			inRect,
 								uint16_t				inColor,
@@ -144,8 +167,59 @@ public:
 //								const Rect8_t*			inRect,
 //								uint16_t				inColor,
 //								uint8_t					inThickness = 1);
-
-	void					DrawAlignmentPoints(void);
+	enum ECircleOctant
+	{
+		eNNEOctant = 1,
+		eENEOctant = 2,
+		eESEOctant = 4,
+		eSSEOctant = 8,
+		eSSWOctant = 0x10,
+		eWSWOctant = 0x20,
+		eWNWOctant = 0x40,
+		eNNWOctant = 0x80,
+		eNEQuarter = eNNEOctant+eENEOctant,
+		eSEQuarter = eESEOctant+eSSEOctant,
+		eSWQuarter = eSSWOctant+eWSWOctant,
+		eNWQuarter = eWNWOctant+eNNWOctant,
+		eNorthHalf = eNEQuarter+eNWQuarter,
+		eSouthHalf = eSWQuarter+eSEQuarter,
+		eEastHalf = eNEQuarter+eSEQuarter,
+		eWestHalf = eNWQuarter+eSWQuarter,
+		eFullCircle = eNorthHalf+eSouthHalf,
+		eOddOctants = eNNEOctant+eESEOctant+eSSWOctant+eWNWOctant,
+		eEvenOctants = eENEOctant+eSSEOctant+eWSWOctant+eNNWOctant
+	};
+	uint8_t					DrawCircle(
+								int16_t					inCenterX,
+								int16_t					inCenterY,
+								int16_t					inRadius,
+								int16_t					inThickness,
+								uint8_t					inOctants = eFullCircle,
+								int16_t					inOctantXOffset = 0,
+								int16_t					inOctantYOffset = 0);
+	void					DrawLine(
+								int16_t					inX0,
+								int16_t					inY0,
+								int16_t					inX1,
+								int16_t					inY1,
+								int16_t					inThickness,
+								bool					inUseMask = false);
+	virtual void			CopyTintedPattern(
+								uint16_t				inX,
+								uint16_t				inY,
+								const uint8_t*			inPattern,
+								uint16_t				inPatternLen,
+								uint16_t				inReps,
+								bool					inVertical,
+								bool					inReverseOrder);
+	uint16_t				DrawRoundedRect(
+								int16_t					inX,
+								int16_t					inY,
+								int16_t					inWidth,
+								int16_t					inHeight,
+								int16_t					inRadius,
+								uint8_t					inFillTint=255,
+								bool					inFrameOnly = false);
 
 	/*
 	*	SetColumnRange: Sets a the column clipping relative to the current
@@ -215,12 +289,55 @@ public:
 	};
 	virtual void			SetAddressingMode(
 								EAddressingMode			inAddressingMode = eHorizontal) = 0;
+	/*
+	*	Calc565Color was moved from XFont.h to support anti-aliased lines.
+	*/
+	static uint16_t			Calc565Color(
+								uint16_t				inFG,
+								uint16_t				inBG,
+								uint8_t					inTint);
+	uint16_t				Calc565Color(
+								uint8_t					inTint);
+	/*
+	*	The foreground and background colors are used by some of the newer
+	*	routines to avoid constantly passing these colors.
+	*	See DrawCircle() as an example.
+	*/
+	void					SetFGColor(
+								uint16_t				inFGColor)
+								{mFGColor = inFGColor;}
+	uint16_t				GetFGColor(void) const
+								{return(mFGColor);}
+	void					SetBGColor(
+								uint16_t				inBGColor)
+								{mBGColor = inBGColor;}
+	uint16_t				GetBGColor(void) const
+								{return(mBGColor);}
+	static inline void		SwapInt16(
+								int16_t&				ioA,
+								int16_t&				ioB)
+							{int16_t	tmp = ioA; ioA = ioB; ioB = tmp;}
+
+	static inline void		SwapInt32(
+								int32_t&				ioA,
+								int32_t&				ioB)
+							{int32_t	tmp = ioA; ioA = ioB; ioB = tmp;}
+#ifdef __MACH__
+	static int32_t			map(
+								int32_t 				x,
+								int32_t 				inMin,
+								int32_t 				inMax,
+								int32_t 				outMin,
+								int32_t 				outMax);
+#endif
 protected:
 	uint16_t	mRows;
 	uint16_t	mColumns;
 	uint16_t	mRow;
 	uint16_t	mColumn;
 	EAddressingMode	mAddressingMode;
+	uint16_t	mFGColor;
+	uint16_t	mBGColor;
 };
 
 #endif // DisplayController_h

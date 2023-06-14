@@ -25,7 +25,7 @@
 #include <SPI.h>
 #include "XPT2046.h"
 
-volatile bool	XPT2046::sDisplayTouched;
+volatile bool	XPT2046::sPenStateChanged;
 
 /********************************** XPT2046 ***********************************/
 XPT2046::XPT2046(
@@ -43,8 +43,7 @@ XPT2046::XPT2046(
 		mRows(inHeight), mColumns(inWidth),
 		mSPISettings(2000000, MSBFIRST, SPI_MODE0),
 		mMinMax{inMinX, inMaxX, inMinY, inMaxY},
-		mInvertX(inInvertX), mInvertY(inInvertY),
-		mAlignXY{0x7FF, 0x7FF, 0x7FF, 0x7FF}
+		mInvertX(inInvertX), mInvertY(inInvertY)
 {
 }
 
@@ -60,12 +59,12 @@ void XPT2046::begin(
 		digitalWrite(mCSPin, HIGH);
 		pinMode(mCSPin, OUTPUT);
 	}
-	sDisplayTouched = false;
+	sPenStateChanged = false;
 	SetRotation(inRotation);
 	if (mPenIRQPin >= 0)
 	{
 		pinMode(mPenIRQPin, INPUT);
-		attachInterrupt(digitalPinToInterrupt(mPenIRQPin), XPT2046::DisplayTouchedISR, FALLING);
+		attachInterrupt(digitalPinToInterrupt(mPenIRQPin), XPT2046::PenStateChangedISR, CHANGE);
 	}
 }
 
@@ -83,30 +82,44 @@ void XPT2046::SetRotation(
 	}
 }
 
-/******************************* DisplayTouched *******************************/
-bool XPT2046::DisplayTouched(void)
+/******************************** ToggleInvertX *******************************/
+void XPT2046::ToggleInvertX(void)
 {
-	bool touched = false;
+	mInvertX = !mInvertX;
+}
 
-	// Ensure that the touch lasts more than mDebouncePeriod.
-	if (sDisplayTouched)
+/******************************** ToggleInvertY *******************************/
+void XPT2046::ToggleInvertY(void)
+{
+	mInvertY = !mInvertY;
+}
+
+/****************************** PenStateChanged *******************************/
+bool XPT2046::PenStateChanged(void)
+{
+	bool penStateChanged = false;
+
+	// Ensure that the change lasts more than mDebouncePeriod.
+	if (sPenStateChanged)
 	{
 		if (!mDebouncePeriod.Get())
 		{
-			mDebouncePeriod.Set(20);	// 20ms
+			/*
+			*	If the debounce period is too long you miss real changes to
+			*	the pen state.  It's still not perfect.  Some of the state
+			*	changes are missed on very light or fast touches.
+			*/
+			mDebouncePeriod.Set(1);	// 1ms
 			mDebouncePeriod.Start();
+			mPenStateIsDown = PenIsDown();
 		} else if (mDebouncePeriod.Passed())
 		{
 			mDebouncePeriod.Set(0);
-			// While in the ReadRaw function, the PenIRQPin toggles between
-			// high and low several times during the SPI.transfer().
-			// To determine if the touch should be ignored, the current state
-			// of the pin is read.
-			touched = !digitalRead(mPenIRQPin);
-			sDisplayTouched = false;
+			penStateChanged = mPenStateIsDown == PenIsDown();
+			sPenStateChanged = false;
 		}
 	}
-	return(touched);
+	return(penStateChanged);
 }
 
 /********************************** ReadRaw ***********************************/
@@ -163,12 +176,21 @@ bool XPT2046::ReadRaw(
 		// 0x91 0xD1 commands into the array above, and add corresponding
 		// enum values.	 Then average the returned data.
 
-
+	/*
+	*	Within the SPI.transfer(), the PenIRQPin toggles between
+	*	high and low several times during the SPI.transfer().
+	*	Stop watching the mPenIRQPin
+	*/
+	detachInterrupt(digitalPinToInterrupt(mPenIRQPin));
 	BeginTransaction();
 	SPI.transfer(&cmdData[0].cmd, sizeof(cmdData));
 	EndTransaction();
-
-	sDisplayTouched = false;
+	/*
+	*	Wait for the pen up by watching for the mPenIRQPin to go from low to
+	*	high.
+	*/
+	attachInterrupt(digitalPinToInterrupt(mPenIRQPin), XPT2046::PenStateChangedISR, CHANGE);
+	sPenStateChanged = false;
 
 	for (uint8_t i = 0; i < eNumCommands; i++)
 	{
@@ -249,10 +271,10 @@ bool XPT2046::Read(
 	return(isValid);
 }
 
-/***************************** DisplayTouchedISR ******************************/
-void XPT2046::DisplayTouchedISR(void)
+/***************************** PenStateChangedISR *****************************/
+void XPT2046::PenStateChangedISR(void)
 {
-	sDisplayTouched = true;
+	sPenStateChanged = true;
 }
 
 /********************************* DumpMinMax *********************************/
@@ -265,6 +287,41 @@ void XPT2046::DumpMinMax(void) const
 		Serial.print(mMinMax[i]);
 		Serial.println(';');
 	}
+}
+
+/********************************* StartAlign *********************************/
+void XPT2046::StartAlign(void)
+{
+	mAlignXY[0] = mAlignXY[1] = mAlignXY[2] = mAlignXY[3] = 0x7FF;
+}
+
+/******************************* AlignmentReady *******************************/
+/*
+*	Returns true when enough alignment points have been entered to save min&max.
+*	True does NOT mean that the current min & max values are any good.  That can
+*	only be determined by visually checking the points touched align with
+*	the display, generally by drawing the point touched after each press.
+*/
+bool XPT2046::AlignmentReady(void) const
+{
+	return(mAlignXY[eXMin] != 0x7FF &&
+			mAlignXY[eXMax] != 0x7FF &&
+			mAlignXY[eYMin] != 0x7FF &&
+			mAlignXY[eYMax] != 0x7FF);
+}
+
+/********************************** GetMinMax *********************************/
+void XPT2046::GetMinMax(
+	uint16_t	outMinMax[4]) const
+{
+	memcpy(outMinMax, mMinMax, sizeof(mMinMax));
+}
+
+/********************************** SetMinMax *********************************/
+void XPT2046::SetMinMax(
+	const uint16_t	inMinMax[4])
+{
+	memcpy(mMinMax, inMinMax, sizeof(mMinMax));
 }
 
 /*********************************** Align ************************************/

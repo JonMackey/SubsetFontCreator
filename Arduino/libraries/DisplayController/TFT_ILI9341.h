@@ -29,10 +29,10 @@ class TFT_ILI9341 : public TFT_ST77XX
 {
 public:
 							TFT_ILI9341(
-								uint8_t					inDCPin,
-								int8_t					inResetPin,	
-								int8_t					inCSPin,
-								int8_t					inBacklightPin = -1,
+								pin_t					inDCPin,
+								pin_t					inResetPin,	
+								pin_t					inCSPin,
+								pin_t					inBacklightPin = -1,
 								uint16_t				inHeight = 320,
 								uint16_t				inWidth = 240,
 								bool					inCentered = false,

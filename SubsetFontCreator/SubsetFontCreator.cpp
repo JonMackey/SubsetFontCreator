@@ -217,7 +217,7 @@ int SubsetFontCreator::CreateFile(
 							{
 								std::string	subsetStr;
 								charcodeIterator.GetSubset(subsetStr);
-								createFileError = XFntToC_Header(file, utf8ExportPath.c_str(), exportFile, subsetStr, !glyphDataSeparately);
+								createFileError = XFntToC_Header(file, utf8ExportPath.c_str(), exportFile, subsetStr, !glyphDataSeparately, inOptions);
 								break;
 							}
 							default:
@@ -408,6 +408,7 @@ int SubsetFontCreator::CreateXfntFile(
 					fontHeader.rotated = rotated ? 1:0;
 					fontHeader.ascent = face->size->metrics.ascender/64;
 					fontHeader.descent = face->size->metrics.descender/64;
+					int32_t ascent = (int32_t)(fontHeader.ascent);
 					uint32_t	actualFontHeight;
 					if (!minimizeHeight)
 					{
@@ -416,13 +417,14 @@ int SubsetFontCreator::CreateXfntFile(
 					{
 						// If there's any kerning the fonts may clip.
 						actualFontHeight = xGlyphHeader.rows;
+						fontHeader.ascent -= xGlyphHeader.y;
+						fontHeader.descent = fontHeader.ascent - actualFontHeight;
 					}
 					fontHeader.height = actualFontHeight;
 					fontHeader.numCharcodeRuns = inCharcodeItr.GetNumRuns() +1;
 					fontHeader.numCharCodes = numCharCodes;
 					FT_ULong	maxCharCode = 0;
 					uint32_t	maxEntrySize = 0;
-					int32_t ascent = (int32_t)(fontHeader.ascent);
 					size_t glyphDataOffsetsSize = (numCharCodes + 1) * (wideOffsets ? sizeof(uint32_t) : sizeof(uint16_t));
 					uint32_t*	glyphDataOffsets = new uint32_t[numCharCodes+1];
 					uint32_t*	glyphDataOffsets32Ptr = glyphDataOffsets;
@@ -1093,7 +1095,8 @@ int SubsetFontCreator::XFntToC_Header(
 	const char*		inExportPath,
 	FILE*			inOutputFile,
 	std::string&	inSubsetStr,
-	bool			inIncludeGlyphData)
+	bool			inIncludeGlyphData,
+	int				inOptions)
 {
 	TabbedFileStream	tabbedStream(25, inOutputFile);
 	fseek(inXFntFile, 0, SEEK_END);
@@ -1107,6 +1110,7 @@ int SubsetFontCreator::XFntToC_Header(
 	const char*	exportFilename = GetLastPathComponent(inExportPath);
 	uint32_t	glyphDataLen = 0;
 	CleanStrForMacroName(exportFilename, headerMacro);
+	bool	minimizeHeight = (inOptions & eMinimizeHeight) != 0;
 	// For the namespace name, strip off _h if it exists (it should always exist)
 	std::string	namespaceName(headerMacro, 0, headerMacro.length() - 2);
 	std::string	xFontStreamClassName(fontHeader->rotated ?
@@ -1114,7 +1118,7 @@ int SubsetFontCreator::XFntToC_Header(
 			"XFont16BitDataStream");
 	tabbedStream.Write(
 		"// Subset font created by SubsetFontCreator"
-		"\n// For subset: \"%s\""
+		"\n// For subset: \"%s\"%s"
 		"\n\n#ifndef %s"
 		"\n#define %s"
 		"\n\n#include \"XFontGlyph.h\""
@@ -1122,7 +1126,7 @@ int SubsetFontCreator::XFntToC_Header(
 		"\n\nnamespace %s"
 		"\n{"
 		"\n\tconst FontHeader\tfontHeader PROGMEM ="
-		"\n\t{", inSubsetStr.c_str(),
+		"\n\t{", inSubsetStr.c_str(), minimizeHeight ? " (Height minimized)":"",
 				 headerMacro.c_str(),
 				 headerMacro.c_str(),
 				 xFontStreamClassName.c_str(),
